@@ -1,5 +1,10 @@
 2004-07-09  Joel Rosdahl  <joel@rosdahl.net>
 
+	* irclib.py (DEBUG):
+	* debian/changelog:
+	* python-irclib.spec.in:
+	Preparations for version 0.4.2.
+
 	* irclib.py (ServerNotConnectedError): New exception.
 	(ServerConnection.send_raw): Fix bug #922446, "Raise
 	IllegalStateException in send_raw when disconnected".

@@ -40,6 +40,12 @@ python -c "import py_compile; py_compile.compile('ircbot.py')"
 /usr/lib/python*/site-packages/*
 
 %changelog
+* Fri Jul  9 2004 Joel Rosdahl <joel@rosdahl.net> 0.4.2-1
+- upgraded to 0.4.2
+
+* Thu Oct 30 2003 Joel Rosdahl <joel@rosdahl.net> 0.4.1-1
+- upgraded to 0.4.1
+
 * Mon Sep  1 2002 Gary Benson <gary@inauspicious.org> 0.4.0-1
 - upgraded to 0.4.0
 
