@@ -1,5 +1,7 @@
 2003-10-29  Joel Rosdahl  <joel@rosdahl.net>
 
+	* testbot.py (TestBot.on_nicknameinuse): New method.
+
 	* irclib.py (ServerConnection.process_data): Record nickname when
 	welcome message is sent to trap nickname change triggered in a
 	nicknameinuse callback.
