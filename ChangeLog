@@ -1,3 +1,7 @@
+2005-01-25  Jeff Huang <keltus@users.sourceforge.net>
+    * irclib.py (ServerConnection.connect): closes socket if a connection does not occur
+    * irclib.py (ServerConnection.connect): "Changing server" -> "Changing servers" (more ubiquitous quit phrase)
+
 2005-01-23  Jeff Huang <keltus@users.sourceforge.net>
 
 	* irclib.py: Removed depreciated apply functions. python-irclib is
