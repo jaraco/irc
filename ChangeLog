@@ -1,5 +1,7 @@
 2003-10-29  Joel Rosdahl  <joel@rosdahl.net>
 
+	* debian: Added Debian packaging files.
+
 	* setup.py.in: Create setup.py from setup.py.in.
 
 	* python-irclib.spec.in: RPM spec file from Gary Benson.

@@ -1,0 +1,15 @@
+Source: python-irclib
+Section: devel
+Priority: optional
+Maintainer: Joel Rosdahl <joel@rosdahl.net>
+Standards-Version: 3.6.1
+Build-Depends-Indep: debhelper (>= 3.0.0)
+
+Package: python-irclib
+Architecture: all
+Depends: python (>= 2.3), python (<< 2.4)
+Description: IRC client library for Python
+ This library is intended to encapsulate the IRC protocol at a quite
+ low level.  It provides an event-driven IRC client framework.  It has
+ a fairly thorough support for the basic IRC protocol, CTCP and DCC
+ connections.
