@@ -28,7 +28,11 @@
 
 	* dccsend: New example program.
 
+	* Makefile: Added dccreceive and dccsend to dist files.
+
 	Other changes:
+
+	* setup.py: Added.
 
 	* irclib.py (ServerConnection.connect, ServerConnection.user):
 	Send USER command according to RFC 2812.
@@ -43,6 +47,8 @@
 
 	* ircbot.py (SingleServerIRCBot.on_ctcp): Prepend VERSION reply
 	with VERSION. (Patch from Andrew Gaul.)
+
+	* Makefile: Added setup.py to dist files. Also create zip archive.
 
 2002-03-01  Joel Rosdahl  <joel@rosdahl.net>
 
