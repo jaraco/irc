@@ -410,7 +410,7 @@ class ServerConnection(Connection):
         Returns the ServerConnection object.
         """
         if self.connected:
-            self.quit("Changing server")
+            self.quit("Changing servers")
 
         self.socket = None
         self.previous_buffer = ""
@@ -431,6 +431,8 @@ class ServerConnection(Connection):
             self.socket.bind((self.localaddress, self.localport))
             self.socket.connect((self.server, self.port))
         except socket.error, x:
+            self.socket.close()
+            self.socket = None
             raise ServerConnectionError, "Couldn't connect to socket: %s" % x
         self.connected = 1
         if self.irclibobj.fn_to_add_socket:
