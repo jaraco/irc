@@ -11,10 +11,10 @@ DISTFILES = \
     irccat \
     irccat2 \
     irclib.py \
+    python-irclib.spec \
     servermap \
     setup.py \
-    testbot.py \
-    python-irclib.spec
+    testbot.py
 
 PACKAGENAME = python-irclib-$(VERSION)
 
