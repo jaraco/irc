@@ -1,3 +1,12 @@
+2000-12-11  Joel Rosdahl  <joel@rosdahl.net>
+
+	* Released version 0.3.1.
+
+	* irclib.py (IRC.process_once): Work-around for platform-dependent
+	select() on Windows systems.
+
+	* ircbot.py: Clarification of SingleServerIRCBot doc string.
+
 2000-11-26  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.3.0.
