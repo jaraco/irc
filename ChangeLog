@@ -1,5 +1,7 @@
 2004-07-09  Joel Rosdahl  <joel@rosdahl.net>
 
+	* Released version 0.4.2.
+
 	* debian/rules: Remove built *.pyc files before making package.
 
 	* irclib.py (DEBUG):
