@@ -141,7 +141,9 @@ class SingleServerIRCBot(SimpleIRCClient):
     def _on_namreply(self, c, e):
         """[Internal]"""
 
-        # e.arguments()[0] == "="     (why?)
+        # e.arguments()[0] == "@" for secret channels,
+        #                     "*" for private channels,
+        #                     "=" for others (public channels)
         # e.arguments()[1] == channel
         # e.arguments()[2] == nick list
 
@@ -415,8 +417,7 @@ class Channel:
     def is_invite_only(self):
         return self.has_mode("i")
 
-    def has_message_from_outside_protection(self):
-        # Eh... What should it be called, really?
+    def has_allow_external_messages(self):
         return self.has_mode("n")
 
     def has_limit(self):
