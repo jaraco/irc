@@ -364,6 +364,9 @@ class Connection:
 class ServerConnectionError(IRCError):
     pass
 
+class ServerNotConnectedError(ServerConnectionError):
+    pass
+
 
 # Huh!?  Crrrrazy EFNet doesn't follow the RFC: their ircd seems to
 # use \n as message separator!  :P
@@ -770,6 +773,8 @@ class ServerConnection(Connection):
 
         The string will be padded with appropriate CR LF.
         """
+        if self.socket is None:
+            raise ServerNotConnectedError, "Not connected."
         try:
             self.socket.send(string + "\r\n")
             if DEBUG:

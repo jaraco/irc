@@ -1,3 +1,9 @@
+2004-07-09  Joel Rosdahl  <joel@rosdahl.net>
+
+	* irclib.py (ServerNotConnectedError): New exception.
+	(ServerConnection.send_raw): Fix bug #922446, "Raise
+	IllegalStateException in send_raw when disconnected".
+
 2003-10-30  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.4.1.
