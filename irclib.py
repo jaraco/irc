@@ -499,6 +499,9 @@ class ServerConnection(Connection):
             if DEBUG:
                 print "FROM SERVER:", line
 
+            if not line:
+                continue
+
             prefix = None
             command = None
             arguments = None
