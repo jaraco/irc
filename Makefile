@@ -1,4 +1,4 @@
-VERSION := $(shell sed -n -e '/VERSION = /{s/VERSION = \(.*\), \(.*\), \(.*\)/\1.\2.\3/;p;}' <irclib.py)
+VERSION := `sed -n -e '/VERSION = /{s/VERSION = \(.*\), \(.*\), \(.*\)/\1.\2.\3/;p;}' <irclib.py`
 
 DISTFILES = \
     COPYING \
@@ -20,8 +20,11 @@ PACKAGENAME = python-irclib-$(VERSION)
 
 all: $(DISTFILES)
 
-%: %.in
-	sed 's/%%VERSION%%/$(VERSION)/g' $< >$@
+setup.py: setup.py.in
+	sed 's/%%VERSION%%/'$(VERSION)'/g' $< >$@
+
+python-irclib.spec: python-irclib.spec.in
+	sed 's/%%VERSION%%/'$(VERSION)'/g' $< >$@
 
 dist: $(DISTFILES)
 	mkdir $(PACKAGENAME)
@@ -31,7 +34,7 @@ dist: $(DISTFILES)
 	rm -rf $(PACKAGENAME)
 
 cvstag:
-	cvs tag version_`echo $(VERSION) | sed 's/\./_/g'`
+	ver=$(VERSION); echo cvs tag version_`echo $$ver | sed 's/\./_/g'`
 
 clean:
 	rm -rf *~ *.pyc build python-irclib.spec setup.py

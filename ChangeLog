@@ -1,3 +1,7 @@
+2005-01-19  Joel Rosdahl  <joel@rosdahl.net>
+
+	* Makefile: Don't require GNU make.
+
 2005-01-19  Jeff Huang  <keltus@users.sourceforge.net>
 
 	* ircbot.py (IRCDict.__iter__): Added __iter__ method for IRCDict.
