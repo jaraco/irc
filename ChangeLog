@@ -1,3 +1,8 @@
+2005-01-23  Jeff Huang <keltus@users.sourceforge.net>
+
+	* irclib.py: Removed depreciated apply functions. python-irclib is
+	now compatible with Python 1.6 and above.
+
 2005-01-20  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Makefile: Removed more GNU make specific constructs.

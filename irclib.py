@@ -194,7 +194,7 @@ class IRC:
         t = time.time()
         while self.delayed_commands:
             if t >= self.delayed_commands[0][0]:
-                apply(self.delayed_commands[0][1], self.delayed_commands[0][2])
+                self.delayed_commands[0][1](*self.delayed_commands[0][2])
                 del self.delayed_commands[0]
             else:
                 break
@@ -612,14 +612,14 @@ class ServerConnection(Connection):
 
         See documentation for IRC.add_global_handler.
         """
-        apply(self.irclibobj.add_global_handler, args)
+        self.irclibobj.add_global_handler(*args)
 
     def remove_global_handler(self, *args):
         """Remove global handler.
 
         See documentation for IRC.remove_global_handler.
         """
-        apply(self.irclibobj.remove_global_handler, args)
+        self.irclibobj.remove_global_handler(*args)
 
     def action(self, target, action):
         """Send a CTCP ACTION command."""
