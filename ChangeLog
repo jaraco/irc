@@ -1,3 +1,7 @@
+2005-01-19  Jeff Huang  <keltus@users.sourceforge.net>
+
+	* ircbot.py (IRCDict.__iter__): Added __iter__ method for IRCDict.
+
 2005-01-17  Joel Rosdahl  <joel@rosdahl.net>
 
 	* ircbot.py (IRCDict.__contains__): Added __contains__method for
