@@ -1,3 +1,22 @@
+2002-03-01  Joel Rosdahl  <joel@lysator.liu.se>
+
+	Corrected problems spotted by Markku Hänninen <hmm@iki.fi>:
+
+	* irccat2 (IRCCat.on_welcome): Added missing connection argument.
+	(IRCCat.on_join): Likewise.
+	(IRCCat.on_disconnect): Likewise.
+
+	* irclib.py (ServerConnection.ison): Bug fix: Join nicks by space
+	instead of commas.
+
+	* irclib.py (ServerConnection.whowas): Bug fix: Let the max
+	argument default to the empty string.
+
+	* irclib.py (numeric_events): Added new events: traceservice,
+	tracereconnect, tryagain, invitelist, endofinvitelist, exceptlist,
+	endofexceptlist, unavailresource, nochanmodes, banlistfull,
+	restricted and uniqopprivsneeded.
+
 2002-02-17  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.3.3.

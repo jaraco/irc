@@ -637,7 +637,7 @@ class ServerConnection(Connection):
 
             nicks -- List of nicks.
         """
-        self.send_raw("ISON " + string.join(nicks, ","))
+        self.send_raw("ISON " + string.join(nicks, " "))
 
     def join(self, channel, key=""):
         """Send a JOIN command."""
@@ -797,7 +797,7 @@ class ServerConnection(Connection):
         """Send a WHOIS command."""
         self.send_raw("WHOIS " + string.join(targets, ","))
 
-    def whowas(self, nick, max=None, server=""):
+    def whowas(self, nick, max="", server=""):
         """Send a WHOWAS command."""
         self.send_raw("WHOWAS %s%s%s" % (nick,
                                          max and (" " + max),
@@ -1118,8 +1118,10 @@ numeric_events = {
     "204": "traceoperator",
     "205": "traceuser",
     "206": "traceserver",
+    "207": "traceservice",
     "208": "tracenewtype",
     "209": "traceclass",
+    "210": "tracereconnect",
     "211": "statslinkinfo",
     "212": "statscommands",
     "213": "statscline",
@@ -1151,6 +1153,7 @@ numeric_events = {
     "259": "adminemail",
     "261": "tracelog",
     "262": "endoftrace",
+    "263": "tryagain",
     "265": "n_local",
     "266": "n_global",
     "300": "none",
@@ -1178,6 +1181,10 @@ numeric_events = {
     "333": "topicinfo",
     "341": "inviting",
     "342": "summoning",
+    "346": "invitelist",
+    "347": "endofinvitelist",
+    "348": "exceptlist",
+    "349": "endofexceptlist",
     "351": "version",
     "352": "whoreply",
     "353": "namreply",
@@ -1225,6 +1232,7 @@ numeric_events = {
     "432": "erroneusnickname", # Thiss iz how its speld in thee RFC.
     "433": "nicknameinuse",
     "436": "nickcollision",
+    "437": "unavailresource",  # "Nick temporally unavailable"
     "441": "usernotinchannel",
     "442": "notonchannel",
     "443": "useronchannel",
@@ -1245,9 +1253,13 @@ numeric_events = {
     "474": "bannedfromchan",
     "475": "badchannelkey",
     "476": "badchanmask",
+    "477": "nochanmodes",  # "Channel doesn't support modes"
+    "478": "banlistfull",
     "481": "noprivileges",
     "482": "chanoprivsneeded",
     "483": "cantkillserver",
+    "484": "restricted",   # Connection is restricted
+    "485": "uniqopprivsneeded",
     "491": "nooperhost",
     "492": "noservicehost",
     "501": "umodeunknownflag",
