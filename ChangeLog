@@ -1,5 +1,8 @@
 2005-01-17  Joel Rosdahl  <joel@rosdahl.net>
 
+	* debian: Removed Debian package directory since python-irclib is
+	in Debian now.
+
 	* ircbot.py (SingleServerIRCBot._on_namreply): Improved comment
 	about arguments to the function. Patch from Jeff Huang.
 	(Channel.has_allow_external_messages): Renamed from
