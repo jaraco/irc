@@ -381,7 +381,7 @@ class ServerConnection(Connection):
         self.connected = 0  # Not connected yet.
 
     def connect(self, server, port, nickname, password=None, username=None,
-                ircname=None, localaddress="0.0.0.0", localport=0):
+                ircname=None, localaddress="", localport=0):
         """Connect/reconnect to a server.
 
         Arguments:
@@ -837,6 +837,8 @@ class DCCConnection(Connection):
         self.connected = 0
         self.passive = 0
         self.dcctype = dcctype
+        self.peeraddress = None
+        self.peerport = None
 
     def connect(self, address, port):
         """Connect/reconnect to a DCC peer.
@@ -864,18 +866,16 @@ class DCCConnection(Connection):
             self.irclibobj.fn_to_add_socket(self.socket)
         return self
 
-    def listen(self, address):
+    def listen(self):
         """Wait for a connection/reconnection from a DCC peer.
-
-        Arguments:
-            address -- Host/IP address of the peer.
 
         Returns the DCCConnection object.
 
         The local IP address and port are available as
-        self.localaddress and self.localport.
+        self.localaddress and self.localport.  After connection from a
+        peer, the peer address and port are available as
+        self.peeraddress and self.peerport.
         """
-        self.peeraddress = socket.gethostbyname(address)
         self.previous_buffer = ""
         self.handlers = {}
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -913,10 +913,16 @@ class DCCConnection(Connection):
         """[Internal]"""
 
         if self.passive and not self.connected:
-            conn, addr = self.socket.accept()
+            conn, (self.peeraddress, self.peerport) = self.socket.accept()
             self.socket.close()
             self.socket = conn
             self.connected = 1
+            if DEBUG:
+                print "DCC connection from %s:%d" % (
+                    self.peeraddress, self.peerport)
+            self.irclibobj._handle_event(
+                self,
+                Event("dcc_connect", self.peeraddress, None, None))
             return
 
         try:
@@ -1017,7 +1023,7 @@ class SimpleIRCClient:
         self.dcc_connections.remove(c)
 
     def connect(self, server, port, nickname, password=None, username=None,
-                ircname=None, localaddress="0.0.0.0", localport=0):
+                ircname=None, localaddress="", localport=0):
         """Connect/reconnect to a server.
 
         Arguments:
@@ -1060,14 +1066,14 @@ class SimpleIRCClient:
         dcc.connect(address, port)
         return dcc
 
-    def dcc_listen(self, address, dcctype="chat"):
+    def dcc_listen(self, dcctype="chat"):
         """Listen for connections from a DCC peer.
 
         Returns a DCCConnection instance.
         """
         dcc = self.ircobj.dcc(dcctype)
         self.dcc_connections.append(dcc)
-        dcc.listen(address)
+        dcc.listen()
         return dcc
 
     def start(self):
@@ -1494,6 +1500,8 @@ numeric_events = {
 
 generated_events = [
     # Generated events
+    "dcc_connect",
+    "dcc_disconnect",
     "dccmsg",
     "disconnect",
     "ctcp",
