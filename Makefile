@@ -24,13 +24,13 @@ dist:
 	mkdir $(PACKAGENAME)
 	cp -r $(DISTFILES) $(PACKAGENAME)
 	tar cvzf $(PACKAGENAME).tar.gz $(PACKAGENAME)
-	zip -r9yq $(PACKAGENAME).tar.gz $(PACKAGENAME)
-	rm -r $(PACKAGENAME)
+	zip -r9yq $(PACKAGENAME).zip $(PACKAGENAME)
+	rm -rf $(PACKAGENAME)
 
 cvstag:
 	cvs tag version_`echo $(VERSION) | sed 's/\./_/g'`
 
 clean:
-	rm -f *.tar.gz
+	rm -rf *~ *.pyc build
 
 .PHONY: all doc dist cvstag clean
