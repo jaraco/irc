@@ -1,5 +1,7 @@
 2003-10-29  Joel Rosdahl  <joel@rosdahl.net>
 
+	* setup.py.in: Create setup.py from setup.py.in.
+
 	* python-irclib.spec.in: RPM spec file from Gary Benson.
 
 	* testbot.py (TestBot.on_nicknameinuse): New method.

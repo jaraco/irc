@@ -20,7 +20,7 @@ PACKAGENAME = python-irclib-$(VERSION)
 
 all: $(DISTFILES)
 
-python-irclib.spec: python-irclib.spec.in
+%: %.in
 	sed 's/%%VERSION%%/$(VERSION)/g' $< >$@
 
 dist: $(DISTFILES)
@@ -34,6 +34,6 @@ cvstag:
 	cvs tag version_`echo $(VERSION) | sed 's/\./_/g'`
 
 clean:
-	rm -rf *~ *.pyc build python-irclib.spec
+	rm -rf *~ *.pyc build python-irclib.spec setup.py
 
 .PHONY: all doc dist cvstag clean
