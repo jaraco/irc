@@ -1,5 +1,7 @@
 2003-10-30  Joel Rosdahl  <joel@rosdahl.net>
 
+	* Released version 0.4.1.
+
 	* debian/examples: Added dccreceive and dccsend as example files
 	in Debian.
 
