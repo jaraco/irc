@@ -36,7 +36,7 @@ python -c "import py_compile; py_compile.compile('ircbot.py')"
 
 %files
 %defattr(-,root,root)
-%doc README ChangeLog COPYING irccat irccat2 servermap testbot.py
+%doc README ChangeLog COPYING irccat irccat2 servermap testbot.py dccsend dccreceive
 /usr/lib/python*/site-packages/*
 
 %changelog

@@ -1,3 +1,10 @@
+2003-10-30  Joel Rosdahl  <joel@rosdahl.net>
+
+	* debian/examples: Added dccreceive and dccsend as example files
+	in Debian.
+
+	* python-irclib.spec.in: Likewise.
+
 2003-10-29  Joel Rosdahl  <joel@rosdahl.net>
 
 	* debian: Added Debian packaging files.
