@@ -2,10 +2,10 @@ python-irclib (0.4.2-1) unstable; urgency=low
 
   * New version.
 
- -- Joel Rosdahl <joel@debian.org>  Fri,  9 Jul 2004 10:44:26 +0200
+ -- Joel Rosdahl <joel@rosdahl.net>  Fri,  9 Jul 2004 10:44:26 +0200
 
 python-irclib (0.4.1-1) unstable; urgency=low
 
   * First Debian packaged version.
 
- -- Joel Rosdahl <joel@debian.org>  Wed, 29 Oct 2003 22:32:37 +0100
+ -- Joel Rosdahl <joel@rosdahl.net>  Wed, 29 Oct 2003 22:32:37 +0100
