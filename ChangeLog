@@ -1,5 +1,9 @@
 2005-01-17  Joel Rosdahl  <joel@rosdahl.net>
 
+	* irclib.py (VERSION):
+	* python-irclib.spec.in:
+	Preparations for version 0.4.3.
+
 	* debian: Removed Debian package directory since python-irclib is
 	in Debian now.
 
