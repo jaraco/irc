@@ -58,9 +58,6 @@ class SingleServerIRCBot(SimpleIRCClient):
 
             reconnection_interval -- How long the bot should wait
                                      before trying to reconnect.
-
-            dcc_connections -- A list of initiated/accepted DCC
-            connections.
         """
 
         SimpleIRCClient.__init__(self)
