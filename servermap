@@ -29,9 +29,9 @@
 # % ./servermap irc.dal.net somenickname
 # Connecting to server...
 # Getting links...
-# 
+#
 # 26 servers (18 leaves and 8 hubs)
-# 
+#
 # splitrock.tx.us.dal.net
 # `-vader.ny.us.dal.net
 #   |-twisted.ma.us.dal.net
@@ -102,7 +102,7 @@ def on_endoflinks(connection, event):
             hubs = len(m)
     else:
         hubs = 0
-    
+
     print "%d servers (%d leaves and %d hubs)\n" % (len(links), len(links)-hubs, hubs)
 
     print_tree(0, [], connection.get_server_name(), m)
@@ -134,7 +134,7 @@ def print_tree(level, active_levels, root, map, last=0):
         for r in list[:-1]:
             print_tree(level+1, active_levels[:]+[level], r, map)
         print_tree(level+1, active_levels[:], list[-1], map, 1)
-        
+
 s = string.split(sys.argv[1], ":", 1)
 server = s[0]
 if len(s) == 2:
