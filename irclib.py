@@ -396,7 +396,7 @@ class ServerConnection(Connection):
 
             username -- The username.
 
-            ircname -- The IRC name.
+            ircname -- The IRC name ("realname").
 
             localaddress -- Bind the connection to a specific local IP address.
 
@@ -437,7 +437,7 @@ class ServerConnection(Connection):
         if self.password:
             self.pass_(self.password)
         self.nick(self.nickname)
-        self.user(self.username, self.localhost, self.server, self.ircname)
+        self.user(self.username, self.ircname)
         return self
 
     def close(self):
@@ -797,9 +797,9 @@ class ServerConnection(Connection):
         """Send a TRACE command."""
         self.send_raw("TRACE" + (target and (" " + target)))
 
-    def user(self, username, localhost, server, ircname):
+    def user(self, username, realname):
         """Send a USER command."""
-        self.send_raw("USER %s %s %s :%s" % (username, localhost, server, ircname))
+        self.send_raw("USER %s 0 * :%s" % (username, realname))
 
     def userhost(self, nicks):
         """Send a USERHOST command."""
