@@ -561,6 +561,9 @@ class ServerConnection(Connection):
                             print "command: %s, source: %s, target: %s, arguments: %s" % (
                                 command, prefix, target, m)
                         self._handle_event(Event(command, prefix, target, m))
+                        if command == "ctcp" and m[0] == "ACTION":
+                            # Emit an action event too. We're generous today.
+                            self._handle_event(Event("action", prefix, target, m[1:]))
                     else:
                         if DEBUG:
                             print "command: %s, source: %s, target: %s, arguments: %s" % (

@@ -208,14 +208,20 @@ class SingleServerIRCBot(SimpleIRCClient):
         """
         return "ircbot.py by Joel Rosdahl <joel@rosdahl.net>"
 
-    def jump_server(self):
+    def jump_server(self, msg="Changing servers"):
         """Connect to a new server, possibly disconnecting from the current.
 
         The bot will skip to next server in the server_list each time
         jump_server is called.
         """
         if self.connection.is_connected():
-            self.connection.quit("Jumping servers")
+            self.connection.quit(msg)
+            self.connected = 0
+            try:
+                self.connection.socket.close()
+            except socket.error, x:
+                pass
+            self.socket = None
         self.server_list.append(self.server_list.pop(0))
         self._connect()
 
