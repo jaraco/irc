@@ -1,6 +1,12 @@
+2005-01-28  Jeff Huang <keltus@users.sourceforge.net>
+    * irclib.py: Moved self.irclibobj._remove_connection call from
+    close() to disconnect(). Patch from Alexey Nezhdanov.
+
 2005-01-25  Jeff Huang <keltus@users.sourceforge.net>
-    * irclib.py (ServerConnection.connect): closes socket if a connection does not occur
-    * irclib.py (ServerConnection.connect): "Changing server" -> "Changing servers" (more ubiquitous quit phrase)
+    * irclib.py (ServerConnection.connect): closes socket if a
+    connection does not occur
+    * irclib.py (ServerConnection.connect): "Changing server" ->
+    "Changing servers" (more ubiquitous quit phrase)
 
 2005-01-23  Jeff Huang <keltus@users.sourceforge.net>
 

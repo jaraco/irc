@@ -453,7 +453,6 @@ class ServerConnection(Connection):
         """
 
         self.disconnect("Closing object")
-        self.irclibobj._remove_connection(self)
 
     def _get_socket(self):
         """[Internal]"""
@@ -650,6 +649,7 @@ class ServerConnection(Connection):
         if not self.connected:
             return
 
+        self.irclibobj._remove_connection(self)
         self.connected = 0
         try:
             self.socket.close()
