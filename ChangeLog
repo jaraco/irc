@@ -1,3 +1,44 @@
+2000-11-26  Joel Rosdahl  <joel@rosdahl.net>
+
+	* Released version 0.3.0.
+
+	* Makefile (dist): Include ircbot.py again.
+
+	* README: Updated.
+
+	* irclib.py (ServerConnection.get_nickname): Renamed from
+	get_nick_name.
+	(ServerConnection._get_socket): Return None if not connected.
+
+2000-11-25  Joel Rosdahl  <joel@rosdahl.net>
+
+	* irclib.py (ServerConnection.process_data): all_raw_messages
+	instead of allrawmessages.
+	(IRC._handle_event): Added "all_events" event type.
+	(nm_to_n): Renamed from nick_from_nickmask.
+	(nm_to_uh): Renamed from userhost_from_nickmask.
+	(nm_to_h): Renamed from host_from_nickmask.
+	(nm_to_u): Renamed from user_from_nickmask.
+	(SimpleIRCClient): Created.
+
+2000-11-22  Joel Rosdahl  <joel@rosdahl.net>
+
+	* irclib.py (lower_irc_string): Use translation instead.
+	(ServerConnection.process_data): Split non-RFC-compliant lines a
+	bit more intelligently.
+	(ServerConnection.process_data): Removed unnecessary try/except
+	block.
+	(ServerConnection.get_server_name): Return empty server if
+	unknown.
+	(_rfc_1459_command_regexp): Tweaked a bit.
+
+	* ircbot.py: Rewritten.
+
+2000-11-21  Joel Rosdahl  <joel@rosdahl.net>
+
+	* irclib.py (IRC.process_forever): Default to processing a bit
+	more often.
+
 2000-10-29  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.2.4.

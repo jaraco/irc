@@ -1,6 +1,4 @@
-# irclib -- IRC protocol client library
-#
-# Copyright (C) 1999 Joel Rosdahl
+# Copyright (C) 1999, 2000 Joel Rosdahl
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -31,11 +29,38 @@ In order to understand how to make an IRC client, I'm afraid you more
 or less must understand the IRC specifications.  They are available
 here: [IRC specifications].
 
+The main features of the IRC client framework are:
+
+  * Abstraction of the IRC protocol.
+  * Handles multiple simultaneous IRC server connections.
+  * Handles server PONGing transparently.
+  * Messages to the IRC server are done by calling methods on an IRC
+    connection object.
+  * Messages from an IRC server triggers events, which can be caught
+    by event handlers.
+  * Reading from and writing to IRC server sockets are normally done
+    by an internal select() loop, but the select()ing may be done by
+    an external main loop.
+  * Functions can be registered to execute at specified times by the
+    event-loop.
+  * Decodes CTCP tagging correctly (hopefully); I haven't seen any
+    other IRC client implementation that handles the CTCP
+    specification subtilties.
+  * A kind of simple, single-server, object-oriented IRC client class
+    that dispatches events to instance methods is included.
+
+Current limitations:
+
+  * The IRC protocol shines through the abstraction a bit too much.
+  * Data is not written asynchronously to the server, i.e. the write()
+    may block if the TCP buffers are stuffed.
+  * There are no support for DCC connections.
+  * The author haven't even read RFC 2810, 2811, 2812 and 2813.
+  * Like most projects, documentation is lacking...
+
 Since I seldom use IRC anymore, I will probably not work much on the
 library.  If you want to help or continue developing the library,
-please contact me.
-
-Joel Rosdahl <joel@rosdahl.net>
+please contact me (Joel Rosdahl <joel@rosdahl.net>).
 
 .. [IRC specifications] http://www.irchelp.org/irchelp/rfc/
 """
@@ -49,7 +74,7 @@ import sys
 import time
 import types
 
-VERSION = 0, 2, 4
+VERSION = 0, 3, 0
 DEBUG = 0
 
 # TODO
@@ -71,10 +96,11 @@ class IRCError(Exception):
     """Represents an IRC exception."""
     pass
 
+
 class IRC:
     """Class that handles one or several IRC server connections.
 
-    When an IRC object has been instanciated, it can be used to create
+    When an IRC object has been instantiated, it can be used to create
     Connection objects that represent the IRC connections.  The
     responsibility of the IRC object is to provide an event-driven
     framework for the connections and to keep the connections alive.
@@ -191,14 +217,17 @@ class IRC:
         self.process_data(i)
         self.process_timeout()
 
-    def process_forever(self):
+    def process_forever(self, timeout=0.2):
         """Run an infinite loop, processing data from connections.
 
-        This method repeatedly calls process_once.  Timeouts will be
-        processed every second.
+        This method repeatedly calls process_once.
+
+        Arguments:
+
+            timeout -- Parameter to pass to process_once.
         """
         while 1:
-            self.process_once(1)
+            self.process_once(timeout)
 
     def disconnect_all(self, message=""):
         """Disconnects all connections."""
@@ -250,7 +279,7 @@ class IRC:
                 self.handlers[event].remove(h)
         return 1
 
-    def execute_at(self, at, function, arguments):
+    def execute_at(self, at, function, arguments=()):
         """Execute a function at a specified time.
 
         Arguments:
@@ -263,7 +292,7 @@ class IRC:
         """
         self.execute_delayed(at-time.time(), function, arguments)
 
-    def execute_delayed(self, delay, function, arguments):
+    def execute_delayed(self, delay, function, arguments=()):
         """Execute a function after a specified time.
 
         Arguments:
@@ -280,18 +309,19 @@ class IRC:
 
     def _handle_event(self, connection, event):
         """[Internal]"""
-        if self.handlers.has_key(event.eventtype()):
-            for handler in self.handlers[event.eventtype()]:
-                if handler[1](connection, event) == "NO MORE":
-                    return
+        h = self.handlers
+        for handler in h.get("all_events", []) + h.get(event.eventtype(), []):
+            if handler[1](connection, event) == "NO MORE":
+                return
 
     def _remove_connection(self, connection):
         """[Internal]"""
         self.connections.remove(connection)
         if self.fn_to_remove_socket:
-            self.fn_to_remove_socket(connection._get_socket()) 
+            self.fn_to_remove_socket(connection._get_socket())
 
-_rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( +(?P<argument>.+))?")
+_rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
+
 
 class Connection:
     """Base class for IRC connections.
@@ -304,19 +334,28 @@ class Connection:
     def _get_socket():
         raise IRCError, "Not overridden"
 
-    def execute_at(self, at, function, arguments):
+    ##############################
+    ### Convenience wrappers.
+
+    def execute_at(self, at, function, arguments=()):
         self.irclibobj.execute_at(at, function, arguments)
-        
-    def execute_delayed(self, delay, function, arguments):
+
+    def execute_delayed(self, delay, function, arguments=()):
         self.irclibobj.execute_delayed(delay, function, arguments)
+
 
 class ServerConnectionError(IRCError):
     pass
 
+
+# Huh!?  Crrrrazy EFNet doesn't follow the RFC: their ircd seems to
+# use \n as message separator!  :P
+_linesep_regexp = re.compile("\r?\n")
+
 class ServerConnection(Connection):
     """This class represents an IRC server connection.
 
-    ServerConnection objects are instanciated by calling the server
+    ServerConnection objects are instantiated by calling the server
     method on an IRC object.
     """
 
@@ -324,7 +363,8 @@ class ServerConnection(Connection):
         Connection.__init__(self, irclibobj)
         self.connected = 0  # Not connected yet.
 
-    def connect(self, server, port, nickname, password=None, username=None, ircname=None):
+    def connect(self, server, port, nickname, password=None, username=None,
+                ircname=None):
         """Connect/reconnect to a server.
 
         Arguments:
@@ -385,10 +425,13 @@ class ServerConnection(Connection):
 
         self.disconnect("Closing object")
         self.irclibobj._remove_connection(self)
-        
+
     def _get_socket(self):
         """[Internal]"""
-        return self.socket
+        if self.connected:
+            return self.socket
+        else:
+            return None
 
     def get_server_name(self):
         """Get the (real) server name.
@@ -400,15 +443,14 @@ class ServerConnection(Connection):
         if self.real_server_name:
             return self.real_server_name
         else:
-            raise ServerConnectionError, "Not connected yet"
+            return ""
 
-    def get_nick_name(self):
+    def get_nickname(self):
         """Get the (real) nick name.
 
-        This method returns the (real) nick name.  The library keeps
+        This method returns the (real) nickname.  The library keeps
         track of nick changes, so it might not be the nick name that
-        was passed to the connect() method.
-        """
+        was passed to the connect() method.  """
 
         return self.real_nickname
 
@@ -425,30 +467,24 @@ class ServerConnection(Connection):
             # Read nothing: connection must be down.
             self.disconnect("Connection reset by peer")
             return
-          
-        lines = string.split(self.previous_buffer + new_data, "\r\n")
 
-        # Huh!?  Crrrrazy EFNet doesn't follow the RFC: their ircd
-        # seems to use \n as message separator!  :P
-        efnet_kluge = string.split(self.previous_buffer + new_data, "\n")
-        if len(efnet_kluge) > len(lines):
-            lines = efnet_kluge
+        lines = _linesep_regexp.split(self.previous_buffer + new_data)
 
         # Save the last, unfinished line.
         self.previous_buffer = lines[-1]
         lines = lines[:-1]
 
         for line in lines:
+            if DEBUG:
+                print "FROM SERVER:", line
+
             prefix = None
             command = None
             arguments = None
-            try:
-                self._handle_event(Event("allrawmessages",
-                                         self.get_server_name(),
-                                         None,
-                                         [line]))
-            except ServerConnectionError:
-                pass
+            self._handle_event(Event("all_raw_messages",
+                                     self.get_server_name(),
+                                     None,
+                                     [line]))
 
             m = _rfc_1459_command_regexp.match(line)
             if m.group("prefix"):
@@ -466,7 +502,7 @@ class ServerConnection(Connection):
                     arguments.append(a[1])
 
             if command == "nick":
-                if nick_from_nickmask(prefix) == self.real_nickname:
+                if nm_to_n(prefix) == self.real_nickname:
                     self.real_nickname = arguments[0]
 
             if command in ["privmsg", "notice"]:
@@ -501,7 +537,7 @@ class ServerConnection(Connection):
                         self._handle_event(Event(command, prefix, target, [m]))
             else:
                 target = None
-  
+
                 if command == "quit":
                     arguments = [arguments[0]]
                 elif command == "ping":
@@ -517,7 +553,7 @@ class ServerConnection(Connection):
                 # Translate numerics into more readable strings.
                 if numeric_events.has_key(command):
                     command = numeric_events[command]
-  
+
                 if DEBUG:
                     print "command: %s, source: %s, target: %s, arguments: %s" % (
                         command, prefix, target, arguments)
@@ -702,7 +738,7 @@ class ServerConnection(Connection):
         try:
             self.socket.send(string + "\r\n")
             if DEBUG:
-                print "SENT TO SERVER:", string
+                print "TO SERVER:", string
         except socket.error, x:
             # Aouch!
             self.disconnect("Connection reset by peer.")
@@ -745,7 +781,7 @@ class ServerConnection(Connection):
     def version(self, server=""):
         """Send a VERSION command."""
         self.send_raw("VERSION" + (server and (" " + server)))
-        
+
     def wallops(self, text):
         """Send a WALLOPS command."""
         self.send_raw("WALLOPS :" + text)
@@ -764,16 +800,76 @@ class ServerConnection(Connection):
                                          max and (" " + max),
                                          server and (" " + server)))
 
+
 class DCCConnection(Connection):
     """Unimplemented."""
     def __init__(self):
         raise IRCError, "Unimplemented."
 
+
+class SimpleIRCClient:
+    """A simple single-server IRC client class.
+
+    This is an example of an object-oriented wrapper of the IRC
+    framework.  A real IRC client can be made by subclassing this
+    class and adding appropriate methods.
+
+    The method on_join will be called when a "join" event is created
+    (which is done when the server sends a JOIN messsage/command),
+    on_privmsg will be called for "privmsg" events, and so on.  The
+    handler methods get two arguments: the connection object (same as
+    self.connection) and the event object.
+
+    Instance attributes that can be used by sub classes:
+
+        ircobj -- The IRC instance.
+
+        connection -- The ServerConnection instance.
+    """
+    def __init__(self):
+        self.ircobj = IRC()
+        self.connection = self.ircobj.server()
+        self.ircobj.add_global_handler("all_events", self._dispatcher, -10)
+
+    def _dispatcher(self, c, e):
+        """[Internal]"""
+        m = "on_" + e.eventtype()
+        if hasattr(self, m):
+            getattr(self, m)(c, e)
+
+    def connect(self, server, port, nickname, password=None, username=None,
+                ircname=None):
+        """Connect/reconnect to a server.
+
+        Arguments:
+
+            server -- Server name.
+
+            port -- Port number.
+
+            nickname -- The nickname.
+
+            password -- Password (if any).
+
+            username -- The username.
+
+            ircname -- The IRC name.
+
+        This function can be called to reconnect a closed connection.
+        """
+        self.connection.connect(server, port, nickname,
+                                password, username, ircname)
+
+    def start(self):
+        """Start the IRC client."""
+        self.ircobj.process_forever()
+
+
 class Event:
     """Class representing an IRC event."""
     def __init__(self, eventtype, source, target, arguments=None):
         """Constructor of Event objects.
-        
+
         Arguments:
 
             eventtype -- A string describing the event.
@@ -826,28 +922,29 @@ def mask_matches(nick, mask):
 
     Returns true if the nick matches, otherwise false.
     """
-    nick = lower_irc_string(nick)
-    mask = lower_irc_string(mask)
+    nick = irc_lower(nick)
+    mask = irc_lower(mask)
     mask = string.replace(mask, "\\", "\\\\")
-    for ch in ".$|[](){}?+":
+    for ch in ".$|[](){}+":
         mask = string.replace(mask, ch, "\\" + ch)
     mask = string.replace(mask, "?", ".")
     mask = string.replace(mask, "*", ".*")
     r = re.compile(mask, re.IGNORECASE)
     return r.match(nick)
 
-def lower_irc_string(s):
+_alpha = "abcdefghijklmnopqrstuvxyz"
+_special = "-[]\\`^{}"
+nick_characters = _alpha + string.upper(_alpha) + string.digits + _special
+_ircstring_translation = string.maketrans(string.upper(_alpha) + "[]\\^",
+                                          _alpha + "{}|~")
+
+def irc_lower(s):
     """Returns a lowercased string.
 
     The definition of lowercased comes from the IRC specification (RFC
     1459).
     """
-    s = string.lower(s)
-    s = string.replace(s, "[", "{")
-    s = string.replace(s, "\\", "|")
-    s = string.replace(s, "]", "}")
-    s = string.replace(s, "^", "~")
-    return s
+    return string.translate(s, _ircstring_translation)
 
 def _ctcp_dequote(message):
     """[Internal] Dequote a message according to CTCP specifications.
@@ -900,7 +997,7 @@ def _ctcp_dequote(message):
             # normal message!  (This is according to the CTCP
             # specification.)
             messages.append(_CTCP_DELIMITER + chunks[-1])
-        
+
         return messages
 
 def is_channel(string):
@@ -910,30 +1007,30 @@ def is_channel(string):
     """
     return string and string[0] in "#&+!"
 
-def nick_from_nickmask(s):
+def nm_to_n(s):
     """Get the nick part of a nickmask.
 
     (The source of an Event is a nickmask.)
     """
     return string.split(s, "!")[0]
 
-def userhost_from_nickmask(s):
+def nm_to_uh(s):
     """Get the userhost part of a nickmask.
 
     (The source of an Event is a nickmask.)
     """
     return string.split(s, "!")[1]
 
-def host_from_nickmask(s):
+def nm_to_h(s):
     """Get the host part of a nickmask.
 
     (The source of an Event is a nickmask.)
     """
     return string.split(s, "@")[1]
 
-def user_from_nickmask(s):
+def nm_to_u(s):
     """Get the user part of a nickmask.
-    
+
     (The source of an Event is a nickmask.)
     """
     s = string.split(s, "!")[1]
@@ -1000,8 +1097,6 @@ def _parse_modes(mode_string, unary_modes=""):
 def _ping_ponger(connection, event):
     """[Internal]"""
     connection.pong(event.target())
-
-nick_characters = "]ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789\\[-`^{}"
 
 # Numeric table mostly stolen from the Perl IRC module (Net::IRC).
 numeric_events = {

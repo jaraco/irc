@@ -5,11 +5,11 @@ all: doc
 doc:
 	rm -r doc
 	mkdir doc
-	PYTHONPATH=. pythondoc -d doc -f HTML4 -i frame=1 irclib
+	PYTHONPATH=. pythondoc -d doc -f HTML4 -i frame=1 irclib ircbot
 
 dist: doc
 	mkdir irclib-$(VERSION)
-	cp -r COPYING README ChangeLog Makefile irclib.py irccat servermap doc irclib-$(VERSION)
+	cp -r COPYING README ChangeLog Makefile irclib.py ircbot.py irccat irccat2 servermap testbot.py doc irclib-$(VERSION)
 	tar cvzf irclib-$(VERSION).tar.gz irclib-$(VERSION)
 	rm -r irclib-$(VERSION)
 
