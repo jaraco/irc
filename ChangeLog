@@ -1,3 +1,9 @@
+2005-04-03  Keltus <keltus@users.sourceforge.net>
+	* irclib.py (protocol_events): Added "pong" and "invite" events.
+	Patch from Adam Mikuta.
+	* irclib.py (ServerConnection.part): Added message parameter.
+	Patch from Adam Mikuta.
+
 2005-02-23  Keltus <keltus@users.sourceforge.net>
 	* Released version 0.4.4.
 
@@ -6,14 +12,14 @@
 	Preparations for version 0.4.4.
 
 2005-01-28  Keltus <keltus@users.sourceforge.net>
-    * irclib.py: Moved self.irclibobj._remove_connection call from
-    close() to disconnect(). Patch from Alexey Nezhdanov.
+	* irclib.py: Moved self.irclibobj._remove_connection call from
+	close() to disconnect(). Patch from Alexey Nezhdanov.
 
 2005-01-25  Keltus <keltus@users.sourceforge.net>
-    * irclib.py (ServerConnection.connect): closes socket if a
-    connection does not occur
-    * irclib.py (ServerConnection.connect): "Changing server" ->
-    "Changing servers" (more ubiquitous quit phrase)
+	* irclib.py (ServerConnection.connect): closes socket if a
+	connection does not occur
+	* irclib.py (ServerConnection.connect): "Changing server" ->
+	"Changing servers" (more ubiquitous quit phrase)
 
 2005-01-23  Keltus <keltus@users.sourceforge.net>
 
