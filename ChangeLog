@@ -1,3 +1,16 @@
+2000-10-29  Joel Rosdahl  <joel@rosdahl.net>
+
+	* Released version 0.2.4.
+
+	* Makefile (dist): Include generated documentation in
+	distribution.
+
+	* Makefile (doc): Make documentation.
+
+	* irclib.py: Updated documentation.
+	
+	* irclib.py (is_channel): Included "!" as channel prefix.
+
 2000-10-02  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.2.3.

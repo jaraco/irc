@@ -1,8 +1,47 @@
 #! /usr/bin/env python
 #
-# Example script using irclib.py.
+# Example program using irclib.py.
 #
 # Joel Rosdahl <joel@rosdahl.net>
+#
+# servermap connects to an IRC server and finds out what other IRC
+# servers there are in the net and prints a tree-like map of their
+# interconnections.
+#
+# Example:
+#
+# % ./servermap irc.dal.net somenickname
+# Connecting to server...
+# Getting links...
+# 
+# 26 servers (18 leaves and 8 hubs)
+# 
+# splitrock.tx.us.dal.net
+# `-vader.ny.us.dal.net
+#   |-twisted.ma.us.dal.net
+#   |-sodre.nj.us.dal.net
+#   |-glass.oh.us.dal.net
+#   |-distant.ny.us.dal.net
+#   | |-algo.se.eu.dal.net
+#   | | |-borg.se.eu.dal.net
+#   | | | `-ced.se.eu.dal.net
+#   | | |-viking.no.eu.dal.net
+#   | | |-inco.fr.eu.dal.net
+#   | | |-paranoia.se.eu.dal.net
+#   | | |-gaston.se.eu.dal.net
+#   | | | `-powertech.no.eu.dal.net
+#   | | `-algo-u.se.eu.dal.net
+#   | |-philly.pa.us.dal.net
+#   | |-liberty.nj.us.dal.net
+#   | `-jade.va.us.dal.net
+#   `-journey.ca.us.dal.net
+#     |-ion.va.us.dal.net
+#     |-dragons.ca.us.dal.net
+#     |-toronto.on.ca.dal.net
+#     | `-netropolis-r.uk.eu.dal.net
+#     |   |-traced.de.eu.dal.net
+#     |   `-lineone.uk.eu.dal.net
+#     `-omega.ca.us.dal.net
 
 import irclib
 import string

@@ -1,5 +1,23 @@
-IRC library for Python
-----------------------
+irclib -- Internet Relay Chat (IRC) protocol client library
+-----------------------------------------------------------
+
+This library is intended to encapsulate the IRC protocol at a quite
+low level.  It provides an event-driven IRC client framework.  It has
+a fairly thorough support for the basic IRC protocol and CTCP, but DCC
+connection support is not yet implemented.
+
+In order to understand how to make an IRC client, I'm afraid you more
+or less must understand the IRC specifications.  They are available
+here:
+
+    http://www.irchelp.org/irchelp/rfc/
+
+Unfortunately, this library isn't as well-documented as I would like
+it to be.  There is some documentation in HTML format in the doc
+subdirectory.  It is generated from the docstrings in irclib.py by the
+pythondoc utility.  I think the best way to get started is to read and
+understand the example program irccat, which is included in the
+distribution.
 
 The following files might be of interest:
 
@@ -7,7 +25,8 @@ The following files might be of interest:
 
     The library itself.  Read the code along with comments and
     docstrings to get a grip of what it does.  Use it at your own risk
-    and read the source, Luke!
+    and read the source, Luke!  There is also an HTML version of the
+    docstring documentation in the doc subdirectory.
 
   * irccat
 
@@ -22,5 +41,9 @@ The following files might be of interest:
     a tree-like map of their interconnections.
 
 Enjoy.
+
+Since I seldom use IRC anymore, I will probably not work much on the
+library.  If you want to help or continue developing the library,
+please contact me.
 
 Joel Rosdahl <joel@rosdahl.net>

@@ -20,17 +20,24 @@
 #
 # $Id$
 
-"""irclib -- IRC protocol client library.
+"""irclib -- Internet Relay Chat (IRC) protocol client library.
 
 This library is intended to encapsulate the IRC protocol at a quite
-low level.  Clients are written by registering callbacks (i.e. not by
-inheriting a class), to make it easy to use different programming
-paradigms.  (It should be quite easy to write an object-oriented
-wrapper for one server connection, for example.)
+low level.  It provides an event-driven IRC client framework.  It has
+a fairly thorough support for the basic IRC protocol and CTCP, but DCC
+connection support is not yet implemented.
 
-The class hierarchy is inspired by the Perl IRC module (Net::IRC).
+In order to understand how to make an IRC client, I'm afraid you more
+or less must understand the IRC specifications.  They are available
+here: [IRC specifications].
+
+Since I seldom use IRC anymore, I will probably not work much on the
+library.  If you want to help or continue developing the library,
+please contact me.
 
 Joel Rosdahl <joel@rosdahl.net>
+
+.. [IRC specifications] http://www.irchelp.org/irchelp/rfc/
 """
 
 import bisect
@@ -42,7 +49,7 @@ import sys
 import time
 import types
 
-VERSION = 0, 2, 3
+VERSION = 0, 2, 4
 DEBUG = 0
 
 # TODO
@@ -61,13 +68,41 @@ DEBUG = 0
 # dropping of the connection triggers the disconnect event.
 
 class IRCError(Exception):
+    """Represents an IRC exception."""
     pass
 
 class IRC:
+    """Class that handles one or several IRC server connections.
+
+    When an IRC object has been instanciated, it can be used to create
+    Connection objects that represent the IRC connections.  The
+    responsibility of the IRC object is to provide an event-driven
+    framework for the connections and to keep the connections alive.
+    It runs a select loop to poll each connection's TCP socket and
+    hands over the sockets with incoming data for processing by the
+    corresponding connection.
+
+    The methods of most interest for an IRC client writer are server,
+    add_global_handler, remove_global_handler, execute_at,
+    execute_delayed, process_once and process_forever.
+
+    Here is an example:
+
+        irc = irclib.IRC()
+        server = irc.server()
+        server.connect(\"irc.some.where\", 6667, \"my_nickname\")
+        server.privmsg(\"a_nickname\", \"Hi there!\")
+        server.process_forever()
+
+    This will connect to the IRC server irc.some.where on port 6667
+    using the nickname my_nickname and send the message \"Hi there!\"
+    to the nickname a_nickname.
+    """
+
     def __init__(self, fn_to_add_socket=None,
                  fn_to_remove_socket=None,
                  fn_to_add_timeout=None):
-        """Creates an IRC object.
+        """Constructor for IRC objects.
 
         Optional arguments are fn_to_add_socket, fn_to_remove_socket
         and fn_to_add_timeout.  The first two specify functions that
@@ -105,24 +140,31 @@ class IRC:
         self.add_global_handler("ping", _ping_ponger, -42)
 
     def server(self):
-        """Creates and returns an IRC server object."""
+        """Creates and returns a ServerConnection object."""
 
         c = ServerConnection(self)
         self.connections.append(c)
         return c
 
     def process_data(self, sockets):
-        """Called when there is more data to read.
+        """Called when there is more data to read on connection sockets.
 
-        The argument is a list of socket objects.
+        Arguments:
+
+            sockets -- A list of socket objects.
+
+        See documentation for IRC.__init__.
         """
         for s in sockets:
-           for c in self.connections:
-               if s == c._get_socket():
-                   c.process_data()
+            for c in self.connections:
+                if s == c._get_socket():
+                    c.process_data()
 
     def process_timeout(self):
-        """Called when a timeout notification is due."""
+        """Called when a timeout notification is due.
+
+        See documentation for IRC.__init__.
+        """
         t = time.time()
         while self.delayed_commands:
             if t >= self.delayed_commands[0][0]:
@@ -135,8 +177,13 @@ class IRC:
         """Process data from connections once.
 
         Arguments:
+
             timeout -- How long the select() call should wait if no
-                       data is available (default 0).
+                       data is available.
+
+        This method should be called periodically to check and process
+        incoming data, if there are any.  If that seems boring, look
+        at the process_forever method.
         """
         sockets = map(lambda x: x._get_socket(), self.connections)
         sockets = filter(lambda x: x != None, sockets)
@@ -145,9 +192,10 @@ class IRC:
         self.process_timeout()
 
     def process_forever(self):
-        """This starts an infinite loop, processing data from connections.
+        """Run an infinite loop, processing data from connections.
 
-        Timeouts will be processed every second.
+        This method repeatedly calls process_once.  Timeouts will be
+        processed every second.
         """
         while 1:
             self.process_once(1)
@@ -159,19 +207,25 @@ class IRC:
             c.disconnect(message)
 
     def add_global_handler(self, event, handler, priority=0):
-        """Adds a global handler function for a type of event.
+        """Adds a global handler function for a specific event type.
 
-        The function is called whenever the specified event is
-        triggered in any of the connections.
+        Arguments:
+
+            event -- Event type (a string).  Check the values of the
+            numeric_events dictionary in irclib.py for possible event
+            types.
+
+            handler -- Callback function.
+
+            priority -- A number (the lower number, the higher priority).
+
+        The handler function is called whenever the specified event is
+        triggered in any of the connections.  See documentation for
+        the Event class.
 
         The handler functions are called in priority order (lowest
         number is highest priority).  If a handler function returns
-        "NO MORE", no more handlers will be called.
-
-        Arguments:
-            event -- Event type (a string).
-            handler -- Callback function.
-            priority -- A number (the lower number, the higher priority).
+        \"NO MORE\", no more handlers will be called.
         """
 
         if not self.handlers.has_key(event):
@@ -181,11 +235,13 @@ class IRC:
     def remove_global_handler(self, event, handler):
         """Removes a global handler function.
 
-        Returns 1 on success, otherwise 0.
-
         Arguments:
+
             event -- Event type (a string).
+
             handler -- Callback function.
+
+        Returns 1 on success, otherwise 0.
         """
         if not self.handlers.has_key(event):
             return 0
@@ -198,8 +254,11 @@ class IRC:
         """Execute a function at a specified time.
 
         Arguments:
-            at -- Execute at this time (standard "time_t" time).
+
+            at -- Execute at this time (standard \"time_t\" time).
+
             function -- Function to call.
+
             arguments -- Arguments to give the function.
         """
         self.execute_delayed(at-time.time(), function, arguments)
@@ -208,8 +267,11 @@ class IRC:
         """Execute a function after a specified time.
 
         Arguments:
+
             delay -- How many seconds to wait.
+
             function -- Function to call.
+
             arguments -- Arguments to give the function.
         """
         bisect.insort(self.delayed_commands, (delay+time.time(), function, arguments))
@@ -217,12 +279,14 @@ class IRC:
             self.fn_to_add_timeout(delay)
 
     def _handle_event(self, connection, event):
-       if self.handlers.has_key(event.eventtype()):
-           for handler in self.handlers[event.eventtype()]:
-               if handler[1](connection, event) == "NO MORE":
-                   return
+        """[Internal]"""
+        if self.handlers.has_key(event.eventtype()):
+            for handler in self.handlers[event.eventtype()]:
+                if handler[1](connection, event) == "NO MORE":
+                    return
 
     def _remove_connection(self, connection):
+        """[Internal]"""
         self.connections.remove(connection)
         if self.fn_to_remove_socket:
             self.fn_to_remove_socket(connection._get_socket()) 
@@ -250,12 +314,32 @@ class ServerConnectionError(IRCError):
     pass
 
 class ServerConnection(Connection):
+    """This class represents an IRC server connection.
+
+    ServerConnection objects are instanciated by calling the server
+    method on an IRC object.
+    """
+
     def __init__(self, irclibobj):
         Connection.__init__(self, irclibobj)
         self.connected = 0  # Not connected yet.
 
     def connect(self, server, port, nickname, password=None, username=None, ircname=None):
-        """(Re)connect to a server.
+        """Connect/reconnect to a server.
+
+        Arguments:
+
+            server -- Server name.
+
+            port -- Port number.
+
+            nickname -- The nickname.
+
+            password -- Password (if any).
+
+            username -- The username.
+
+            ircname -- The IRC name.
 
         This function can be called to reconnect a closed connection.
 
@@ -295,14 +379,15 @@ class ServerConnection(Connection):
     def close(self):
         """Close the connection.
 
-        This method closes the connection permanently; after it is
-        called, the object is unusable.
+        This method closes the connection permanently; after it has
+        been called, the object is unusable.
         """
 
         self.disconnect("Closing object")
         self.irclibobj._remove_connection(self)
         
     def _get_socket(self):
+        """[Internal]"""
         return self.socket
 
     def get_server_name(self):
@@ -328,12 +413,7 @@ class ServerConnection(Connection):
         return self.real_nickname
 
     def process_data(self):
-        """Process incoming data on the connections.
-
-        This method should be called periodically.  If that seems
-        boring, look at the process_forever() method.  You may also
-        want to look at the process_once() method.
-        """
+        """[Internal]"""
 
         try:
             new_data = self.socket.recv(2**14)
@@ -444,36 +524,50 @@ class ServerConnection(Connection):
                 self._handle_event(Event(command, prefix, target, arguments))
 
     def _handle_event(self, event):
+        """[Internal]"""
         self.irclibobj._handle_event(self, event)
         if self.handlers.has_key(event.eventtype()):
             for fn in self.handlers[event.eventtype()]:
                 fn(self, event)
 
     def is_connected(self):
-        """Return connection status (true if connected, otherwise
-        false)."""
+        """Return connection status.
+
+        Returns true if connected, otherwise false.
+        """
         return self.connected
 
     def add_global_handler(self, *args):
-        """See documentation for IRC.add_global_handler."""
+        """Add global handler.
+
+        See documentation for IRC.add_global_handler.
+        """
         apply(self.irclibobj.add_global_handler, args)
 
     def action(self, target, action):
+        """Send a CTCP ACTION command."""
         self.ctcp("ACTION", target, action)
 
     def admin(self, server=""):
+        """Send an ADMIN command."""
         self.send_raw(string.strip(string.join(["ADMIN", server])))
 
     def ctcp(self, ctcptype, target, parameter=""):
+        """Send a CTCP command."""
         ctcptype = string.upper(ctcptype)
         self.privmsg(target, "\001%s%s\001" % (ctcptype, parameter and (" " + parameter) or ""))
 
     def ctcp_reply(self, target, parameter):
+        """Send a CTCP REPLY command."""
         self.notice(target, "\001%s\001" % parameter)
 
     def disconnect(self, message=""):
-        """Hang up the connection."""
+        """Hang up the connection.
 
+        Arguments:
+
+            message -- Quit message.
+        """
         if self.connected == 0:
             return
 
@@ -486,25 +580,36 @@ class ServerConnection(Connection):
         self._handle_event(Event("disconnect", self.server, "", [message]))
 
     def globops(self, text):
+        """Send a GLOBOPS command."""
         self.send_raw("GLOBOPS :" + text)
 
     def info(self, server=""):
+        """Send an INFO command."""
         self.send_raw(string.strip(string.join(["INFO", server])))
 
     def invite(self, nick, channel):
+        """Send an INVITE command."""
         self.send_raw(string.strip(string.join(["INVITE", nick, channel])))
 
     def ison(self, nicks):
-        """nicks is a list of nicks"""
+        """Send an ISON command.
+
+        Arguments:
+
+            nicks -- List of nicks.
+        """
         self.send_raw("ISON " + string.join(nicks, ","))
 
     def join(self, channel, key=""):
+        """Send a JOIN command."""
         self.send_raw("JOIN %s%s" % (channel, (key and (" " + key))))
 
     def kick(self, channel, nick, comment=""):
+        """Send a KICK command."""
         self.send_raw("KICK %s %s%s" % (channel, nick, (comment and (" :" + comment))))
 
     def links(self, remote_server="", server_mask=""):
+        """Send a LINKS command."""
         command = "LINKS"
         if remote_server:
             command = command + " " + remote_server
@@ -513,6 +618,7 @@ class ServerConnection(Connection):
         self.send_raw(command)
 
     def list(self, channels=None, server=""):
+        """Send a LIST command."""
         command = "LIST"
         if channels:
             command = command + " " + string.join(channels, ",")
@@ -521,60 +627,75 @@ class ServerConnection(Connection):
         self.send_raw(command)
 
     def lusers(self, server=""):
+        """Send a LUSERS command."""
         self.send_raw("LUSERS" + (server and (" " + server)))
 
     def mode(self, target, command):
+        """Send a MODE command."""
         self.send_raw("MODE %s %s" % (target, command))
 
     def motd(self, server=""):
+        """Send an MOTD command."""
         self.send_raw("MOTD" + (server and (" " + server)))
 
     def names(self, channels=None):
+        """Send a NAMES command."""
         self.send_raw("NAMES" + (channels and (" " + string.join(channels, ",")) or ""))
 
     def nick(self, newnick):
+        """Send a NICK command."""
         self.send_raw("NICK " + newnick)
 
     def notice(self, target, text):
+        """Send a NOTICE command."""
         # Should limit len(text) here!
         self.send_raw("NOTICE %s :%s" % (target, text))
 
     def oper(self, nick, password):
+        """Send an OPER command."""
         self.send_raw("OPER %s %s" % (nick, password))
 
     def part(self, channels):
+        """Send a PART command."""
         if type(channels) == types.StringType:
             self.send_raw("PART " + channels)
         else:
             self.send_raw("PART " + string.join(channels, ","))
 
     def pass_(self, password):
+        """Send a PASS command."""
         self.send_raw("PASS " + password)
 
     def ping(self, target, target2=""):
-       self.send_raw("PING %s%s" % (target, target2 and (" " + target2)))
+        """Send a PING command."""
+        self.send_raw("PING %s%s" % (target, target2 and (" " + target2)))
 
     def pong(self, target, target2=""):
-       self.send_raw("PONG %s%s" % (target, target2 and (" " + target2)))
+        """Send a PONG command."""
+        self.send_raw("PONG %s%s" % (target, target2 and (" " + target2)))
 
     def privmsg(self, target, text):
+        """Send a PRIVMSG command."""
         # Should limit len(text) here!
         self.send_raw("PRIVMSG %s :%s" % (target, text))
 
     def privmsg_many(self, targets, text):
+        """Send a PRIVMSG command to multiple targets."""
         # Should limit len(text) here!
         self.send_raw("PRIVMSG %s :%s" % (string.join(targets, ","), text))
 
     def quit(self, message=""):
+        """Send a QUIT command."""
         self.send_raw("QUIT" + (message and (" :" + message)))
 
     def sconnect(self, target, port="", server=""):
+        """Send an SCONNECT command."""
         self.send_raw("CONNECT %s%s%s" % (target,
                                           port and (" " + port),
                                           server and (" " + server)))
 
     def send_raw(self, string):
-        """Send raw string to server.
+        """Send raw string to the server.
 
         The string will be padded with appropriate CR LF.
         """
@@ -587,59 +708,82 @@ class ServerConnection(Connection):
             self.disconnect("Connection reset by peer.")
 
     def squit(self, server, comment=""):
+        """Send an SQUIT command."""
         self.send_raw("SQUIT %s%s" % (server, comment and (" :" + comment)))
 
     def stats(self, statstype, server=""):
+        """Send a STATS command."""
         self.send_raw("STATS %s%s" % (statstype, server and (" " + server)))
 
     def time(self, server=""):
+        """Send a TIME command."""
         self.send_raw("TIME" + (server and (" " + server)))
 
     def topic(self, channel, new_topic=None):
+        """Send a TOPIC command."""
         if new_topic == None:
             self.send_raw("TOPIC " + channel)
         else:
             self.send_raw("TOPIC %s :%s" % (channel, new_topic))
 
     def trace(self, target=""):
+        """Send a TRACE command."""
         self.send_raw("TRACE" + (target and (" " + target)))
 
     def user(self, username, localhost, server, ircname):
+        """Send a USER command."""
         self.send_raw("USER %s %s %s :%s" % (username, localhost, server, ircname))
 
     def userhost(self, nicks):
+        """Send a USERHOST command."""
         self.send_raw("USERHOST " + string.join(nicks, ","))
 
     def users(self, server=""):
+        """Send a USERS command."""
         self.send_raw("USERS" + (server and (" " + server)))
 
     def version(self, server=""):
+        """Send a VERSION command."""
         self.send_raw("VERSION" + (server and (" " + server)))
         
     def wallops(self, text):
+        """Send a WALLOPS command."""
         self.send_raw("WALLOPS :" + text)
 
     def who(self, target="", op=""):
+        """Send a WHO command."""
         self.send_raw("WHO%s%s" % (target and (" " + target), op and (" o")))
 
     def whois(self, targets):
+        """Send a WHOIS command."""
         self.send_raw("WHOIS " + string.join(targets, ","))
 
     def whowas(self, nick, max=None, server=""):
+        """Send a WHOWAS command."""
         self.send_raw("WHOWAS %s%s%s" % (nick,
                                          max and (" " + max),
                                          server and (" " + server)))
 
-class Event:
-    """Event class.
+class DCCConnection(Connection):
+    """Unimplemented."""
+    def __init__(self):
+        raise IRCError, "Unimplemented."
 
-    Arguments:
-        eventtype -- A string describing the event.
-        source -- The originator of the event (a nick mask or a server). XXX Correct?
-        target -- The target of the event (a nick or a channel). XXX Correct?
-        arguments -- Any event specific arguments.
-    """
+class Event:
+    """Class representing an IRC event."""
     def __init__(self, eventtype, source, target, arguments=None):
+        """Constructor of Event objects.
+        
+        Arguments:
+
+            eventtype -- A string describing the event.
+
+            source -- The originator of the event (a nick mask or a server). XXX Correct?
+
+            target -- The target of the event (a nick or a channel). XXX Correct?
+
+            arguments -- Any event specific arguments.
+        """
         self._eventtype = eventtype
         self._source = source
         self._target = target
@@ -649,16 +793,20 @@ class Event:
             self._arguments = []
 
     def eventtype(self):
-       return self._eventtype
+        """Get the event type."""
+        return self._eventtype
 
     def source(self):
-       return self._source
+        """Get the event source."""
+        return self._source
 
     def target(self):
-       return self._target
+        """Get the event target."""
+        return self._target
 
     def arguments(self):
-       return self._arguments
+        """Get the event arguments."""
+        return self._arguments
 
 _LOW_LEVEL_QUOTE = "\020"
 _CTCP_LEVEL_QUOTE = "\134"
@@ -689,8 +837,10 @@ def mask_matches(nick, mask):
     return r.match(nick)
 
 def lower_irc_string(s):
-    """Returns a lowercased string, where the definition of lowercased
-    comes from the IRC specification (RFC 1459).
+    """Returns a lowercased string.
+
+    The definition of lowercased comes from the IRC specification (RFC
+    1459).
     """
     s = string.lower(s)
     s = string.replace(s, "[", "{")
@@ -700,7 +850,7 @@ def lower_irc_string(s):
     return s
 
 def _ctcp_dequote(message):
-    """Dequote a message according to CTCP specifications.
+    """[Internal] Dequote a message according to CTCP specifications.
 
     The function returns a list where each element can be either a
     string (normal message) or a tuple of one or two strings (tagged
@@ -709,6 +859,7 @@ def _ctcp_dequote(message):
     tag and the data.
 
     Arguments:
+
         message -- The message to be decoded.
     """
 
@@ -753,31 +904,37 @@ def _ctcp_dequote(message):
         return messages
 
 def is_channel(string):
-    """Returns true if the argument is a channel name, otherwise
-    false."""
-    return string and string[0] in "#&+"
+    """Check if a string is a channel name.
+
+    Returns true if the argument is a channel name, otherwise false.
+    """
+    return string and string[0] in "#&+!"
 
 def nick_from_nickmask(s):
-    """Returns the nickname part of a nickmask.  (The source of an
-    Event is a nickmask.)
+    """Get the nick part of a nickmask.
+
+    (The source of an Event is a nickmask.)
     """
     return string.split(s, "!")[0]
 
 def userhost_from_nickmask(s):
-    """Returns the userhost part of a nickmask.  (The source of an
-    Event is a nickmask.)
+    """Get the userhost part of a nickmask.
+
+    (The source of an Event is a nickmask.)
     """
     return string.split(s, "!")[1]
 
 def host_from_nickmask(s):
-    """Returns the host part of a nickmask.  (The source of an
-    Event is a nickmask.)
+    """Get the host part of a nickmask.
+
+    (The source of an Event is a nickmask.)
     """
     return string.split(s, "@")[1]
 
 def user_from_nickmask(s):
-    """Returns the user part of a nickmask.  (The source of an
-    Event is a nickmask.)
+    """Get the user part of a nickmask.
+    
+    (The source of an Event is a nickmask.)
     """
     s = string.split(s, "!")[1]
     return string.split(s, "@")[0]
@@ -786,12 +943,12 @@ def parse_nick_modes(mode_string):
     """Parse a nick mode string.
 
     The function returns a list of lists with three members: sign,
-    mode and argument.  The sign is "+" or "-".  The argument is
+    mode and argument.  The sign is \"+\" or \"-\".  The argument is
     always None.
 
     Example:
 
-    >>> irclib.parse_nick_modes("+ab-c")
+    >>> irclib.parse_nick_modes(\"+ab-c\")
     [['+', 'a', None], ['+', 'b', None], ['-', 'c', None]]
     """
 
@@ -801,18 +958,19 @@ def parse_channel_modes(mode_string):
     """Parse a channel mode string.
 
     The function returns a list of lists with three members: sign,
-    mode and argument.  The sign is "+" or "-".  The argument is None
-    if mode isn't one of "b", "k", "l", "v" or "o".
+    mode and argument.  The sign is \"+\" or \"-\".  The argument is
+    None if mode isn't one of \"b\", \"k\", \"l\", \"v\" or \"o\".
 
     Example:
 
-    >>> irclib.parse_channel_modes("+ab-c foo")
+    >>> irclib.parse_channel_modes(\"+ab-c foo\")
     [['+', 'a', None], ['+', 'b', 'foo'], ['-', 'c', None]]
     """
 
     return _parse_modes(mode_string, "bklvo")
 
 def _parse_modes(mode_string, unary_modes=""):
+    """[Internal]"""
     modes = []
     arg_count = 0
 
@@ -840,6 +998,7 @@ def _parse_modes(mode_string, unary_modes=""):
     return modes
 
 def _ping_ponger(connection, event):
+    """[Internal]"""
     connection.pong(event.target())
 
 nick_characters = "]ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789\\[-`^{}"
