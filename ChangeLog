@@ -1,3 +1,7 @@
+2005-01-20  Joel Rosdahl  <joel@rosdahl.net>
+
+	* Makefile: Removed more GNU make specific constructs.
+
 2005-01-19  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Makefile: Don't require GNU make.
