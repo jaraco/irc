@@ -3,6 +3,11 @@
 	* ircbot.py (SingleServerIRCBot.jump_server): Improved jump_server
 	behaviour. Patch from Jeff Huang.
 
+2004-08-04  Joel Rosdahl  <joel@rosdahl.net>
+
+	* irclib.py (ServerConnection.process_data): Added "bonus" action
+	event that is triggered on CTCP ACTION messages.
+
 2004-07-09  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.4.2.
