@@ -48,9 +48,7 @@ Current limitations:
   * Like most projects, documentation is lacking...
 
 Unfortunately, this library isn't as well-documented as I would like
-it to be.  There is some documentation in HTML format in the doc
-subdirectory.  It is generated from the docstrings in irclib.py by the
-pythondoc utility.  I think the best way to get started is to read and
+it to be.  I think the best way to get started is to read and
 understand the example program irccat, which is included in the
 distribution.
 
@@ -60,8 +58,7 @@ The following files might be of interest:
 
     The library itself.  Read the code along with comments and
     docstrings to get a grip of what it does.  Use it at your own risk
-    and read the source, Luke!  There is also an HTML version of the
-    docstring documentation in the doc subdirectory.
+    and read the source, Luke!
 
   * irccat
 
