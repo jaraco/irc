@@ -2,6 +2,8 @@
 
 	* ircbot.py (IRCDict.__contains__): Added __contains__method for
 	IRCDict. Patch from Jeff Huang.
+	(SingleServerIRCBot.on_ctcp): Corrected default decoding of CTCP
+	DCC CHAT. Patch from Jeff Huang.
 
 	* irclib.py (VERSION):
 	* python-irclib.spec.in:
