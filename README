@@ -42,7 +42,8 @@ Current limitations:
   * The IRC protocol shines through the abstraction a bit too much.
   * Data is not written asynchronously to the server (and DCC peers),
     i.e. the write() may block if the TCP buffers are stuffed.
-  * The author hasn't read RFC 2810, 2811, 2812 and 2813 very much.
+  * The author hasn't studied the new RFCs (2810, 2811, 2812 and 2813)
+    very closely.
   * Like most projects, documentation is lacking...
 
 Unfortunately, this library isn't as well-documented as I would like
