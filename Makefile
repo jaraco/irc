@@ -13,14 +13,17 @@ DISTFILES = \
     irclib.py \
     servermap \
     setup.py \
-    testbot.py
+    testbot.py \
+    python-irclib.spec
 
 PACKAGENAME = python-irclib-$(VERSION)
 
-all:
-	echo "Nothing to do."
+all: $(DISTFILES)
 
-dist:
+python-irclib.spec: python-irclib.spec.in
+	sed 's/%%VERSION%%/$(VERSION)/g' $< >$@
+
+dist: $(DISTFILES)
 	mkdir $(PACKAGENAME)
 	cp -r $(DISTFILES) $(PACKAGENAME)
 	tar cvzf $(PACKAGENAME).tar.gz $(PACKAGENAME)

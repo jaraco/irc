@@ -1,5 +1,7 @@
 2003-10-29  Joel Rosdahl  <joel@rosdahl.net>
 
+	* python-irclib.spec.in: RPM spec file from Gary Benson.
+
 	* testbot.py (TestBot.on_nicknameinuse): New method.
 
 	* irclib.py (ServerConnection.process_data): Record nickname when
