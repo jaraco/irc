@@ -44,7 +44,7 @@ Current limitations:
   * Data is not written asynchronously to the server, i.e. the write()
     may block if the TCP buffers are stuffed.
   * There are no support for DCC connections.
-  * The author haven't even read RFC 2810, 2811, 2812 and 2813.
+  * The author hasn't even read RFC 2810, 2811, 2812 and 2813.
   * Like most projects, documentation is lacking...
 
 Unfortunately, this library isn't as well-documented as I would like
