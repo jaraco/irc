@@ -286,6 +286,8 @@ class IRCDict:
         ck = irc_lower(key)
         del self.data[self.canon_keys[ck]]
         del self.canon_keys[ck]
+    def __contains__(self, key):
+        return self.has_key(key)
     def clear(self):
         self.data.clear()
         self.canon_keys.clear()

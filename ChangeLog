@@ -1,5 +1,8 @@
 2005-01-17  Joel Rosdahl  <joel@rosdahl.net>
 
+	* ircbot.py (IRCDict.__contains__): Added __contains__method for
+	IRCDict. Patch from Jeff Huang.
+
 	* irclib.py (VERSION):
 	* python-irclib.spec.in:
 	Preparations for version 0.4.3.
