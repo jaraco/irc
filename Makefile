@@ -5,7 +5,7 @@ main:
 
 dist:
 	mkdir irclib-$(VERSION)
-	cp COPYING README ChangeLog Makefile irclib.py ircbot.py irccat servermap irclib-$(VERSION)
+	cp COPYING README ChangeLog Makefile irclib.py irccat servermap irclib-$(VERSION)
 	tar cvzf irclib-$(VERSION).tar.gz irclib-$(VERSION)
 	rm -r irclib-$(VERSION)
 

@@ -1,3 +1,25 @@
+2000-09-24  Joel Rosdahl  <joel@rosdahl.net>
+
+	* Released version 0.2.1.
+
+	* irclib.py (ServerConnection.process_data): Bug fix (didn't keep
+	track of nick name).
+	(IRC.process_once): New method.
+	(ServerConnection.process_data): Bug fix.
+	(IRC.disconnect_all): Created.
+	(IRC.exit): Removed.
+	(ServerConnection.exit): Removed.
+	(ServerConnection.connect): Follow RFC closer.
+	(ServerConnection.user): Follow RFC closer.
+
+	* ircbot.py: Removed.
+
+	* irccat (on_disconnect): Just sys.exit(0).
+
+	* servermap (on_disconnect): Just sys.exit(0).
+
+	* irclib.py: Various documentation and some clean-ups.
+
 1999-08-21  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.2.0.

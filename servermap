@@ -54,7 +54,7 @@ def on_endoflinks(connection, event):
     connection.quit("Using irclib.py")
 
 def on_disconnect(connection, event):
-    connection.exit()
+    sys.exit(0)
 
 def indent_string(level, active_levels, last):
     if level == 0:

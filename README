@@ -1,5 +1,26 @@
-irclib.py
----------
+IRC library for Python
+----------------------
 
-This code is very beta, or not even that.  Use at your own risk and
-read the source, Luke!
+The following files might be of interest:
+
+  * irclib.py
+
+    The library itself.  Read the code along with comments and
+    docstrings to get a grip of what it does.  Use it at your own risk
+    and read the source, Luke!
+
+  * irccat
+
+    A simple example of how to use irclib.py.  irccat reads text from
+    stdin and writes it to a specified user or channel on an IRC
+    server.
+
+  * servermap
+
+    Another simple example.  servermap connects to an IRC server,
+    finds out what other IRC servers there are in the net and prints
+    a tree-like map of their interconnections.
+
+Enjoy.
+
+Joel Rosdahl <joel@rosdahl.net>

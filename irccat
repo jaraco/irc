@@ -33,7 +33,7 @@ if len(sys.argv) != 4:
     sys.exit(1)
 
 def on_disconnect(connection, event):
-    connection.exit()
+    sys.exit(0)
 
 s = string.split(sys.argv[1], ":", 1)
 server = s[0]
