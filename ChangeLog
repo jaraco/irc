@@ -2,6 +2,7 @@
 
 	* irclib.py: Removed depreciated apply functions. python-irclib is
 	now compatible with Python 1.6 and above.
+	* testbot.py: Removed redundant extra start() call
 
 2005-01-20  Joel Rosdahl  <joel@rosdahl.net>
 

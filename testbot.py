@@ -33,7 +33,6 @@ class TestBot(SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
         SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
         self.channel = channel
-        self.start()
 
     def on_nicknameinuse(self, c, e):
         c.nick(c.get_nickname() + "_")
