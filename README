@@ -7,10 +7,8 @@ The home of irclib.py is now:
 
 This library is intended to encapsulate the IRC protocol at a quite
 low level.  It provides an event-driven IRC client framework.  It has
-a fairly thorough support for the basic IRC protocol and CTCP, but DCC
-connection support is not yet implemented.  It actually does CTCP
-parsing exactly as the CTCP specifications describe it -- I've never
-seen another IRC client do that!
+a fairly thorough support for the basic IRC protocol, CTCP and DCC
+connections.
 
 In order to understand how to make an IRC client, I'm afraid you more
 or less must understand the IRC specifications.  They are available
@@ -37,13 +35,13 @@ The main features of the IRC client framework are:
     specification subtilties.
   * A kind of simple, single-server, object-oriented IRC client class
     that dispatches events to instance methods is included.
+  * DCC connection support.
 
 Current limitations:
 
   * The IRC protocol shines through the abstraction a bit too much.
-  * Data is not written asynchronously to the server, i.e. the write()
-    may block if the TCP buffers are stuffed.
-  * There are no support for DCC connections.
+  * Data is not written asynchronously to the server (and DCC peers),
+    i.e. the write() may block if the TCP buffers are stuffed.
   * The author hasn't even read RFC 2810, 2811, 2812 and 2813.
   * Like most projects, documentation is lacking...
 
@@ -80,7 +78,16 @@ The following files might be of interest:
 
     An example bot that uses the SingleServerIRCBot class from
     ircbot.py.  The bot enters a channel and listens for commands in
-    private messages or channel traffic.
+    private messages or channel traffic.  It also accepts DCC
+    invitations and echos back sent DCC chat messages.
+
+  * dccreceive
+
+    Receives a file over DCC.
+
+  * dccsend
+
+    Sends a file over DCC.
 
 Enjoy.
 
