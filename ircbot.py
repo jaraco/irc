@@ -228,7 +228,8 @@ class SingleServerIRCBot(SimpleIRCClient):
         to the on_dccchat method.
         """
         if e.arguments()[0] == "VERSION":
-            c.ctcp_reply(nm_to_n(e.source()), self.get_version())
+            c.ctcp_reply(nm_to_n(e.source()),
+                         "VERSION " + self.get_version())
         elif e.arguments()[0] == "PING":
             if len(e.arguments()) > 1:
                 c.ctcp_reply(nm_to_n(e.source()),
