@@ -79,12 +79,12 @@ DEBUG = 0
 
 # TODO
 # ----
-# DCC
 # (maybe) thread safety
 # (maybe) color parser convenience functions
 # documentation (including all event types)
 # (maybe) add awareness of different types of ircds
-# send data asynchronously to the server
+# send data asynchronously to the server (and DCC connections)
+# (maybe) automatically close unused, passive DCC connections after a while
 
 # NOTES
 # -----
@@ -310,6 +310,20 @@ class IRC:
         if self.fn_to_add_timeout:
             self.fn_to_add_timeout(delay)
 
+    def dcc(self, dcctype="chat"):
+        """Creates and returns a DCCConnection object.
+
+        Arguments:
+
+            dcctype -- "chat" for DCC CHAT connections or "raw" for
+                       DCC SEND (or other DCC types). If "chat",
+                       incoming data will be split in newline-separated
+                       chunks. If "raw", incoming data is not touched.
+        """
+        c = DCCConnection(self, dcctype)
+        self.connections.append(c)
+        return c
+
     def _handle_event(self, connection, event):
         """[Internal]"""
         h = self.handlers
@@ -367,7 +381,7 @@ class ServerConnection(Connection):
         self.connected = 0  # Not connected yet.
 
     def connect(self, server, port, nickname, password=None, username=None,
-                ircname=None):
+                ircname=None, localaddress="0.0.0.0", localport=0):
         """Connect/reconnect to a server.
 
         Arguments:
@@ -383,6 +397,10 @@ class ServerConnection(Connection):
             username -- The username.
 
             ircname -- The IRC name.
+
+            localaddress -- Bind the connection to a specific local IP address.
+
+            localport -- Bind the connection to a specific local port.
 
         This function can be called to reconnect a closed connection.
 
@@ -402,9 +420,12 @@ class ServerConnection(Connection):
         self.username = username or nickname
         self.ircname = ircname or nickname
         self.password = password
+        self.localaddress = localaddress
+        self.localport = localport
         self.localhost = socket.gethostname()
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
+            self.socket.bind((self.localaddress, self.localport))
             self.socket.connect((self.server, self.port))
         except socket.error, x:
             raise ServerConnectionError, "Couldn't connect to socket: %s" % x
@@ -431,10 +452,7 @@ class ServerConnection(Connection):
 
     def _get_socket(self):
         """[Internal]"""
-        if self.connected:
-            return self.socket
-        else:
-            return None
+        return self.socket
 
     def get_server_name(self):
         """Get the (real) server name.
@@ -607,7 +625,7 @@ class ServerConnection(Connection):
 
             message -- Quit message.
         """
-        if self.connected == 0:
+        if not self.connected:
             return
 
         self.connected = 0
@@ -743,7 +761,7 @@ class ServerConnection(Connection):
             if DEBUG:
                 print "TO SERVER:", string
         except socket.error, x:
-            # Aouch!
+            # Ouch!
             self.disconnect("Connection reset by peer.")
 
     def squit(self, server, comment=""):
@@ -804,11 +822,162 @@ class ServerConnection(Connection):
                                          server and (" " + server)))
 
 
-class DCCConnection(Connection):
-    """Unimplemented."""
-    def __init__(self):
-        raise IRCError, "Unimplemented."
+class DCCConnectionError(IRCError):
+    pass
 
+
+class DCCConnection(Connection):
+    """This class represents a DCC connection.
+
+    DCCConnection objects are instantiated by calling the dcc
+    method on an IRC object.
+    """
+    def __init__(self, irclibobj, dcctype):
+        Connection.__init__(self, irclibobj)
+        self.connected = 0
+        self.passive = 0
+        self.dcctype = dcctype
+
+    def connect(self, address, port):
+        """Connect/reconnect to a DCC peer.
+
+        Arguments:
+            address -- Host/IP address of the peer.
+
+            port -- The port number to connect to.
+
+        Returns the DCCConnection object.
+        """
+        self.peeraddress = socket.gethostbyname(address)
+        self.peerport = port
+        self.socket = None
+        self.previous_buffer = ""
+        self.handlers = {}
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.passive = 0
+        try:
+            self.socket.connect((self.peeraddress, self.peerport))
+        except socket.error, x:
+            raise DCCConnectionError, "Couldn't connect to socket: %s" % x
+        self.connected = 1
+        if self.irclibobj.fn_to_add_socket:
+            self.irclibobj.fn_to_add_socket(self.socket)
+        return self
+
+    def listen(self, address):
+        """Wait for a connection/reconnection from a DCC peer.
+
+        Arguments:
+            address -- Host/IP address of the peer.
+
+        Returns the DCCConnection object.
+
+        The local IP address and port are available as
+        self.localaddress and self.localport.
+        """
+        self.peeraddress = socket.gethostbyname(address)
+        self.previous_buffer = ""
+        self.handlers = {}
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.passive = 1
+        try:
+            self.socket.bind((socket.gethostbyname(socket.gethostname()), 0))
+            self.localaddress, self.localport = self.socket.getsockname()
+            self.socket.listen(10)
+        except socket.error, x:
+            raise DCCConnectionError, "Couldn't bind socket: %s" % x
+        return self
+
+    def disconnect(self, message=""):
+        """Hang up the connection and close the object.
+
+        Arguments:
+
+            message -- Quit message.
+        """
+        if not self.connected:
+            return
+
+        self.connected = 0
+        try:
+            self.socket.close()
+        except socket.error, x:
+            pass
+        self.socket = None
+        self.irclibobj._handle_event(
+            self,
+            Event("dcc_disconnect", self.peeraddress, "", [message]))
+        self.irclibobj._remove_connection(self)
+
+    def process_data(self):
+        """[Internal]"""
+
+        if self.passive and not self.connected:
+            conn, addr = self.socket.accept()
+            self.socket.close()
+            self.socket = conn
+            self.connected = 1
+            return
+
+        try:
+            new_data = self.socket.recv(2**14)
+        except socket.error, x:
+            # The server hung up.
+            self.disconnect("Connection reset by peer")
+            return
+        if not new_data:
+            # Read nothing: connection must be down.
+            self.disconnect("Connection reset by peer")
+            return
+
+        if self.dcctype == "chat":
+            # The specification says lines are terminated with LF, but
+            # it seems safer to handle CR LF terminations too.
+            chunks = _linesep_regexp.split(self.previous_buffer + new_data)
+
+            # Save the last, unfinished line.
+            self.previous_buffer = chunks[-1]
+            if len(self.previous_buffer) > 2**14:
+                # Bad peer! Naughty peer!
+                self.disconnect()
+                return
+            chunks = chunks[:-1]
+        else:
+            chunks = [new_data]
+
+        command = "dccmsg"
+        prefix = self.peeraddress
+        target = None
+        for chunk in chunks:
+            if DEBUG:
+                print "FROM PEER:", chunk
+            arguments = [chunk]
+            if DEBUG:
+                print "command: %s, source: %s, target: %s, arguments: %s" % (
+                    command, prefix, target, arguments)
+            self.irclibobj._handle_event(
+                self,
+                Event(command, prefix, target, arguments))
+
+    def _get_socket(self):
+        """[Internal]"""
+        return self.socket
+
+    def privmsg(self, string):
+        """Send data to DCC peer.
+
+        The string will be padded with appropriate LF if it's a DCC
+        CHAT session.
+        """
+        try:
+            self.socket.send(string)
+            if self.dcctype == "chat":
+                self.socket.send("\n")
+            if DEBUG:
+                print "TO PEER: %s\n" % string
+        except socket.error, x:
+            # Ouch!
+            self.disconnect("Connection reset by peer.")
 
 class SimpleIRCClient:
     """A simple single-server IRC client class.
@@ -828,11 +997,15 @@ class SimpleIRCClient:
         ircobj -- The IRC instance.
 
         connection -- The ServerConnection instance.
+
+        dcc_connections -- A list of DCCConnection instances.
     """
     def __init__(self):
         self.ircobj = IRC()
         self.connection = self.ircobj.server()
+        self.dcc_connections = []
         self.ircobj.add_global_handler("all_events", self._dispatcher, -10)
+        self.ircobj.add_global_handler("dcc_disconnect", self._dcc_disconnect, -10)
 
     def _dispatcher(self, c, e):
         """[Internal]"""
@@ -840,8 +1013,11 @@ class SimpleIRCClient:
         if hasattr(self, m):
             getattr(self, m)(c, e)
 
+    def _dcc_disconnect(self, c, e):
+        self.dcc_connections.remove(c)
+
     def connect(self, server, port, nickname, password=None, username=None,
-                ircname=None):
+                ircname=None, localaddress="0.0.0.0", localport=0):
         """Connect/reconnect to a server.
 
         Arguments:
@@ -858,10 +1034,41 @@ class SimpleIRCClient:
 
             ircname -- The IRC name.
 
+            localaddress -- Bind the connection to a specific local IP address.
+
+            localport -- Bind the connection to a specific local port.
+
         This function can be called to reconnect a closed connection.
         """
         self.connection.connect(server, port, nickname,
-                                password, username, ircname)
+                                password, username, ircname,
+                                localaddress, localport)
+
+    def dcc_connect(self, address, port, dcctype="chat"):
+        """Connect to a DCC peer.
+
+        Arguments:
+
+            address -- IP address of the peer.
+
+            port -- Port to connect to.
+
+        Returns a DCCConnection instance.
+        """
+        dcc = self.ircobj.dcc(dcctype)
+        self.dcc_connections.append(dcc)
+        dcc.connect(address, port)
+        return dcc
+
+    def dcc_listen(self, address, dcctype="chat"):
+        """Listen for connections from a DCC peer.
+
+        Returns a DCCConnection instance.
+        """
+        dcc = self.ircobj.dcc(dcctype)
+        self.dcc_connections.append(dcc)
+        dcc.listen(address)
+        return dcc
 
     def start(self):
         """Start the IRC client."""
@@ -1009,6 +1216,25 @@ def is_channel(string):
     Returns true if the argument is a channel name, otherwise false.
     """
     return string and string[0] in "#&+!"
+
+def ip_numstr_to_quad(num):
+    """Convert an IP number as an integer given in ASCII
+    representation (e.g. '3232235521') to an IP address string
+    (e.g. '192.168.0.1')."""
+    n = long(num)
+    p = map(str, map(int, [n >> 24 & 0xFF, n >> 16 & 0xFF,
+                           n >> 8 & 0xFF, n & 0xFF]))
+    return string.join(p, ".")
+
+def ip_quad_to_numstr(quad):
+    """Convert an IP address string (e.g. '192.168.0.1') to an IP
+    number as an integer given in ASCII representation
+    (e.g. '3232235521')."""
+    p = map(long, string.split(quad, "."))
+    s = str((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3])
+    if s[-1] == "L":
+        s = s[:-1]
+    return s
 
 def nm_to_n(s):
     """Get the nick part of a nickmask.
@@ -1268,9 +1494,10 @@ numeric_events = {
 
 generated_events = [
     # Generated events
+    "dccmsg",
     "disconnect",
     "ctcp",
-    "ctcpreply"
+    "ctcpreply",
 ]
 
 protocol_events = [
@@ -1285,7 +1512,7 @@ protocol_events = [
     "privnotice",
     "pubmsg",
     "pubnotice",
-    "quit"
+    "quit",
 ]
 
 all_events = generated_events + protocol_events + numeric_events.values()
