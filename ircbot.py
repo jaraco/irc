@@ -108,7 +108,7 @@ class SingleServerIRCBot(SimpleIRCClient):
         """[Internal]"""
         ch = e.target()
         nick = nm_to_n(e.source())
-        if nick == self._nickname:
+        if nick == c.get_nickname():
             self.channels[ch] = Channel()
         self.channels[ch].add_user(nick)
 
@@ -117,7 +117,7 @@ class SingleServerIRCBot(SimpleIRCClient):
         nick = e.arguments()[0]
         channel = e.target()
 
-        if nick == self._nickname:
+        if nick == c.get_nickname():
             del self.channels[channel]
         else:
             self.channels[channel].remove_user(nick)
@@ -162,15 +162,13 @@ class SingleServerIRCBot(SimpleIRCClient):
         for ch in self.channels.values():
             if ch.has_user(before):
                 ch.change_nick(before, after)
-        if nm_to_n(before) == self._nickname:
-            self._nickname = after
 
     def _on_part(self, c, e):
         """[Internal]"""
         nick = nm_to_n(e.source())
         channel = e.target()
 
-        if nick == self._nickname:
+        if nick == c.get_nickname():
             del self.channels[channel]
         else:
             self.channels[channel].remove_user(nick)

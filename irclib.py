@@ -528,6 +528,10 @@ class ServerConnection(Connection):
             if command == "nick":
                 if nm_to_n(prefix) == self.real_nickname:
                     self.real_nickname = arguments[0]
+            elif command == "001":
+                # Record the nickname in case the client changed nick
+                # in a nicknameinuse callback.
+                self.real_nickname = arguments[0]
 
             if command in ["privmsg", "notice"]:
                 target, message = arguments[0], arguments[1]

@@ -1,3 +1,16 @@
+2003-10-29  Joel Rosdahl  <joel@rosdahl.net>
+
+	* irclib.py (ServerConnection.process_data): Record nickname when
+	welcome message is sent to trap nickname change triggered in a
+	nicknameinuse callback.
+
+	* ircbot.py (SingleServerIRCBot._on_join): Use
+	Connection.get_nickname instead of relying on self._nickname.
+	(SingleServerIRCBot._on_kick): Likewise.
+	(SingleServerIRCBot._on_part): And here too.
+	(SingleServerIRCBot._on_nick): No need to remember nickname change
+	here.
+
 2003-08-31  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.4.0.
