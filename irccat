@@ -2,6 +2,9 @@
 #
 # Example program using irclib.py.
 #
+# This program is free without restrictions; do anything you like with
+# it.
+#
 # Joel Rosdahl <joel@rosdahl.net>
 
 import irclib

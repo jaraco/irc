@@ -935,7 +935,7 @@ def mask_matches(nick, mask):
     r = re.compile(mask, re.IGNORECASE)
     return r.match(nick)
 
-_alpha = "abcdefghijklmnopqrstuvxyz"
+_alpha = "abcdefghijklmnopqrstuvwxyz"
 _special = "-[]\\`^{}"
 nick_characters = _alpha + string.upper(_alpha) + string.digits + _special
 _ircstring_translation = string.maketrans(string.upper(_alpha) + "[]\\^",
@@ -1091,8 +1091,11 @@ def _parse_modes(mode_string, unary_modes=""):
         elif ch == " ":
             collecting_arguments = 1
         elif ch in unary_modes:
-            modes.append([sign, ch, args[arg_count]])
-            arg_count = arg_count + 1
+            if len(args) >= arg_count + 1:
+                modes.append([sign, ch, args[arg_count]])
+                arg_count = arg_count + 1
+            else:
+                modes.append([sign, ch, None])
         else:
             modes.append([sign, ch, None])
     return modes

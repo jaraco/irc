@@ -1,3 +1,20 @@
+2001-10-14  Joel Rosdahl  <joel@rosdahl.net>
+
+	* irclib.py (_parse_modes): Fixed problem found by Tom Morton: the
+	mode parsing code bailed out if a unary mode character didn't have
+	a corresponding argument.
+
+	* irclib.py (_alpha): Fixed bug found by Tom Morton: w was missing
+	in the alphabet used by irc_lower().
+
+	* ircbot.py: Removed redundant import of is_channel.
+
+	* servermap: Clarified copyright and license.
+
+	* irccat: Ditto.
+
+	* irccat2: Ditto.
+
 2000-12-11  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.3.1.
@@ -58,13 +75,13 @@
 	* Makefile (doc): Make documentation.
 
 	* irclib.py: Updated documentation.
-	
+
 	* irclib.py (is_channel): Included "!" as channel prefix.
 
 2000-10-02  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.2.3.
-	
+
 	* irclib.py (ServerConnection.connect): Make socket.connect() work
 	for Python >= 1.6.
 

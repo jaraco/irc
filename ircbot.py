@@ -30,7 +30,7 @@ from UserDict import UserDict
 
 from irclib import SimpleIRCClient
 from irclib import nm_to_n, irc_lower, all_events
-from irclib import parse_channel_modes, is_channel, is_channel
+from irclib import parse_channel_modes, is_channel
 from irclib import ServerConnectionError
 
 class SingleServerIRCBot(SimpleIRCClient):
