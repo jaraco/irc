@@ -50,7 +50,7 @@ target = sys.argv[3]
 
 irc = irclib.IRC()
 try:
-    c = irc.server_connect(server, port, nickname, nickname, nickname)
+    c = irc.server().connect(server, port, nickname, nickname, nickname)
 except irclib.ServerConnectionError, x:
     print x
     sys.exit(1)

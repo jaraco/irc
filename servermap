@@ -96,7 +96,7 @@ irc = irclib.IRC()
 sys.stdout.write("Connecting to server...")
 sys.stdout.flush()
 try:
-    c = irc.server_connect(server, port, nickname, nickname, nickname)
+    c = irc.server().connect(server, port, nickname, nickname, nickname)
 except irclib.ServerConnectionError, x:
     print x
     sys.exit(1)

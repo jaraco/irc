@@ -46,7 +46,7 @@ import sys
 import time
 import types
 
-VERSION = 0, 1, 0
+VERSION = 0, 2, 0
 DEBUG = 0
 
 # TODO
@@ -56,6 +56,7 @@ DEBUG = 0
 # (maybe) color parser convenience functions
 # documentation (including all event types)
 # (maybe) add awareness of different types of ircds
+# send data asynchronously to the server
 
 # NOTES
 # -----
@@ -101,20 +102,15 @@ class IRC:
         self.fn_to_add_timeout = fn_to_add_timeout
         self.connections = []
         self.handlers = {}
-        self.delayed_commands = [] # list of (time, function, arguments)
+        self.delayed_commands = [] # list of tuples in the format (time, function, arguments)
 
         self.add_global_handler("ping", _ping_ponger, -42)
 
-    def server_connect(self, server, port, nick, username, ircname, password=None):
-        """Connect to an IRC server.
+    def server(self):
+        """Creates and returns an IRC server object."""
 
-        Returns a ServerConnection object.
-        """
-
-        c = ServerConnection(self, server, port, nick, username, ircname, password)
+        c = ServerConnection(self)
         self.connections.append(c)
-        if self.fn_to_add_socket:
-            self.fn_to_add_socket(c._get_socket())
         return c
 
     def DCC_connect(self, host, port):
@@ -147,11 +143,9 @@ class IRC:
         Timeouts will be processed every second.
         """
         while 1:
-            (i, o, e) = select.select(map(lambda x: x._get_socket(),
-                                          self.connections),
-                                      [],
-                                      [],
-                                      1)
+            sockets = map(lambda x: x._get_socket(), self.connections)
+            sockets = filter(lambda x: x != None, sockets)
+            (i, o, e) = select.select(sockets, [], [], 1)
             self.process_data(i)
             self.process_timeout()
 
@@ -240,43 +234,54 @@ class ServerConnectionError(IRCError):
 
 class ServerConnection(Connection):
     # Creates a ServerConnection object.
-    def __init__(self, irclibobj, server, port, nickname, username, ircname, password):
+    def __init__(self, irclibobj):
         Connection.__init__(self, irclibobj)
+        self.connected = 0  # Not connected yet.
+
+    def connect(self, server, port, nickname, username, ircname, password=None):
+        """(Re)connect to a server.
+
+        This function can be called to reconnect a closed connection.
+
+        Returns the ServerConnection object.
+        """
+        if self.connected:
+            self.quit("Changing server")
+
+        self.socket = None
+        self.previous_buffer = ""
+        self.handlers = {}
+        self.real_server_name = ""
+        self.real_nickname = nickname
         self.server = server
         self.port = port
         self.nickname = nickname
         self.username = username
         self.ircname = ircname
         self.password = password
-        self.connected = 0  # Not connected yet.
-        self.socket = None
-        self.previous_buffer = ""
-        self.handlers = {}
-        self.real_server_name = ""
-        self.real_nickname = nickname
-
-        self.connect_to_server()
-
-    def connect_to_server(self):
-        """(Re)connect to server.
-
-        This function can be called to reconnect a closed connection.
-        """
-        if self.connected:
-            self.quit("Changing server")
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.socket.connect(self.server, self.port)
         except socket.error, x:
             raise ServerConnectionError, "Couldn't connect to socket: %s" % x
         self.connected = 1
+        if self.irclibobj.fn_to_add_socket:
+            self.irclibobj.fn_to_add_socket(self.socket)
 
         # Log on...
         if self.password:
             self.pass_(self.password)
         self.nick(self.nickname)
         self.user(self.username, self.ircname)
+        return self
 
+    def close(self):
+        """This method closes the connection permanently; after it is
+        called the object is unusable."""
+
+        self.disconnect("Closing object")
+        self.irclibobj._remove_connection(self)
+        
     def _get_socket(self):
         return self.socket
 
@@ -295,10 +300,7 @@ class ServerConnection(Connection):
             new_data = self.socket.recv(2**14)
         except socket.error, x:
             # The server hung up.
-            self._handle_event(Event("disconnect",
-                                     self.get_server_name(),
-                                     None,
-                                     []))
+            self.disconnect("Connection reset by peer")
             return
         if not new_data:
             # Read nothing: connection must be down.
@@ -409,6 +411,9 @@ class ServerConnection(Connection):
             for fn in self.handlers[event.eventtype()]:
                 fn(self, event)
 
+    def is_connected(self):
+        return self.connected
+
     def add_global_handler(self, *args):
         """See documentation for IRC.add_global_handler."""
         apply(self.irclibobj.add_global_handler, args)
@@ -439,11 +444,6 @@ class ServerConnection(Connection):
     def admin(self, server=""):
         self.send_raw(string.strip(string.join(["ADMIN", server])))
 
-    def connect(self, target, port="", server=""):
-        self.send_raw("CONNECT %s%s%s" % (target,
-                                          port and (" " + port),
-                                          server and (" " + server)))
-
     def ctcp(self, ctcptype, target, parameter=""):
         ctcptype = string.upper(ctcptype)
         self.privmsg(target, "\001%s%s\001" % (ctcptype, parameter and (" " + parameter) or ""))
@@ -454,11 +454,11 @@ class ServerConnection(Connection):
     def disconnect(self, message=""):
         """Hang up the connection."""
         self.connected = 0
-        self.irclibobj._remove_connection(self)
         try:
             self.socket.close()
         except socket.error, x:
             pass
+        self.socket = None
         self._handle_event(Event("disconnect", self.server, "", [message]))
 
     def exit(self, message=""):
@@ -547,6 +547,11 @@ class ServerConnection(Connection):
 
     def quit(self, message=""):
         self.send_raw("QUIT" + (message and (" :" + message)))
+
+    def sconnect(self, target, port="", server=""):
+        self.send_raw("CONNECT %s%s%s" % (target,
+                                          port and (" " + port),
+                                          server and (" " + server)))
 
     def send_raw(self, string):
         """Send raw string to server.

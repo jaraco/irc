@@ -1,7 +1,7 @@
 VERSION := $(shell sed -n -e '/VERSION = /{s/VERSION = \(.*\), \(.*\), \(.*\)/\1.\2.\3/;p;}' <irclib.py)
 
 main:
-	echo "Nothing to be made."
+	@echo "Nothing to be made."
 
 dist:
 	mkdir irclib-$(VERSION)

@@ -24,6 +24,10 @@ import sys
 
 from irclib import *
 
+# Every RECONNECT_INTERVAL seconds, check if the bot is connected and
+# reconnect it if it isn't.
+RECONNECT_INTERVAL = 60
+
 class SingleServerIRCBot:
     def __init__(self, server_list, nickname, realname, channels_file="bot.channels"):
         self.channels = {}
@@ -44,23 +48,34 @@ class SingleServerIRCBot:
 
         self.nickname = nickname
         self.realname = realname
-        self.connect()
+        self.connection = self.irc.server()
         for numeric in all_events:
             self.connection.add_global_handler(numeric, self.event_dispatcher)
+        self.connection.execute_delayed(RECONNECT_INTERVAL, self.__connected_checker, ())
+        self.connect()
+
+    def __connected_checker(self):
+        self.connection.execute_delayed(RECONNECT_INTERVAL, self.__connected_checker, ())
+        if not self.connection.is_connected():
+            self.jump_server()
 
     def connect(self):
         password = None
         if len(self.server_list[self.current_server]) > 2:
             password = self.server_list[self.current_server][2]
-        self.connection = self.irc.server_connect(self.server_list[self.current_server][0],
-                                                  self.server_list[self.current_server][1],
-                                                  self.nickname,
-                                                  self.nickname,
-                                                  self.realname,
-                                                  password)
+        try:
+            self.connection.connect(self.server_list[self.current_server][0],
+                                    self.server_list[self.current_server][1],
+                                    self.nickname,
+                                    self.nickname,
+                                    self.realname,
+                                    password)
+        except ServerConnectionError:
+            pass
 
     def jump_server(self):
-        self.get_connection().quit("Jumping servers")
+        if self.connection.is_connected():
+            self.get_connection().quit("Jumping servers")
         self.current_server = (self.current_server + 1) % len(self.server_list)
         self.connect()
 
@@ -113,8 +128,8 @@ class SingleServerIRCBot:
                 c.ctcp_reply(nick_from_nickmask(e.source()), "PING " + e.arguments()[1])
     
     def on_error(self, c, e):
-        self.jump_server()
         # XXX join channels here, etc.
+        pass
         
     def on_join(self, c, e):
         self.channels[lower_irc_string(e.target())].add_nick(e.source())
@@ -310,9 +325,3 @@ class Channel:
             return self.modes["k"]
         else:
             return None
-
-    def is_(self):
-        return self.has_mode("")
-
-    def is_(self):
-        return self.has_mode("")

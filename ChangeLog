@@ -1,3 +1,19 @@
+1999-08-21  Joel Rosdahl  <joel@rosdahl.net>
+
+	* Released version 0.2.0.
+
+	* servermap: Updated to work with irclib 0.2.0.
+
+	* irccat: Updated to work with irclib 0.2.0.
+
+	* ircbot.py: Updated to work with irclib 0.2.0.  The bot now
+ 	checks every minute that it is connected.  If it's not, it
+ 	reconnects.
+
+	* irclib.py: Changes in how to create a ServerConnection object.
+  	Made the code for handling disconnection hopefully more robust.
+  	Renamed connect() to sconnect().
+
 1999-06-19  Joel Rosdahl  <joel@rosdahl.net>
 
 	* irclib.py: Released 0.1.0.
