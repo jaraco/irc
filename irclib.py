@@ -601,6 +601,13 @@ class ServerConnection(Connection):
         """
         apply(self.irclibobj.add_global_handler, args)
 
+    def remove_global_handler(self, *args):
+        """Remove global handler.
+
+        See documentation for IRC.remove_global_handler.
+        """
+        apply(self.irclibobj.remove_global_handler, args)
+
     def action(self, target, action):
         """Send a CTCP ACTION command."""
         self.ctcp("ACTION", target, action)
