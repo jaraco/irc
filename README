@@ -16,6 +16,15 @@ here:
 
     http://www.irchelp.org/irchelp/rfc/
 
+Requirements:
+
+  * Python 1.5.2 or newer.
+
+Installation:
+
+  * Run "python setup.py install" or copy irclib.py and/or ircbot.py
+    to an appropriate Python module directory.
+
 The main features of the IRC client framework are:
 
   * Abstraction of the IRC protocol.
