@@ -84,7 +84,7 @@ class TestBot(SingleServerIRCBot):
                 voiced.sort()
                 c.notice(nick, "Voiced: " + string.join(voiced, ", "))
         elif cmd == "dcc":
-            dcc = self.dcc_listen(nm_to_h(e.source()))
+            dcc = self.dcc_listen()
             c.ctcp("DCC", nick, "CHAT chat %s %d" % (
                 ip_quad_to_numstr(dcc.localaddress),
                 dcc.localport))
