@@ -233,7 +233,7 @@ class SingleServerIRCBot(SimpleIRCClient):
             if len(e.arguments()) > 1:
                 c.ctcp_reply(nm_to_n(e.source()),
                              "PING " + e.arguments()[1])
-        elif e.arguments()[0] == "DCC":
+        elif e.arguments()[0] == "DCC" and e.arguments()[1] = "CHAT":
             self.on_dccchat(c, e)
 
     def on_dccchat(self, c, e):
