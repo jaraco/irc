@@ -1,5 +1,7 @@
 2004-07-09  Joel Rosdahl  <joel@rosdahl.net>
 
+	* debian/rules: Remove built *.pyc files before making package.
+
 	* irclib.py (DEBUG):
 	* debian/changelog:
 	* python-irclib.spec.in:

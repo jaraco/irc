@@ -29,6 +29,7 @@ binary-indep: build
 	dh_installdirs
 
 	python2.3 setup.py install --root=debian/python-irclib
+	find debian/python-irclib -name '*.py[co]' -exec rm {} \;
 #	cp irclib.py ircbot.py debian/python-irclib/usr/lib/python2.3/site-packages
 
 	dh_installdocs
