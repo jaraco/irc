@@ -1,3 +1,49 @@
+2003-08-31  Joel Rosdahl  <joel@rosdahl.net>
+
+	* Released version 0.4.0.
+
+	Implemented DCC support (based on patches from Adam Langley and
+	Marco Bettio):
+
+	* irclib.py (IRC.dcc): New method.
+	(DCCConnectionError): New class.
+	(DCCConnection): New class.
+	(SimpleIRCClient.__init__): Added dcc_connections attribute.
+	(SimpleIRCClient._dcc_disconnect): New method.
+	(SimpleIRCClient.connect): Added localaddress and
+	localport parameters. The socket will be bound accordingly before
+	connecting.
+	(SimpleIRCClient.dcc_connect): New method.
+	(SimpleIRCClient.dcc_listen): New method.
+	(ip_numstr_to_quad): New function.
+	(ip_quad_to_numstr): New function.
+
+	* ircbot.py (SingleServerIRCBot.on_ctcp): Relay DCC CHAT CTCPs to
+	the on_dccchat method.
+
+	* testbot.py: Added support for accepting DCC chats and for
+	initiating DCC chats via a "dcc" command.
+
+	* dccreceive: New example program.
+
+	* dccsend: New example program.
+
+	Other changes:
+
+	* irclib.py (ServerConnection.connect, ServerConnection.user):
+	Send USER command according to RFC 2812.
+	(ServerConnection.connect): Added localaddress and
+	localport parameters. The socket will be bound accordingly before
+	connecting.
+	(ServerConnection.process_data): Ignore empty lines from the
+	server. (Patch by Jason Wies.)
+	(ServerConnection._get_socket): Simplified.
+	(ServerConnection.remove_global_handler): Added. (Patch from
+	Brandon Beck.)
+
+	* ircbot.py (SingleServerIRCBot.on_ctcp): Prepend VERSION reply
+	with VERSION. (Patch from Andrew Gaul.)
+
 2002-03-01  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.3.4.
