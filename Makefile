@@ -1,14 +1,31 @@
 VERSION := $(shell sed -n -e '/VERSION = /{s/VERSION = \(.*\), \(.*\), \(.*\)/\1.\2.\3/;p;}' <irclib.py)
 
+DISTFILES = \
+    COPYING \
+    ChangeLog \
+    Makefile \
+    README \
+    dccreceive \
+    dccsend \
+    ircbot.py \
+    irccat \
+    irccat2 \
+    irclib.py \
+    servermap \
+    setup.py \
+    testbot.py
+
+PACKAGENAME = python-irclib-$(VERSION)
+
 all:
 	echo "Nothing to do."
 
 dist:
-	mkdir python-irclib-$(VERSION)
-	cp -r COPYING README ChangeLog Makefile irclib.py ircbot.py irccat \
-	      irccat2 servermap testbot.py python-irclib-$(VERSION)
-	tar cvzf python-irclib-$(VERSION).tar.gz python-irclib-$(VERSION)
-	rm -r python-irclib-$(VERSION)
+	mkdir $(PACKAGENAME)
+	cp -r $(DISTFILES) $(PACKAGENAME)
+	tar cvzf $(PACKAGENAME).tar.gz $(PACKAGENAME)
+	zip -r9yq $(PACKAGENAME).tar.gz $(PACKAGENAME)
+	rm -r $(PACKAGENAME)
 
 cvstag:
 	cvs tag version_`echo $(VERSION) | sed 's/\./_/g'`
