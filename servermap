@@ -1,0 +1,110 @@
+#! /usr/bin/env python
+#
+# Example script using irclib.py.
+#
+# Joel Rosdahl <joel@rosdahl.net>
+
+import irclib
+import string
+import sys
+
+if len(sys.argv) != 3:
+    print "Usage: servermap <server[:port]> <nickname>"
+    sys.exit(1)
+
+links = []
+
+def on_connect(connection, event):
+    sys.stdout.write("\nGetting links...")
+    sys.stdout.flush()
+    connection.links()
+
+def on_passwdmismatch(connection, event):
+    print "Password required."
+    sys.exit(1)
+
+def on_links(connection, event):
+    global links
+
+    links.append((event.arguments()[0],
+                  event.arguments()[1],
+                  event.arguments()[2]))
+
+def on_endoflinks(connection, event):
+    global links
+
+    print "\n"
+
+    m = {}
+    for (to_node, from_node, desc) in links:
+        if from_node != to_node:
+            m[from_node] = m.get(from_node, []) + [to_node]
+
+    if m.has_key(connection.get_server_name()):
+        if len(m[connection.get_server_name()]) == 1:
+            hubs = len(m) - 1
+        else:
+            hubs = len(m)
+    else:
+        hubs = 0
+    
+    print "%d servers (%d leaves and %d hubs)\n" % (len(links), len(links)-hubs, hubs)
+
+    print_tree(0, [], connection.get_server_name(), m)
+    connection.quit("Using irclib.py")
+
+def on_disconnect(connection, event):
+    connection.exit()
+
+def indent_string(level, active_levels, last):
+    if level == 0:
+        return ""
+    s = ""
+    for i in range(level-1):
+        if i in active_levels:
+            s = s + "| "
+        else:
+            s = s + "  "
+    if last:
+        s = s + "`-"
+    else:
+        s = s + "|-"
+    return s
+
+def print_tree(level, active_levels, root, map, last=0):
+    sys.stdout.write(indent_string(level, active_levels, last)
+                     + root + "\n")
+    if map.has_key(root):
+        list = map[root]
+        for r in list[:-1]:
+            print_tree(level+1, active_levels[:]+[level], r, map)
+        print_tree(level+1, active_levels[:], list[-1], map, 1)
+        
+s = string.split(sys.argv[1], ":", 1)
+server = s[0]
+if len(s) == 2:
+    try:
+        port = int(s[1])
+    except ValueError:
+        print "Error: Erroneous port."
+        sys.exit(1)
+else:
+    port = 6667
+nickname = sys.argv[2]
+
+irc = irclib.IRC()
+sys.stdout.write("Connecting to server...")
+sys.stdout.flush()
+try:
+    c = irc.server_connect(server, port, nickname, nickname, nickname)
+except irclib.ServerConnectionError, x:
+    print x
+    sys.exit(1)
+
+c.add_global_handler("welcome", on_connect)
+c.add_global_handler("passwdmismatch", on_passwdmismatch)
+c.add_global_handler("links", on_links)
+c.add_global_handler("endoflinks", on_endoflinks)
+c.add_global_handler("disconnect", on_disconnect)
+
+irc.process_forever()
