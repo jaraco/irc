@@ -50,6 +50,8 @@
 
 	* Makefile: Added setup.py to dist files. Also create zip archive.
 
+	* README: Added requirements and installation sections.
+
 2002-03-01  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.3.4.
