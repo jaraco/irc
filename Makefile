@@ -8,10 +8,11 @@ doc:
 	PYTHONPATH=. pythondoc -d doc -f HTML4 -i frame=1 irclib ircbot
 
 dist: doc
-	mkdir irclib-$(VERSION)
-	cp -r COPYING README ChangeLog Makefile irclib.py ircbot.py irccat irccat2 servermap testbot.py doc irclib-$(VERSION)
-	tar cvzf irclib-$(VERSION).tar.gz irclib-$(VERSION)
-	rm -r irclib-$(VERSION)
+	mkdir python-irclib-$(VERSION)
+	cp -r COPYING README ChangeLog Makefile irclib.py ircbot.py irccat \
+	      irccat2 servermap testbot.py doc python-irclib-$(VERSION)
+	tar cvzf python-irclib-$(VERSION).tar.gz python-irclib-$(VERSION)
+	rm -r python-irclib-$(VERSION)
 
 cvstag:
 	cvs tag version_`echo $(VERSION) | sed 's/\./_/g'`
