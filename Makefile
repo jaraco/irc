@@ -34,6 +34,6 @@ cvstag:
 	cvs tag version_`echo $(VERSION) | sed 's/\./_/g'`
 
 clean:
-	rm -rf *~ *.pyc build
+	rm -rf *~ *.pyc build python-irclib.spec
 
 .PHONY: all doc dist cvstag clean
