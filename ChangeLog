@@ -1,3 +1,10 @@
+2000-10-02  Joel Rosdahl  <joel@rosdahl.net>
+
+	* Released version 0.2.3.
+	
+	* irclib.py (ServerConnection.connect): Make socket.connect() work
+	for Python >= 1.6.
+
 2000-09-26  Joel Rosdahl  <joel@rosdahl.net>
 
 	* Released version 0.2.2.
