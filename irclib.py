@@ -14,7 +14,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 #
-# Joel Rosdahl <joel@rosdahl.net>
+# keltus <keltus@users.sourceforge.net>
 #
 # $Id$
 
@@ -453,6 +453,7 @@ class ServerConnection(Connection):
         """
 
         self.disconnect("Closing object")
+        self.irclibobj._remove_connection(self)
 
     def _get_socket(self):
         """[Internal]"""
@@ -529,10 +530,14 @@ class ServerConnection(Connection):
                 if len(a) == 2:
                     arguments.append(a[1])
 
+            # Translate numerics into more readable strings.
+            if numeric_events.has_key(command):
+                command = numeric_events[command]
+
             if command == "nick":
                 if nm_to_n(prefix) == self.real_nickname:
                     self.real_nickname = arguments[0]
-            elif command == "001":
+            elif command == "welcome":
                 # Record the nickname in case the client changed nick
                 # in a nicknameinuse callback.
                 self.real_nickname = arguments[0]
@@ -584,10 +589,6 @@ class ServerConnection(Connection):
                 if command == "mode":
                     if not is_channel(target):
                         command = "umode"
-
-                # Translate numerics into more readable strings.
-                if numeric_events.has_key(command):
-                    command = numeric_events[command]
 
                 if DEBUG:
                     print "command: %s, source: %s, target: %s, arguments: %s" % (
@@ -649,7 +650,6 @@ class ServerConnection(Connection):
         if not self.connected:
             return
 
-        self.irclibobj._remove_connection(self)
         self.connected = 0
         try:
             self.socket.close()
@@ -1116,9 +1116,9 @@ class Event:
 
             eventtype -- A string describing the event.
 
-            source -- The originator of the event (a nick mask or a server). XXX Correct?
+            source -- The originator of the event (a nick mask or a server).
 
-            target -- The target of the event (a nick or a channel). XXX Correct?
+            target -- The target of the event (a nick or a channel).
 
             arguments -- Any event specific arguments.
         """

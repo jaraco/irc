@@ -1,3 +1,10 @@
+2005-04-17  Keltus <keltus@users.sourceforge.net>
+	* irclib.py (ServerConnection.process_data): Moved event
+	translation code.
+	* irclib.py (ServerConnection): Reverted the 2005-01-28 change
+	because it breaks jump_server().
+	* irclib.py: minor cmment changes
+
 2005-04-03  Keltus <keltus@users.sourceforge.net>
 	* irclib.py (protocol_events): Added "pong" and "invite" events.
 	Patch from Adam Mikuta.
@@ -12,8 +19,9 @@
 	Preparations for version 0.4.4.
 
 2005-01-28  Keltus <keltus@users.sourceforge.net>
-	* irclib.py: Moved self.irclibobj._remove_connection call from
-	close() to disconnect(). Patch from Alexey Nezhdanov.
+	* irclib.py: (ServerConnection): Moved
+	self.irclibobj._remove_connection call from	close() to
+	disconnect(). Patch from Alexey Nezhdanov.
 
 2005-01-25  Keltus <keltus@users.sourceforge.net>
 	* irclib.py (ServerConnection.connect): closes socket if a
