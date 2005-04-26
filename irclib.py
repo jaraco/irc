@@ -118,7 +118,7 @@ class IRC:
         server = irc.server()
         server.connect(\"irc.some.where\", 6667, \"my_nickname\")
         server.privmsg(\"a_nickname\", \"Hi there!\")
-        server.process_forever()
+        irc.process_forever()
 
     This will connect to the IRC server irc.some.where on port 6667
     using the nickname my_nickname and send the message \"Hi there!\"

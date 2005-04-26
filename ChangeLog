@@ -1,9 +1,13 @@
+2005-04-26  Keltus <keltus@users.sourceforge.net>
+	* irclib.py (IRC.__doc__): Corrected server.process_forever() as
+	irc.process_forever(). Suggestion by olecom.
+
 2005-04-17  Keltus <keltus@users.sourceforge.net>
 	* irclib.py (ServerConnection.process_data): Moved event
 	translation code.
 	* irclib.py (ServerConnection): Reverted the 2005-01-28 change
 	because it breaks jump_server().
-	* irclib.py: minor cmment changes
+	* irclib.py: minor comment changes
 
 2005-04-03  Keltus <keltus@users.sourceforge.net>
 	* irclib.py (protocol_events): Added "pong" and "invite" events.
