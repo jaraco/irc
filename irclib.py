@@ -74,7 +74,7 @@ import sys
 import time
 import types
 
-VERSION = 0, 4, 4
+VERSION = 0, 4, 5
 DEBUG = 0
 
 # TODO
