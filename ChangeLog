@@ -4,7 +4,7 @@
 	connected to a socket. Patch from alst.
 
 2005-04-26  Keltus <keltus@users.sourceforge.net>
-	* irclib.py (IRC.__doc__): Corrected server.process_forever() as
+	* irclib.py (IRC.__doc__): Corrected server.process_forever() to
 	irc.process_forever(). Suggestion by olecom.
 
 2005-04-17  Keltus <keltus@users.sourceforge.net>
