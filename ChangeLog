@@ -1,3 +1,8 @@
+2005-05-18  Keltus <keltus@users.sourceforge.net>
+	* irclib.py (ServerConnection.__init__): Added self.socket = None
+	to be able to process events when ServerConnection is not
+	connected to a socket. Patch from alst.
+
 2005-04-26  Keltus <keltus@users.sourceforge.net>
 	* irclib.py (IRC.__doc__): Corrected server.process_forever() as
 	irc.process_forever(). Suggestion by olecom.

@@ -382,6 +382,7 @@ class ServerConnection(Connection):
     def __init__(self, irclibobj):
         Connection.__init__(self, irclibobj)
         self.connected = 0  # Not connected yet.
+        self.socket = None
 
     def connect(self, server, port, nickname, password=None, username=None,
                 ircname=None, localaddress="", localport=0):
