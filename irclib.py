@@ -580,7 +580,7 @@ class ServerConnection(Connection):
                 target = None
 
                 if command == "quit":
-                    arguments = [arguments[0]]
+                    arguments = arguments[0]
                 elif command == "ping":
                     target = arguments[0]
                 else:

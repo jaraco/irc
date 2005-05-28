@@ -1,3 +1,7 @@
+2005-05-28  Keltus <keltus@users.sourceforge.net>
+	* irclib.py (ServerConnection.process_data): Fixed quit arguments
+	to return a list rather than a list of a list. Patch from peter.
+
 2005-05-18  Keltus <keltus@users.sourceforge.net>
 	* Released version 0.4.5.
 
