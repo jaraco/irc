@@ -1,3 +1,11 @@
+2005-08-18  Keltus <keltus@users.sourceforge.net>
+	* irclib.py: Made ServerConnection.disconnect more consistant and
+	changed some functions to use it instead of quit. Previously,
+	disconnect would ignore the quit message, but now it sends a quit
+	message and disconnect. Suggestion by Erik Max Francis.
+	* ircbot.py: Changed to use ServerConnection.disconnect instead of
+	ServerConnection.quit as well.
+
 2005-05-28  Keltus <keltus@users.sourceforge.net>
 	* irclib.py (ServerConnection.process_data): Fixed quit arguments
 	to return a list rather than a list of a list. Patch from peter.
