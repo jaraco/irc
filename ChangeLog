@@ -1,3 +1,8 @@
+2005-08-27  Keltus <keltus@users.sourceforge.net>
+	* irclib.py (ServerConnection.disconnect): Fixed infinitely
+	recursive calls when disconnecting with a failed connection. Bug
+	reported by Erik Max Francis.
+
 2005-08-18  Keltus <keltus@users.sourceforge.net>
 	* irclib.py: Made ServerConnection.disconnect more consistant and
 	changed some functions to use it instead of quit. Previously,

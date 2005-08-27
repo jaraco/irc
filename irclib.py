@@ -649,9 +649,10 @@ class ServerConnection(Connection):
         if not self.connected:
             return
 
+        self.connected = 0
+
         self.quit(message)
 
-        self.connected = 0
         try:
             self.socket.close()
         except socket.error, x:
