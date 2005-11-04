@@ -58,10 +58,6 @@ Current limitations:
   * The author haven't even read RFC 2810, 2811, 2812 and 2813.
   * Like most projects, documentation is lacking...
 
-Since I seldom use IRC anymore, I will probably not work much on the
-library.  If you want to help or continue developing the library,
-please contact me (Joel Rosdahl <joel@rosdahl.net>).
-
 .. [IRC specifications] http://www.irchelp.org/irchelp/rfc/
 """
 
