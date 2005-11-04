@@ -563,7 +563,6 @@ class ServerConnection(Connection):
                                 command, prefix, target, m)
                         self._handle_event(Event(command, prefix, target, m))
                         if command == "ctcp" and m[0] == "ACTION":
-                            # Emit an action event too. We're generous today.
                             self._handle_event(Event("action", prefix, target, m[1:]))
                     else:
                         if DEBUG:
@@ -1433,7 +1432,7 @@ numeric_events = {
     "324": "channelmodeis",
     "329": "channelcreate",
     "331": "notopic",
-    "332": "topic",
+    "332": "currenttopic",
     "333": "topicinfo",
     "341": "inviting",
     "342": "summoning",
