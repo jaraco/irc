@@ -1,3 +1,9 @@
+2005-12-06  Keltus <keltus@users.sourceforge.net>
+	* irclib.py (ServerConnection.process_data): Reversed fix from
+	2005-05-28. This is strange because there was a bug before and
+	now it's gone. Either python changed something, or the IRC
+	networks changed something. Confirmed by peter.
+
 2005-11-03  Keltus <keltus@users.sourceforge.net>
 	* irclib.py (numeric_events): Renamed numeric code 332 from topic
 	to currenttopic (the message when "/topic <chan>" is sent), so it

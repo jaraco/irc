@@ -22,8 +22,8 @@
 
 This library is intended to encapsulate the IRC protocol at a quite
 low level.  It provides an event-driven IRC client framework.  It has
-a fairly thorough support for the basic IRC protocol and CTCP, but DCC
-connection support is not yet implemented.
+a fairly thorough support for the basic IRC protocol, CTCP, DCC chat,
+but DCC send is not yet supported.
 
 In order to understand how to make an IRC client, I'm afraid you more
 or less must understand the IRC specifications.  They are available
@@ -54,7 +54,7 @@ Current limitations:
   * The IRC protocol shines through the abstraction a bit too much.
   * Data is not written asynchronously to the server, i.e. the write()
     may block if the TCP buffers are stuffed.
-  * There are no support for DCC connections.
+  * There are no support for DCC sends.
   * The author haven't even read RFC 2810, 2811, 2812 and 2813.
   * Like most projects, documentation is lacking...
 
@@ -573,7 +573,7 @@ class ServerConnection(Connection):
                 target = None
 
                 if command == "quit":
-                    arguments = arguments[0]
+                    arguments = [arguments[0]]
                 elif command == "ping":
                     target = arguments[0]
                 else:
