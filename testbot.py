@@ -25,7 +25,6 @@ The known commands are:
     dcc -- Let the bot invite you to a DCC CHAT connection.
 """
 
-import string
 from ircbot import SingleServerIRCBot
 from irclib import nm_to_n, nm_to_h, irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
 
@@ -44,9 +43,9 @@ class TestBot(SingleServerIRCBot):
         self.do_command(e, e.arguments()[0])
 
     def on_pubmsg(self, c, e):
-        a = string.split(e.arguments()[0], ":", 1)
+        a = e.arguments()[0].split(":", 1)
         if len(a) > 1 and irc_lower(a[0]) == irc_lower(self.connection.get_nickname()):
-            self.do_command(e, string.strip(a[1]))
+            self.do_command(e, a[1].strip())
         return
 
     def on_dccmsg(self, c, e):
@@ -55,7 +54,7 @@ class TestBot(SingleServerIRCBot):
     def on_dccchat(self, c, e):
         if len(e.arguments()) != 2:
             return
-        args = string.split(e.arguments()[1])
+        args = e.arguments()[1].split()
         if len(args) == 4:
             try:
                 address = ip_numstr_to_quad(args[2])
@@ -78,13 +77,13 @@ class TestBot(SingleServerIRCBot):
                 c.notice(nick, "Channel: " + chname)
                 users = chobj.users()
                 users.sort()
-                c.notice(nick, "Users: " + string.join(users, ", "))
+                c.notice(nick, "Users: " + ", ".join(users))
                 opers = chobj.opers()
                 opers.sort()
-                c.notice(nick, "Opers: " + string.join(opers, ", "))
+                c.notice(nick, "Opers: " + ", ".join(opers))
                 voiced = chobj.voiced()
                 voiced.sort()
-                c.notice(nick, "Voiced: " + string.join(voiced, ", "))
+                c.notice(nick, "Voiced: " + ", ".join(voiced))
         elif cmd == "dcc":
             dcc = self.dcc_listen()
             c.ctcp("DCC", nick, "CHAT chat %s %d" % (
@@ -99,7 +98,7 @@ def main():
         print "Usage: testbot <server[:port]> <channel> <nickname>"
         sys.exit(1)
 
-    s = string.split(sys.argv[1], ":", 1)
+    s = sys.argv[1].split(":", 1)
     server = s[0]
     if len(s) == 2:
         try:

@@ -60,7 +60,6 @@
 #     `-omega.ca.us.dal.net
 
 import irclib
-import string
 import sys
 
 if len(sys.argv) != 3:
@@ -95,7 +94,7 @@ def on_endoflinks(connection, event):
         if from_node != to_node:
             m[from_node] = m.get(from_node, []) + [to_node]
 
-    if m.has_key(connection.get_server_name()):
+    if connection.get_server_name() in m:
         if len(m[connection.get_server_name()]) == 1:
             hubs = len(m) - 1
         else:
@@ -129,13 +128,13 @@ def indent_string(level, active_levels, last):
 def print_tree(level, active_levels, root, map, last=0):
     sys.stdout.write(indent_string(level, active_levels, last)
                      + root + "\n")
-    if map.has_key(root):
+    if root in map:
         list = map[root]
         for r in list[:-1]:
             print_tree(level+1, active_levels[:]+[level], r, map)
         print_tree(level+1, active_levels[:], list[-1], map, 1)
 
-s = string.split(sys.argv[1], ":", 1)
+s = sys.argv[1].split(":", 1)
 server = s[0]
 if len(s) == 2:
     try:

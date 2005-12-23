@@ -9,7 +9,6 @@
 
 import irclib
 import os
-import string
 import struct
 import sys
 
@@ -19,7 +18,7 @@ class DCCReceive(irclib.SimpleIRCClient):
         self.received_bytes = 0
 
     def on_ctcp(self, connection, event):
-        args = string.split(event.arguments()[1])
+        args = event.arguments()[1].split()
         if args[0] != "SEND":
             return
         self.filename = os.path.basename(args[1])
@@ -54,7 +53,7 @@ def main():
         print "current directory."
         sys.exit(1)
 
-    s = string.split(sys.argv[1], ":", 1)
+    s = sys.argv[1].split(":", 1)
     server = s[0]
     if len(s) == 2:
         try:

@@ -1,3 +1,16 @@
+2005-12-23  Keltus <keltus@users.sourceforge.net>
+	* dccsend:
+	* dccreceive:
+	* irclib.py:
+	* ircbot.py:
+	* irccat:
+	* irccat2:
+	* servermap:
+	* testbot.py:
+	Code modernization - String methods used instead of deprecated
+	string functions, keyword 'in' used for membership testing instead
+	of 'has_key' method, etc.
+
 2005-12-06  Keltus <keltus@users.sourceforge.net>
 	* irclib.py (ServerConnection.process_data): Reversed fix from
 	2005-05-28. This is strange because there was a bug before and

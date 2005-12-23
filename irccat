@@ -8,7 +8,6 @@
 # Joel Rosdahl <joel@rosdahl.net>
 
 import irclib
-import string
 import sys
 
 def on_connect(connection, event):
@@ -38,7 +37,7 @@ if len(sys.argv) != 4:
 def on_disconnect(connection, event):
     sys.exit(0)
 
-s = string.split(sys.argv[1], ":", 1)
+s = sys.argv[1].split(":", 1)
 server = s[0]
 if len(s) == 2:
     try:

@@ -9,7 +9,6 @@
 
 import irclib
 import os
-import string
 import struct
 import sys
 
@@ -66,7 +65,7 @@ def main():
         print "\nSends <filename> to <receiver nickname> via DCC and then exits."
         sys.exit(1)
 
-    s = string.split(sys.argv[1], ":", 1)
+    s = sys.argv[1].split(":", 1)
     server = s[0]
     if len(s) == 2:
         try:
