@@ -1,3 +1,10 @@
+2005-12-24  Keltus <keltus@users.sourceforge.net>
+	* Released version 0.4.6.
+
+	* irclib.py (VERSION):
+	* python-irclib.spec.in:
+	Preparations for version 0.4.6.
+
 2005-12-23  Keltus <keltus@users.sourceforge.net>
 	* dccsend:
 	* dccreceive:
