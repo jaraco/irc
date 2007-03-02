@@ -69,6 +69,7 @@ import string
 import sys
 import time
 import types
+import threading
 
 VERSION = 0, 4, 6
 DEBUG = 0
@@ -334,6 +335,14 @@ class IRC:
 
 _rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
 
+class IRCmultithread(IRC):
+    def server(self):
+        """Creates and returns a ServerConnection object."""
+        
+        c = ServerConnectionThread(self)
+        self.connections.append(c)
+        
+        return c
 
 class Connection:
     """Base class for IRC connections.
@@ -380,7 +389,7 @@ class ServerConnection(Connection):
         self.socket = None
 
     def connect(self, server, port, nickname, password=None, username=None,
-                ircname=None, localaddress="", localport=0):
+                ircname=None, localaddress="", localport=0, serverid="unspec"):
         """Connect/reconnect to a server.
 
         Arguments:
@@ -400,6 +409,8 @@ class ServerConnection(Connection):
             localaddress -- Bind the connection to a specific local IP address.
 
             localport -- Bind the connection to a specific local port.
+            
+            serverid -- A little mechanism to keep track of multiple connections in a program
 
         This function can be called to reconnect a closed connection.
 
@@ -420,6 +431,7 @@ class ServerConnection(Connection):
         self.password = password
         self.localaddress = localaddress
         self.localport = localport
+        self.serverid = serverid
         self.localhost = socket.gethostname()
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
@@ -766,6 +778,22 @@ class ServerConnection(Connection):
         # unless you've been connected for at least 5 minutes!
         self.send_raw("QUIT" + (message and (" :" + message)))
 
+    def sajoin(self, target, channel):
+        """ Send a SAJOIN command. """
+        self.send_raw("SAJOIN %s %s" % (target, channel))
+        
+    def sapart(self, target, channel):
+        """ Send a SAPART command. """
+        self.send_raw("SAPART %s %s" % (target, channel))
+    
+    def sethost(self, hostname):
+        """ Send a SETHOST command. """
+        self.send_raw("SETHOST %s" % hostname)
+    
+    def privmsgtosource(self, event, message):
+        """ Send a PRIVMSG to where the message came from """
+        privmsg_origin(self, event, message)
+
     def sconnect(self, target, port="", server=""):
         """Send an SCONNECT command."""
         self.send_raw("CONNECT %s%s%s" % (target,
@@ -844,6 +872,25 @@ class ServerConnection(Connection):
                                          max and (" " + max),
                                          server and (" " + server)))
 
+class ServerConnectionThread(threading.Thread, ServerConnection):
+    def __init__(self, irclibobj):
+        threading.Thread.__init__(self)
+        ServerConnection.__init__(self, irclibobj)
+        self.isThread = True
+        
+    def setargs(self, server, port, nickname, password=None, username=None,
+                ircname = None, localaddress="", localport=0, serverid="unspec"):
+        self.t_server = server
+        self.t_port = port
+        self.t_nickname = nickname
+        self.t_password = password
+        self.t_username = username
+        self.t_ircname = ircname
+        self.t_localaddress = localaddress
+        self.t_localport = localport
+        self.t_serverid = serverid
+    def run(self):
+        self.connect(self.t_server, self.t_port, self.t_nickname, self.t_password, self.t_username, self.t_ircname, self.t_localaddress, self.t_localport, self.t_serverid)
 
 class DCCConnectionError(IRCError):
     pass
@@ -1264,6 +1311,16 @@ def ip_quad_to_numstr(quad):
         s = s[:-1]
     return s
 
+def nm(s):
+    """ Returns a 3-tuple
+    ( a, b, c) where a = nick, b = username,
+    c = hostname """
+    
+    a = s.split("!")[0]
+    b = s.split("!")[1].split("@")[0]
+    c = s.split("@")[1]
+    return (a,b,c)
+
 def nm_to_n(s):
     """Get the nick part of a nickmask.
 
@@ -1292,6 +1349,17 @@ def nm_to_u(s):
     """
     s = s.split("!")[1]
     return s.split("@")[0]
+
+def privmsg_origin(connection, event, message):
+    """ Given the connection and event,
+    will send message to where the message
+    originated from.
+    """
+    if is_channel(event.target()):
+        target = event.target()
+    else:
+        target = nm_to_n(event.source())
+    connection.privmsg(target, message)
 
 def parse_nick_modes(mode_string):
     """Parse a nick mode string.
