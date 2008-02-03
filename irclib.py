@@ -255,7 +255,6 @@ class IRC:
         number is highest priority).  If a handler function returns
         \"NO MORE\", no more handlers will be called.
         """
-
         if not event in self.handlers:
             self.handlers[event] = []
         bisect.insort(self.handlers[event], ((priority, handler)))
@@ -504,8 +503,7 @@ class ServerConnection(Connection):
         lines = _linesep_regexp.split(self.previous_buffer + new_data)
 
         # Save the last, unfinished line.
-        self.previous_buffer = lines[-1]
-        lines = lines[:-1]
+        self.previous_buffer = lines.pop()
 
         for line in lines:
             if DEBUG:
