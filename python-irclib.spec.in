@@ -40,6 +40,9 @@ python -c "import py_compile; py_compile.compile('ircbot.py')"
 /usr/lib/python*/site-packages/*
 
 %changelog
+* Sat Aug 29 2008 Keltus <keltus@users.sourceforge.net> 0.4.7-1
+- upgraded to 0.4.7
+
 * Sat Dec 24 2005 Keltus <keltus@users.sourceforge.net> 0.4.6-1
 - upgraded to 0.4.6
 

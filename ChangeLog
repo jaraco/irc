@@ -1,3 +1,9 @@
+2008-08-29  Keltus <keltus@users.sourceforge.net>
+    * irclib.py: Reverted changes in irclib that don't really belong in the core lib
+    * irclib.py: Add support for ssl
+    * irclib.py: Add support for ipv6
+	* python-irclib now requires python 2.3 and above (for ssl and ipv6)
+
 2006-03-09  Keltus <keltus@users.sourceforge.net>
 	* README: Minor update
 

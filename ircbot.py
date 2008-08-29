@@ -93,7 +93,7 @@ class SingleServerIRCBot(SimpleIRCClient):
                          self.server_list[0][1],
                          self._nickname,
                          password,
-                         ircname=self._realname)
+                         ircname=self._realname, ssl=True)
         except ServerConnectionError:
             pass
 
