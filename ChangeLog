@@ -1,3 +1,6 @@
+2008-09-11  Keltus <keltus@users.sourceforge.net>
+    * ircbot.py: Reverted a leftover testing fragment that broke ircbot.py
+
 2008-08-29  Keltus <keltus@users.sourceforge.net>
     * irclib.py: Reverted changes in irclib that don't really belong in the core lib
     * irclib.py: Add support for ssl
