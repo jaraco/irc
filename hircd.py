@@ -64,7 +64,7 @@ class IRCError(Exception):
 
 	def __str__(self):
 		return repr(self.value)
-	
+
 class IRCChannel(object):
 	"""
 	Object representing an IRC channel.
@@ -116,7 +116,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
 					while buf.find("\n") != -1:
 						line, buf = buf.split("\n", 1)
 						line = line.rstrip()
-						
+
 						response = ''
 						try:
 							logging.debug('from %s: %s' % (self.client_ident(), line))
@@ -186,7 +186,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
 				for channel in self.channels:
 					for client in channel.clients:
 						client.send_queue.append(message)
-			
+
 	def handle_user(self, params):
 		"""
 		Handle the USER command which identifies the user to the server.
@@ -225,7 +225,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
 		response = ':%s JOIN :%s' % (self.client_ident(), channel_name)
 		for client in channel.clients:
 			client.send_queue.append(response)
-	
+
 	def handle_privmsg(self, params):
 		"""
 		Handle sending a private message to a user or channel.
@@ -249,7 +249,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
 				client.send_queue.append(message)
 			else:
 				raise IRCError(ERR_NOSUCHNICK, 'PRIVMSG :%s' % (target))
-	
+
 	def handle_quit(self, params):
 		"""
 		Handle the client breaking off the connection with a QUIT command.
@@ -353,10 +353,11 @@ if __name__ == "__main__":
 	else:
 		loglevel = logging.WARNING
 
-	log = logging.basicConfig(level=loglevel,
-	                          format='%(asctime)s:%(levelname)s:%(message)s',
-	                          filename=logfile,
-	                          filemode='a')
+	log = logging.basicConfig(
+		level=loglevel,
+		format='%(asctime)s:%(levelname)s:%(message)s',
+		filename=logfile,
+		filemode='a')
 
 	#
 	# Handle start/stop/restart commands.
