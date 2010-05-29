@@ -12,7 +12,7 @@
 # Known missing features which might be implemented one day:
 #
 # - No user list on joining a channel.
-# - Proper nick name support is lacking (changing nick, duplicate nicks).
+# - Proper nick name support is lacking (changing nick party working).
 # - No part support.
 # - starting server when already started doesn't work properly. PID file is not changed, no error messsage is displayed.
 # 
@@ -178,14 +178,22 @@ class IRCClient(SocketServer.BaseRequestHandler):
 				raise IRCError(ERR_NICKNAMEINUSE, 'NICK :%s' % (nick))
 			else:
 				# Nick is available. Change the nick.
+				message = ':%s NICK :%s' % (self.client_ident(), nick)
+
 				self.server.clients.pop(self.nick)
+				prev_nick = self.nick
 				self.nick = nick
 				self.server.clients[self.nick] = self
-				message = ':%s NICK :%s' % (self.client_ident(), self.nick) # FIXME: something wrong with this.
-				# FIXME Send a message to the client specificly, he may not be on a channel.
+
+				# Send a notification of the nick change to all the clients in
+				# the channels the client is in.
 				for channel in self.channels:
 					for client in channel.clients:
-						client.send_queue.append(message)
+						if client != self: # do not send to client itself.
+							client.send_queue.append(message)
+
+				# Send a notification of the nick change to the client itself
+				return(message)
 
 	def handle_user(self, params):
 		"""
