@@ -1,13 +1,7 @@
 #!/usr/bin/python
 
 # 
-# Very simple hacky ugly IRC server. It doesn't support much other than
-# connecting, setting a nickname (partly implemented) and joining a channel.
-#
-# Most notable is the handling of messages to channels.. everything is
-# broadcasted to all channels regardless of the channel you're in. YMMV
-#
-# Bugs in Kip MAY actually be the result of this IRC server.
+# Very simple hacky ugly IRC server.
 #
 # Known missing features which might be implemented one day:
 #
@@ -15,6 +9,10 @@
 # - Proper nick name support is lacking (changing nick party working).
 # - No part support.
 # - starting server when already started doesn't work properly. PID file is not changed, no error messsage is displayed.
+#
+# Things which will never be supported:
+#
+# - Server linking.
 # 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
