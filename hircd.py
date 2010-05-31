@@ -125,7 +125,8 @@ class IRCClient(SocketServer.BaseRequestHandler):
 								params = ''
 							handler = getattr(self, 'handle_%s' % (command.lower()), None)
 							if not handler:
-								print "No handler for command" # FIXME: raise an error here.
+								# FIXME: Raise an error here and send it to the client.
+								logging.info('No handler for command: %s' % (line))
 								break
 							response = handler(params)
 						except AttributeError, e:
@@ -261,10 +262,24 @@ class IRCClient(SocketServer.BaseRequestHandler):
 		Handle the client breaking off the connection with a QUIT command.
 		"""
 		response = ':%s QUIT :%s' % (self.client_ident(), params.lstrip(':'))
+		# Send part message to all clients in all channels user is in.
 		for channel in self.channels:
 			for client in channel.clients:
 				client.send_queue.append(response)
 		self.server.clients.pop(self.nick)
+
+	def handle_part(self, params):
+		"""
+		Handle a client parting from channel(s).
+		"""
+		for pchannel in params.split(','):
+			channel = self.server.channels.get(pchannel)
+			response = ':%s PART :%s' % (self.client_ident(), pchannel)
+			if channel:
+				for client in channel.clients:
+					client.send_queue.append(response)
+			self.channels.remove(channel)
+			channel.clients.remove(self)
 
 	def client_ident(self):
 		"""
