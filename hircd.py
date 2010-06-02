@@ -67,8 +67,10 @@ class IRCChannel(object):
 	"""
 	Object representing an IRC channel.
 	"""
-	def __init__(self, name):
+	def __init__(self, name, topic='No topic'):
 		self.name = name
+		self.topic_by = 'Unknown'
+		self.topic = topic
 		self.clients = set()
 
 class IRCClient(SocketServer.BaseRequestHandler):
@@ -228,10 +230,23 @@ class IRCClient(SocketServer.BaseRequestHandler):
 		# Add channel to user's channel list
 		self.channels.add(channel)
 
-		# Send join message to everybody in the channel, including yourself
-		response = ':%s JOIN :%s' % (self.client_ident(), channel_name)
+		# Send the topic
+		response_join = ':%s TOPIC %s :%s' % (channel.topic_by, channel.name, channel.topic)
+		self.send_queue.append(response_join)
+
+		# Send join message to everybody in the channel, including yourself and
+		# send user list of the channel back to the user.
+		response_join = ':%s JOIN :%s' % (self.client_ident(), channel_name)
 		for client in channel.clients:
-			client.send_queue.append(response)
+			#if client != self: # FIXME: According to specs, this should be done because the user is included in the channel listing sent later.
+			client.send_queue.append(response_join)
+
+		nicks = [client.nick for client in channel.clients]
+		response_userlist = ':%s 353 %s = %s :%s' % (self.server.servername, self.nick, channel.name, ' '.join(nicks))
+		self.send_queue.append(response_userlist)
+
+		response = ':%s 366 %s %s :End of /NAMES list' % (self.server.servername, self.nick, channel.name)
+		self.send_queue.append(response)
 
 	def handle_privmsg(self, params):
 		"""
@@ -242,6 +257,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
 		message = ':%s PRIVMSG %s %s' % (self.client_ident(), target, msg)
 		if target.startswith('#') or target.startswith('$'):
 			# Message to channel
+			# FIXME: Do not allow msg to channel if user isn't in it.
 			channel = self.server.channels.get(target)
 			if channel:
 				for client in channel.clients:
@@ -288,6 +304,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
 		return('%s!%s@%s' % (self.nick, self.user, self.server.servername))
 
 	def finish(self):
+		"""FINISH HIM!"""
 		pass
 
 class IRCServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
