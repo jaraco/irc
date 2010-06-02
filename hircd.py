@@ -51,6 +51,7 @@ ERR_NOSUCHNICK       = '401'
 ERR_NOSUCHCHANNEL    = '403'
 ERR_ERRONEUSNICKNAME = '432'
 ERR_NICKNAMEINUSE    = '433'
+ERR_NEEDMOREPARAMS   = '461'
 
 class IRCError(Exception):
 	"""
@@ -86,7 +87,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
 		self.realname = None        # Client's real name
 		self.nick = None            # Client's currently registered nickname
 		self.send_queue = []        # Messages to send to client (strings)
-		self.channels = set()       # Channels the client is in
+		self.channels = {}          # Channels the client is in
 
 		SocketServer.BaseRequestHandler.__init__(self, request, client_address, server)
 
@@ -188,7 +189,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
 
 				# Send a notification of the nick change to all the clients in
 				# the channels the client is in.
-				for channel in self.channels:
+				for channel in self.channels.values():
 					for client in channel.clients:
 						if client != self: # do not send to client itself.
 							client.send_queue.append(message)
@@ -200,6 +201,9 @@ class IRCClient(SocketServer.BaseRequestHandler):
 		"""
 		Handle the USER command which identifies the user to the server.
 		"""
+		if params.count(' ') < 3:
+			raise IRCError(ERR_NEEDMOREPARAMS, '%s :Not enough parameters' % (USER))
+
 		user, mode, unused, realname = params.split(' ', 3)
 		self.user = user
 		self.mode = mode
@@ -221,14 +225,14 @@ class IRCClient(SocketServer.BaseRequestHandler):
 
 		# Valid channel name?
 		if not re.match('^#([a-zA-Z0-9_])+$', channel_name):
-			raise IRCError(ERR_NOSUCHCHANNEL, ':%s' % (channel_name))
+			raise IRCError(ERR_NOSUCHCHANNEL, '%s :No such channel' % (channel_name))
 
 		# Add user to the channel (create new channel if not exists)
 		channel = self.server.channels.setdefault(channel_name, IRCChannel(channel_name))
 		channel.clients.add(self)
 
 		# Add channel to user's channel list
-		self.channels.add(channel)
+		self.channels[channel.name] = channel
 
 		# Send the topic
 		response_join = ':%s TOPIC %s :%s' % (channel.topic_by, channel.name, channel.topic)
@@ -278,8 +282,8 @@ class IRCClient(SocketServer.BaseRequestHandler):
 		Handle the client breaking off the connection with a QUIT command.
 		"""
 		response = ':%s QUIT :%s' % (self.client_ident(), params.lstrip(':'))
-		# Send part message to all clients in all channels user is in.
-		for channel in self.channels:
+		# Send quit message to all clients in all channels user is in.
+		for channel in self.channels.values():
 			for client in channel.clients:
 				client.send_queue.append(response)
 		self.server.clients.pop(self.nick)
@@ -289,13 +293,18 @@ class IRCClient(SocketServer.BaseRequestHandler):
 		Handle a client parting from channel(s).
 		"""
 		for pchannel in params.split(','):
-			channel = self.server.channels.get(pchannel)
-			response = ':%s PART :%s' % (self.client_ident(), pchannel)
-			if channel:
-				for client in channel.clients:
-					client.send_queue.append(response)
-			self.channels.remove(channel)
-			channel.clients.remove(self)
+			print pchannel, self.server.channels, self.channels
+			if pchannel in self.server.channels:
+				channel = self.server.channels.get(pchannel.strip())
+				response = ':%s PART :%s' % (self.client_ident(), pchannel)
+				if channel:
+					for client in channel.clients:
+						client.send_queue.append(response)
+				channel.clients.remove(self)
+				self.channels.pop(pchannel)
+			else:
+				response = ':%s 403 %s :%s' % (self.server.servername, pchannel, pchannel)
+				self.send_queue.append(response)
 
 	def client_ident(self):
 		"""
