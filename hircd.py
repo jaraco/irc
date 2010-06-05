@@ -13,6 +13,12 @@
 # Things which will never be supported:
 #
 # - Server linking.
+#
+# Bugs:
+# 
+# - Parting doesn't work properly.
+# - Return erro 421 ERR_UNKNOWNCOMMAND on invalid command.
+# - Delete channel if last user leaves.
 # 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
@@ -46,9 +52,14 @@ import socket
 import select
 import re
 
+SRV_NAME    = "Hircd"
+SRV_VERSION = "0.1"
+SRV_WELCOME = "Welcome to %s v%s, the ugliest IRC server in the world." % (SRV_NAME, SRV_VERSION)
+
 RPL_WELCOME          = '001'
 ERR_NOSUCHNICK       = '401'
 ERR_NOSUCHCHANNEL    = '403'
+ERR_CANNOTSENDTOCHAN = '404'
 ERR_ERRONEUSNICKNAME = '432'
 ERR_NICKNAMEINUSE    = '433'
 ERR_NEEDMOREPARAMS   = '461'
@@ -169,7 +180,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
 				# Nick is available, register and send welcome
 				self.nick = nick
 				self.server.clients[nick] = self
-				response = ':%s %s %s :Welcome to the ugliest IRC server in the world.' % (self.server.servername, RPL_WELCOME, self.nick)
+				response = ':%s %s %s :%s' % (self.server.servername, RPL_WELCOME, self.nick, SRV_WELCOME)
 				return(response)
 		else:
 			if self.server.clients.get(nick, None) == self:
@@ -264,6 +275,8 @@ class IRCClient(SocketServer.BaseRequestHandler):
 			# FIXME: Do not allow msg to channel if user isn't in it.
 			channel = self.server.channels.get(target)
 			if channel:
+				if not channel.name in self.channels:
+					raise IRCError(ERR_CANNOTSENDTOCHAN, '%s :Cannot send to channel' % (channel.name))
 				for client in channel.clients:
 					if client != self:
 						client.send_queue.append(message)
@@ -305,6 +318,21 @@ class IRCClient(SocketServer.BaseRequestHandler):
 			else:
 				response = ':%s 403 %s :%s' % (self.server.servername, pchannel, pchannel)
 				self.send_queue.append(response)
+
+	def handle_dump(self, params):
+		"""
+		Dump internal server information for debugging purposes.
+		"""
+		print "Clients:", self.server.clients
+		for client in self.server.clients.values():
+			print "    ", client
+			for channel in client.channels.values():
+				print "        ", channel.name
+		print "Channels:", self.server.channels
+		for channel in self.server.channels.values():
+			print "    ", channel.name, channel
+			for client in channel.clients:
+				print "        ", client.nick, client
 
 	def client_ident(self):
 		"""
