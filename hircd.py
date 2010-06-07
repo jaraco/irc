@@ -19,6 +19,7 @@
 # - Parting doesn't work properly.
 # - Return erro 421 ERR_UNKNOWNCOMMAND on invalid command.
 # - Delete channel if last user leaves.
+# - [ERROR] <socket.error instance at 0x7f9f203dfb90> (better error msg required)
 # 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
