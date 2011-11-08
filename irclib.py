@@ -743,7 +743,7 @@ class ServerConnection(Connection):
 
     def part(self, channels, message=""):
         """Send a PART command."""
-        if type(channels) == types.StringType:
+	if type(channels) == types.StringType or type(channels) == types.UnicodeType :
             self.send_raw("PART " + channels + (message and (" " + message)))
         else:
             self.send_raw("PART " + ",".join(channels) + (message and (" " + message)))
