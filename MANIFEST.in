@@ -1,0 +1,13 @@
+include setup.py
+include pavement.py
+include paver-minilib.zip
+include COPYING
+include ChangeLog
+include README
+include dccreceive
+include dccsend
+include irccat
+include irccat2
+include python-irclib.spec
+include servermap
+include testbot.py
