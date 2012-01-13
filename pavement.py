@@ -13,7 +13,7 @@ def get_version():
 	with open(irclib) as f:
 		content = f.read()
 	VERSION = eval(re.search('VERSION = (.*)', content).group(1))
-	VERSION = "'%s'" % '.'.join(map(str, VERSION))
+	VERSION = '.'.join(map(str, VERSION))
 	return VERSION
 
 setup(
@@ -26,6 +26,14 @@ setup(
 )
 
 @task
-@needs('generate_setup', 'minilib', 'distutils.command.sdist')
+def generate_specfile():
+	with open('python-irclib.spec.in', 'rb') as f:
+		content = f.read()
+	content = content.replace('%%VERSION%%', get_version())
+	with open('python-irclib.spec', 'wb') as f:
+		f.write(content)
+
+@task
+@needs('generate_setup', 'generate_specfile', 'minilib', 'distutils.command.sdist')
 def sdist():
 	"Override sdist to make sure the setup.py gets generated"
