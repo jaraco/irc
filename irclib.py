@@ -191,6 +191,11 @@ class IRC:
         while self.delayed_commands:
             if t >= self.delayed_commands[0][0]:
                 self.delayed_commands[0][1](*self.delayed_commands[0][2])
+                if len(self.delayed_commands[0]) > 3:
+                    self.execute_delayed(self.delayed_commands[0][3]['tick'],
+                                         self.delayed_commands[0][1],
+                                         self.delayed_commands[0][2],
+                                         self.delayed_commands[0][3])
                 del self.delayed_commands[0]
             else:
                 break
@@ -288,22 +293,24 @@ class IRC:
             arguments -- Arguments to give the function.
         """
         self.execute_delayed(at-time.time(), function, arguments)
-
-    def execute_delayed(self, delay, function, arguments=()):
+    def execute_delayed(self, delay, function, arguments=(), persistant=False):
         """Execute a function after a specified time.
-
         Arguments:
 
             delay -- How many seconds to wait.
 
             function -- Function to call.
-
             arguments -- Arguments to give the function.
+
+            persistant -- Do not delete the job, keep processing for ever.
         """
-        bisect.insort(self.delayed_commands, (delay+time.time(), function, arguments))
+        if persistant:
+            data = (delay+time.time(), function, arguments, {'tick': delay})
+        else:
+            data = (delay+time.time(), function, arguments)
+        bisect.insort(self.delayed_commands, data)
         if self.fn_to_add_timeout:
             self.fn_to_add_timeout(delay)
-
     def dcc(self, dcctype="chat"):
         """Creates and returns a DCCConnection object.
 
@@ -321,10 +328,11 @@ class IRC:
     def _handle_event(self, connection, event):
         """[Internal]"""
         h = self.handlers
-        for handler in h.get("all_events", []) + h.get(event.eventtype(), []):
+        th = h.get("all_events", []) + h.get(event.eventtype(),[])
+        th.sort()
+        for handler in th: #h.get("all_events", []) + h.get(event.eventtype(), []):
             if handler[1](connection, event) == "NO MORE":
                 return
-
     def _remove_connection(self, connection):
         """[Internal]"""
         self.connections.remove(connection)
@@ -349,11 +357,10 @@ class Connection:
 
     def execute_at(self, at, function, arguments=()):
         self.irclibobj.execute_at(at, function, arguments)
-
-    def execute_delayed(self, delay, function, arguments=()):
-        self.irclibobj.execute_delayed(delay, function, arguments)
-
-
+    def execute_delayed(self, delay, function, arguments=(),
+                        persistant=False):
+        self.irclibobj.execute_delayed(delay, function, arguments,
+                                       persistant)
 class ServerConnectionError(IRCError):
     pass
 
@@ -1041,13 +1048,15 @@ class SimpleIRCClient:
         self.dcc_connections = []
         self.ircobj.add_global_handler("all_events", self._dispatcher, -10)
         self.ircobj.add_global_handler("dcc_disconnect", self._dcc_disconnect, -10)
-
     def _dispatcher(self, c, e):
         """[Internal]"""
+        if DEBUG:
+            print("irclib.py:_dispatcher:%s" % e.eventtype())
+
         m = "on_" + e.eventtype()
+        im = "_"+m
         if hasattr(self, m):
             getattr(self, m)(c, e)
-
     def _dcc_disconnect(self, c, e):
         self.dcc_connections.remove(c)
 
