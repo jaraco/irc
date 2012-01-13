@@ -784,10 +784,13 @@ class ServerConnection(Connection):
 
     def part(self, channels, message=""):
         """Send a PART command."""
-        if type(channels) == types.StringType or type(channels) == types.UnicodeType :
-            self.send_raw("PART " + channels + (message and (" " + message)))
-        else:
-            self.send_raw("PART " + ",".join(channels) + (message and (" " + message)))
+        channels = always_iterable(channels)
+        cmd_parts = [
+            'PART',
+            ','.join(channels),
+        ]
+        if message: cmd_parts.append(message)
+        self.send_raw(' '.join(cmd_parts))
 
     def pass_(self, password):
         """Send a PASS command."""
@@ -1601,3 +1604,22 @@ protocol_events = [
 ]
 
 all_events = generated_events + protocol_events + numeric_events.values()
+
+# from jaraco.util.itertools
+def always_iterable(item):
+    """
+    Given an object, always return an iterable. If the item is not
+    already iterable, return a tuple containing only the item.
+
+    >>> always_iterable([1,2,3])
+    [1, 2, 3]
+    >>> always_iterable('foo')
+    (u'foo',)
+    >>> always_iterable(None)
+    (None,)
+    >>> always_iterable(xrange(10))
+    xrange(10)
+    """
+    if isinstance(item, basestring) or not hasattr(item, '__iter__'):
+        item = item,
+    return item
