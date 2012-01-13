@@ -1,0 +1,5 @@
+build
+dist
+python-irclib.spec
+setup.py
+paver-minilib.zip
