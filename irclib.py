@@ -157,7 +157,7 @@ class IRC:
         self.fn_to_add_timeout = fn_to_add_timeout
         self.connections = []
         self.handlers = {}
-        self.delayed_commands = [] # list of tuples in the format (time, function, arguments)
+        self.delayed_commands = [] # list of DelayedCommands
 
         self.add_global_handler("ping", _ping_ponger, -42)
 
@@ -187,18 +187,14 @@ class IRC:
 
         See documentation for IRC.__init__.
         """
-        t = time.time()
         while self.delayed_commands:
-            if t >= self.delayed_commands[0][0]:
-                self.delayed_commands[0][1](*self.delayed_commands[0][2])
-                if len(self.delayed_commands[0]) > 3:
-                    self.execute_delayed(self.delayed_commands[0][3]['tick'],
-                                         self.delayed_commands[0][1],
-                                         self.delayed_commands[0][2],
-                                         self.delayed_commands[0][3])
-                del self.delayed_commands[0]
-            else:
+            command = self.delayed_commands[0]
+            if not command.due():
                 break
+            command.function(*command.arguments)
+            if isinstance(command, PeriodicCommand):
+                self._schedule_command(command.next())
+            del self.delayed_commands[0]
 
     def process_once(self, timeout=0):
         """Process data from connections once.
@@ -269,7 +265,6 @@ class IRC:
         Arguments:
 
             event -- Event type (a string).
-
             handler -- Callback function.
 
         Returns 1 on success, otherwise 0.
@@ -287,30 +282,39 @@ class IRC:
         Arguments:
 
             at -- Execute at this time (standard \"time_t\" time).
-
-            function -- Function to call.
-
-            arguments -- Arguments to give the function.
-        """
-        self.execute_delayed(at-time.time(), function, arguments)
-    def execute_delayed(self, delay, function, arguments=(), persistant=False):
-        """Execute a function after a specified time.
-        Arguments:
-
-            delay -- How many seconds to wait.
-
             function -- Function to call.
             arguments -- Arguments to give the function.
-
-            persistant -- Do not delete the job, keep processing for ever.
         """
-        if persistant:
-            data = (delay+time.time(), function, arguments, {'tick': delay})
-        else:
-            data = (delay+time.time(), function, arguments)
-        bisect.insort(self.delayed_commands, data)
+        command = DelayedCommand.at_time(at, function, arguments)
+        self._schedule_command(command)
+
+    def execute_delayed(self, delay, function, arguments=()):
+        """
+        Execute a function after a specified time.
+
+        delay -- How many seconds to wait.
+        function -- Function to call.
+        arguments -- Arguments to give the function.
+        """
+        command = DelayedCommand(delay, function, arguments)
+        self._schedule_command(command)
+
+    def execute_every(self, period, function, arguments=()):
+        """
+        Execute a function every 'period' seconds.
+
+        period -- How often to run (always waits this long for first).
+        function -- Function to call.
+        arguments -- Arguments to give the function.
+        """
+        command = PeriodicCommand(period, function, arguments)
+        self._schedule_command(command)
+
+    def _schedule_command(self, command):
+        bisect.insort(self.delayed_commands, command)
         if self.fn_to_add_timeout:
-            self.fn_to_add_timeout(delay)
+            self.fn_to_add_timeout(command.delay)
+
     def dcc(self, dcctype="chat"):
         """Creates and returns a DCCConnection object.
 
@@ -338,6 +342,36 @@ class IRC:
         self.connections.remove(connection)
         if self.fn_to_remove_socket:
             self.fn_to_remove_socket(connection._get_socket())
+
+class DelayedCommand(object):
+    """
+    A three-tuple describing a command to be executed after delay seconds.
+    """
+    def __init__(self, delay, function, arguments):
+        self.at = time.time() + delay
+        self.delay = delay
+        self.function = function
+        self.arguments = arguments
+
+    def at_time(cls, at, function, arguments):
+        """
+        Construct a DelayedCommand to come due at `at`.
+        """
+        delay = at - time.time()
+        return cls(delay, function, arguments)
+    at_time = classmethod(at_time)
+
+    def due(self):
+        return time.time() >= self.at
+
+class PeriodicCommand(DelayedCommand):
+    """
+    Like a deferred command, but expect this command to run every delay
+    seconds.
+    """
+    def next(self):
+        return PeriodicCommand(self.at+self.delay, self.function,
+            self.arguments)
 
 _rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
 
