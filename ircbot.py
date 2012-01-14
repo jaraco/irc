@@ -75,7 +75,7 @@ class SingleServerIRCBot(SimpleIRCClient):
                   "namreply", "nick", "part", "quit"]:
             self.connection.add_global_handler(i,
                                                getattr(self, "_on_" + i),
-                                               -10)
+                                               -20)
     def _connected_checker(self):
         """[Internal]"""
         if not self.connection.is_connected():
