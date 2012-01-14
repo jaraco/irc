@@ -247,6 +247,11 @@ class SingleServerIRCBot(SimpleIRCClient):
         SimpleIRCClient.start(self)
 
 
+class NoDefault(object):
+    """
+    An object, distinguishable from None
+    """
+
 class IRCDict:
     """A dictionary suitable for storing IRC-related things.
 
@@ -306,7 +311,15 @@ class IRCDict:
             self.data[k] = v
     def get(self, key, failobj=None):
         return self.data.get(key, failobj)
-
+    def pop(self, key, default=NoDefault):
+        try:
+            value = self[key]
+            del self[key]
+        except KeyError:
+            if default is NoDefault:
+                raise
+            value = default
+        return value
 
 class Channel:
     """A class for keeping information about an IRC channel.
