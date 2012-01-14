@@ -354,14 +354,11 @@ class Channel:
                 del d[nick]
 
     def change_nick(self, before, after):
-        self.userdict[after] = self.userdict[before]
-        del self.userdict[before]
+        self.userdict[after] = self.userdict.pop(before)
         if before in self.operdict:
-            self.operdict[after] = 1
-            del self.operdict[before]
+            self.operdict[after] = self.operdict.pop(before)
         if before in self.voiceddict:
-            self.voiceddict[after] = 1
-            del self.voiceddict[before]
+            self.voiceddict[after] = self.voiceddict.pop(before)
 
     def set_userdetails(self, nick, details):
         if self.userdict.has_key(nick):
