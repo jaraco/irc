@@ -16,13 +16,34 @@ def get_version():
 	VERSION = '.'.join(map(str, VERSION))
 	return VERSION
 
-setup(
+def read_long_description():
+	f = open('README')
+	try:
+		data = f.read()
+	finally:
+		f.close()
+	return data
+
+setup_params = dict(
 	name="python-irclib",
+	description="IRC (Internet Relay Chat) protocol client library for Python",
+	long_description=read_long_description(),
 	version=get_version(),
 	py_modules=["irclib", "ircbot"],
 	author="Joel Rosdahl",
 	author_email="joel@rosdahl.net",
+	maintainer="Jason R. Coombs",
+	maintainer_email="jaraco@jaraco.com",
 	url="http://python-irclib.sourceforge.net",
+	classifiers = [
+		"Development Status :: 5 - Production/Stable",
+		"Intended Audience :: Developers",
+		"Programming Language :: Python :: 2.3",
+		"Programming Language :: Python :: 2.4",
+		"Programming Language :: Python :: 2.5",
+		"Programming Language :: Python :: 2.6",
+		"Programming Language :: Python :: 2.7",
+	],
 )
 
 @task
@@ -37,3 +58,6 @@ def generate_specfile():
 @needs('generate_setup', 'generate_specfile', 'minilib', 'distutils.command.sdist')
 def sdist():
 	"Override sdist to make sure the setup.py gets generated"
+
+if __name__ == '__main__':
+	setup(**setup_params)
