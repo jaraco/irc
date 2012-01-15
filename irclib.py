@@ -1358,7 +1358,7 @@ def parse_nick_modes(mode_string):
 
     Example:
 
-    >>> irclib.parse_nick_modes(\"+ab-c\")
+    >>> parse_nick_modes(\"+ab-c\")
     [['+', 'a', None], ['+', 'b', None], ['-', 'c', None]]
     """
 
@@ -1373,7 +1373,7 @@ def parse_channel_modes(mode_string):
 
     Example:
 
-    >>> irclib.parse_channel_modes(\"+ab-c foo\")
+    >>> parse_channel_modes(\"+ab-c foo\")
     [['+', 'a', None], ['+', 'b', 'foo'], ['-', 'c', None]]
     """
 
