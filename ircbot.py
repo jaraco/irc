@@ -25,6 +25,7 @@ write simpler bots.
 """
 
 import sys
+import re
 from UserDict import UserDict
 
 from irclib import SimpleIRCClient
@@ -247,80 +248,6 @@ class SingleServerIRCBot(SimpleIRCClient):
         SimpleIRCClient.start(self)
 
 
-class NoDefault(object):
-    """
-    An object, distinguishable from None
-    """
-
-class IRCDict:
-    """A dictionary suitable for storing IRC-related things.
-
-    Dictionary keys a and b are considered equal if and only if
-    irc_lower(a) == irc_lower(b)
-
-    Otherwise, it should behave exactly as a normal dictionary.
-    """
-
-    def __init__(self, dict=None):
-        self.data = {}
-        self.canon_keys = {}  # Canonical keys
-        if dict is not None:
-            self.update(dict)
-    def __repr__(self):
-        return repr(self.data)
-    def __cmp__(self, dict):
-        if isinstance(dict, IRCDict):
-            return cmp(self.data, dict.data)
-        else:
-            return cmp(self.data, dict)
-    def __len__(self):
-        return len(self.data)
-    def __getitem__(self, key):
-        return self.data[self.canon_keys[irc_lower(key)]]
-    def __setitem__(self, key, item):
-        if key in self:
-            del self[key]
-        self.data[key] = item
-        self.canon_keys[irc_lower(key)] = key
-    def __delitem__(self, key):
-        ck = irc_lower(key)
-        del self.data[self.canon_keys[ck]]
-        del self.canon_keys[ck]
-    def __iter__(self):
-        return iter(self.data)
-    def __contains__(self, key):
-        return self.has_key(key)
-    def clear(self):
-        self.data.clear()
-        self.canon_keys.clear()
-    def copy(self):
-        if self.__class__ is UserDict:
-            return UserDict(self.data)
-        import copy
-        return copy.copy(self)
-    def keys(self):
-        return self.data.keys()
-    def items(self):
-        return self.data.items()
-    def values(self):
-        return self.data.values()
-    def has_key(self, key):
-        return irc_lower(key) in self.canon_keys
-    def update(self, dict):
-        for k, v in dict.items():
-            self.data[k] = v
-    def get(self, key, failobj=None):
-        return self.data.get(key, failobj)
-    def pop(self, key, default=NoDefault):
-        try:
-            value = self[key]
-            del self[key]
-        except KeyError:
-            if default is NoDefault:
-                raise
-            value = default
-        return value
-
 class Channel:
     """A class for keeping information about an IRC channel.
 
@@ -328,9 +255,9 @@ class Channel:
     """
 
     def __init__(self):
-        self.userdict = IRCDict()
-        self.operdict = IRCDict()
-        self.voiceddict = IRCDict()
+        self.userdict = FoldedCaseKeyedDict()
+        self.operdict = FoldedCaseKeyedDict()
+        self.voiceddict = FoldedCaseKeyedDict()
         self.modes = {}
 
     def users(self):
@@ -450,3 +377,98 @@ class Channel:
             return self.modes["k"]
         else:
             return None
+
+# from jaraco.util.string
+class FoldedCase(str):
+    """
+    A case insensitive string class; behaves just like str
+    except compares equal when the only variation is case.
+    >>> s = FoldedCase('hello world')
+
+    >>> s == 'Hello World'
+    True
+
+    >>> 'Hello World' == s
+    True
+
+    >>> s.index('O')
+    4
+
+    >>> s.split('O')
+    ['hell', ' w', 'rld']
+
+    >>> names = map(FoldedCase, ['GAMMA', 'alpha', 'Beta'])
+    >>> names.sort()
+    >>> names
+    ['alpha', 'Beta', 'GAMMA']
+    """
+    def __lt__(self, other):
+        return self.lower() < other.lower()
+    def __gt__(self, other):
+        return self.lower() > other.lower()
+    def __eq__(self, other):
+        return self.lower() == other.lower()
+    def __hash__(self):
+        return hash(self.lower())
+    # cache lower since it's likely to be called frequently.
+    def lower(self):
+        self._lower = super(FoldedCase, self).lower()
+        self.lower = lambda: self._lower
+        return self._lower
+
+    def index(self, sub):
+        return self.lower().index(sub.lower())
+
+    def split(self, splitter=' ', maxsplit=0):
+        pattern = re.compile(re.escape(splitter), re.I)
+        return pattern.split(self, maxsplit)
+
+# from jaraco.util.dictlib
+class FoldedCaseKeyedDict(dict):
+    """A case-insensitive dictionary (keys are compared as insensitive
+    if they are strings).
+    >>> d = FoldedCaseKeyedDict()
+    >>> d['heLlo'] = 'world'
+    >>> d
+    {'heLlo': 'world'}
+    >>> d['hello']
+    'world'
+    >>> 'hello' in d
+    True
+    >>> 'HELLO' in d
+    True
+    >>> FoldedCaseKeyedDict({'heLlo': 'world'})
+    {'heLlo': 'world'}
+    >>> d = FoldedCaseKeyedDict({'heLlo': 'world'})
+    >>> d['hello']
+    'world'
+    >>> d['Hello']
+    'world'
+    >>> d
+    {'heLlo': 'world'}
+    >>> d = FoldedCaseKeyedDict({'heLlo': 'world', 'Hello': 'world'})
+    >>> d
+    {'heLlo': 'world'}
+    """
+    def __init__(self, *args, **kargs):
+        super(FoldedCaseKeyedDict, self).__init__()
+        # build a dictionary using the default constructs
+        d = dict(*args, **kargs)
+        # build this dictionary using case insensitivity.
+        for item in d.items():
+            self.__setitem__(*item)
+
+    def __setitem__(self, key, val):
+        if isinstance(key, basestring):
+            key = FoldedCase(key)
+        super(FoldedCaseKeyedDict, self).__setitem__(key, val)
+
+    def __getitem__(self, key):
+        if isinstance(key, basestring):
+            key = FoldedCase(key)
+        return super(FoldedCaseKeyedDict, self).__getitem__(key)
+
+    def __contains__(self, key):
+        if isinstance(key, basestring):
+            key = FoldedCase(key)
+        return super(FoldedCaseKeyedDict, self).__contains__(key)

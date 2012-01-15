@@ -1614,7 +1614,7 @@ def always_iterable(item):
     >>> always_iterable([1,2,3])
     [1, 2, 3]
     >>> always_iterable('foo')
-    (u'foo',)
+    ('foo',)
     >>> always_iterable(None)
     (None,)
     >>> always_iterable(xrange(10))
