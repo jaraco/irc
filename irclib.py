@@ -1229,16 +1229,6 @@ def mask_matches(nick, mask):
 
 _special = "-[]\\`^{}"
 nick_characters = string.ascii_letters + string.digits + _special
-_ircstring_translation = string.maketrans(string.ascii_uppercase + "[]\\^",
-                                          string.ascii_lowercase + "{}|~")
-
-def irc_lower(s):
-    """Returns a lowercased string.
-
-    The definition of lowercased comes from the IRC specification (RFC
-    1459).
-    """
-    return s.translate(_ircstring_translation)
 
 def _ctcp_dequote(message):
     """[Internal] Dequote a message according to CTCP specifications.
@@ -1623,3 +1613,70 @@ def always_iterable(item):
     if isinstance(item, basestring) or not hasattr(item, '__iter__'):
         item = item,
     return item
+
+# from jaraco.util.string
+class FoldedCase(str):
+    """
+    A case insensitive string class; behaves just like str
+    except compares equal when the only variation is case.
+    >>> s = FoldedCase('hello world')
+
+    >>> s == 'Hello World'
+    True
+
+    >>> 'Hello World' == s
+    True
+
+    >>> s.index('O')
+    4
+
+    >>> s.split('O')
+    ['hell', ' w', 'rld']
+
+    >>> names = map(FoldedCase, ['GAMMA', 'alpha', 'Beta'])
+    >>> names.sort()
+    >>> names
+    ['alpha', 'Beta', 'GAMMA']
+    """
+    def __lt__(self, other):
+        return self.lower() < other.lower()
+    def __gt__(self, other):
+        return self.lower() > other.lower()
+    def __eq__(self, other):
+        return self.lower() == other.lower()
+    def __hash__(self):
+        return hash(self.lower())
+    # cache lower since it's likely to be called frequently.
+    def lower(self):
+        self._lower = super(FoldedCase, self).lower()
+        self.lower = lambda: self._lower
+        return self._lower
+
+    def index(self, sub):
+        return self.lower().index(sub.lower())
+
+    def split(self, splitter=' ', maxsplit=0):
+        pattern = re.compile(re.escape(splitter), re.I)
+        return pattern.split(self, maxsplit)
+
+class IRCFoldedCase(FoldedCase):
+    """
+    A version of FoldedCase that honors the IRC specification for lowercased
+    strings (RFC 1459).
+
+    >>> IRCFoldedCase('Foo^').lower()
+    'foo~'
+    >>> IRCFoldedCase('[this]') == IRCFoldedCase('{THIS}')
+    True
+    """
+    translation = string.maketrans(
+        string.ascii_uppercase + r"[]\^",
+        string.ascii_lowercase + r"{}|~",
+    )
+
+    def lower(self):
+        return self.translate(self.translation)
+
+# for compatibility
+def irc_lower(str):
+    return IRCFoldedCase(str).lower()

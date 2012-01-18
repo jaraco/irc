@@ -28,10 +28,9 @@ import sys
 import re
 from UserDict import UserDict
 
-from irclib import SimpleIRCClient
-from irclib import nm_to_n, irc_lower, all_events
-from irclib import parse_channel_modes, is_channel
-from irclib import ServerConnectionError
+import irclib
+from irclib import (SimpleIRCClient, nm_to_n, irc_lower, all_events,
+    parse_channel_modes, is_channel, ServerConnectionError)
 
 class SingleServerIRCBot(SimpleIRCClient):
     """A single-server IRC bot class.
@@ -255,9 +254,9 @@ class Channel:
     """
 
     def __init__(self):
-        self.userdict = FoldedCaseKeyedDict()
-        self.operdict = FoldedCaseKeyedDict()
-        self.voiceddict = FoldedCaseKeyedDict()
+        self.userdict = IRCDict()
+        self.operdict = IRCDict()
+        self.voiceddict = IRCDict()
         self.modes = {}
 
     def users(self):
@@ -378,52 +377,7 @@ class Channel:
         else:
             return None
 
-# from jaraco.util.string
-class FoldedCase(str):
-    """
-    A case insensitive string class; behaves just like str
-    except compares equal when the only variation is case.
-    >>> s = FoldedCase('hello world')
-
-    >>> s == 'Hello World'
-    True
-
-    >>> 'Hello World' == s
-    True
-
-    >>> s.index('O')
-    4
-
-    >>> s.split('O')
-    ['hell', ' w', 'rld']
-
-    >>> names = map(FoldedCase, ['GAMMA', 'alpha', 'Beta'])
-    >>> names.sort()
-    >>> names
-    ['alpha', 'Beta', 'GAMMA']
-    """
-    def __lt__(self, other):
-        return self.lower() < other.lower()
-    def __gt__(self, other):
-        return self.lower() > other.lower()
-    def __eq__(self, other):
-        return self.lower() == other.lower()
-    def __hash__(self):
-        return hash(self.lower())
-    # cache lower since it's likely to be called frequently.
-    def lower(self):
-        self._lower = super(FoldedCase, self).lower()
-        self.lower = lambda: self._lower
-        return self._lower
-
-    def index(self, sub):
-        return self.lower().index(sub.lower())
-
-    def split(self, splitter=' ', maxsplit=0):
-        pattern = re.compile(re.escape(splitter), re.I)
-        return pattern.split(self, maxsplit)
-
-# from jaraco.util.dictlib
+# based on jaraco.util.dictlib
 class FoldedCaseKeyedDict(dict):
     """A case-insensitive dictionary (keys are compared as insensitive
     if they are strings).
@@ -450,6 +404,13 @@ class FoldedCaseKeyedDict(dict):
     >>> d
     {'heLlo': 'world'}
     """
+
+    @staticmethod
+    def key_transform(key):
+        if isinstance(key, basestring):
+            key = irclib.FoldedCase(key)
+        return key
+
     def __init__(self, *args, **kargs):
         super(FoldedCaseKeyedDict, self).__init__()
         # build a dictionary using the default constructs
@@ -459,16 +420,31 @@ class FoldedCaseKeyedDict(dict):
             self.__setitem__(*item)
 
     def __setitem__(self, key, val):
-        if isinstance(key, basestring):
-            key = FoldedCase(key)
+        key = self.key_transform(key)
         super(FoldedCaseKeyedDict, self).__setitem__(key, val)
 
     def __getitem__(self, key):
-        if isinstance(key, basestring):
-            key = FoldedCase(key)
+        key = self.key_transform(key)
         return super(FoldedCaseKeyedDict, self).__getitem__(key)
 
     def __contains__(self, key):
-        if isinstance(key, basestring):
-            key = FoldedCase(key)
+        key = self.key_transform(key)
         return super(FoldedCaseKeyedDict, self).__contains__(key)
+
+class IRCDict(FoldedCaseKeyedDict):
+    """
+    Like FoldedCaseKeyedDict except uses IRCFoldedCase for the keys.
+
+    >>> d = IRCDict({'[This]': 'that'}, A='foo')
+    >>> d['a']
+    'foo'
+    >>> d['{this}']
+    'that'
+    >>> d['{THIS}']
+    'that'
+    """
+    @staticmethod
+    def key_transform(key):
+        if isinstance(key, basestring):
+            key = irclib.IRCFoldedCase(key)
+        return key
