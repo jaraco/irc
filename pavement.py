@@ -24,7 +24,7 @@ def read_long_description():
 		f.close()
 	return data
 
-setup_params = dict(
+setup(
 	name="python-irclib",
 	description="IRC (Internet Relay Chat) protocol client library for Python",
 	long_description=read_long_description(),
@@ -58,6 +58,3 @@ def generate_specfile():
 @needs('generate_setup', 'generate_specfile', 'minilib', 'distutils.command.sdist')
 def sdist():
 	"Override sdist to make sure the setup.py gets generated"
-
-if __name__ == '__main__':
-	setup(**setup_params)
