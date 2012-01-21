@@ -70,6 +70,17 @@ import sys
 import time
 import types
 
+try:
+    import ssl
+    wrap_socket = ssl.wrap_socket
+except ImportError:
+    def wrap_socket(sock):
+        """
+        Wrap a socket with SSL.
+        """
+        return socket.ssl(sock)
+
+
 VERSION = 0, 4, 8
 DEBUG = 0
 
@@ -473,7 +484,7 @@ class ServerConnection(Connection):
             self.socket.bind((self.localaddress, self.localport))
             self.socket.connect((self.server, self.port))
             if ssl:
-                self.ssl = socket.ssl(self.socket)
+                self.ssl = wrap_socket(self.socket)
         except socket.error, x:
             self.socket.close()
             self.socket = None
