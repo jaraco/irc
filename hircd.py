@@ -16,7 +16,6 @@
 # - Return erro 421 ERR_UNKNOWNCOMMAND on invalid command.
 # - Delete channel if last user leaves.
 # - [ERROR] <socket.error instance at 0x7f9f203dfb90> (better error msg required)
-# - Clients not removed from client list/channels, etc when connection is dropped without QUIT.
 # - Empty channels are left behind
 # - No Op assigned when new channel is created.
 # 
@@ -107,7 +106,8 @@ class IRCClient(SocketServer.BaseRequestHandler):
 
         while True:
             buf = ''
-            ready_to_read, ready_to_write, in_error = select.select([self.request], [], [], 0.1)
+            ready_to_read, ready_to_write, in_error = select.select([self.request], [], [], 1)
+            print ready_to_read, ready_to_write, in_error
 
             # Write any commands to the client
             while self.send_queue:
@@ -158,7 +158,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
                             logging.debug('to %s: %s' % (self.client_ident(), response))
                             self.request.send(response + '\r\n')
 
-        logging.info('Client disconnected: %s' % (self.client_ident()))
+        self.disconnect()
         self.request.close()
 
     def handle_nick(self, params):
@@ -343,6 +343,22 @@ class IRCClient(SocketServer.BaseRequestHandler):
         Return the client identifier as included in many command replies.
         """
         return('%s!%s@%s' % (self.nick, self.user, self.server.servername))
+
+    def disconnect(self):
+        """
+        Disconnect the client. This is called if the client suddenly
+        disconnected without properly saying goodbye (QUIT).
+        """
+        logging.info('Client disconnected: %s' % (self.client_ident()))
+
+        response = ':%s QUIT :EOF from client' % (self.client_ident())
+        # Send quit message to all clients in all channels user is in, and
+        # remove the user from the channels.
+        for channel in self.channels.values():
+            for client in channel.clients:
+                client.send_queue.append(response)
+            channel.clients.remove(self)
+        self.server.clients.pop(self.nick)
 
     def finish(self):
         """FINISH HIM!"""
