@@ -5,9 +5,6 @@
 #
 # Known missing features which might be implemented one day:
 #
-# - No user list on joining a channel.
-# - Proper nick name support is lacking (changing nick party working).
-# - No part support.
 # - starting server when already started doesn't work properly. PID file is not changed, no error messsage is displayed.
 #
 # Things which will never be supported:
@@ -16,11 +13,12 @@
 #
 # Bugs:
 # 
-# - Parting doesn't work properly.
 # - Return erro 421 ERR_UNKNOWNCOMMAND on invalid command.
 # - Delete channel if last user leaves.
 # - [ERROR] <socket.error instance at 0x7f9f203dfb90> (better error msg required)
 # - Clients not removed from client list/channels, etc when connection is dropped without QUIT.
+# - Empty channels are left behind
+# - No Op assigned when new channel is created.
 # 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
@@ -54,16 +52,16 @@ import socket
 import select
 import re
 
-SRV_NAME    = "Hircd"
+SRV_NAME	= "Hircd"
 SRV_VERSION = "0.1"
 SRV_WELCOME = "Welcome to %s v%s, the ugliest IRC server in the world." % (SRV_NAME, SRV_VERSION)
 
-RPL_WELCOME          = '001'
-ERR_NOSUCHNICK       = '401'
-ERR_NOSUCHCHANNEL    = '403'
+RPL_WELCOME		  = '001'
+ERR_NOSUCHNICK	   = '401'
+ERR_NOSUCHCHANNEL	= '403'
 ERR_CANNOTSENDTOCHAN = '404'
 ERR_ERRONEUSNICKNAME = '432'
-ERR_NICKNAMEINUSE    = '433'
+ERR_NICKNAMEINUSE	= '433'
 ERR_NEEDMOREPARAMS   = '461'
 
 class IRCError(Exception):
@@ -97,10 +95,10 @@ class IRCClient(SocketServer.BaseRequestHandler):
 	def __init__(self, request, client_address, server):
 		self.user = None
 		self.host = client_address  # Client's hostname / ip.
-		self.realname = None        # Client's real name
-		self.nick = None            # Client's currently registered nickname
-		self.send_queue = []        # Messages to send to client (strings)
-		self.channels = {}          # Channels the client is in
+		self.realname = None		# Client's real name
+		self.nick = None			# Client's currently registered nickname
+		self.send_queue = []		# Messages to send to client (strings)
+		self.channels = {}		  # Channels the client is in
 
 		SocketServer.BaseRequestHandler.__init__(self, request, client_address, server)
 
@@ -297,10 +295,12 @@ class IRCClient(SocketServer.BaseRequestHandler):
 		Handle the client breaking off the connection with a QUIT command.
 		"""
 		response = ':%s QUIT :%s' % (self.client_ident(), params.lstrip(':'))
-		# Send quit message to all clients in all channels user is in.
+		# Send quit message to all clients in all channels user is in, and
+		# remove the user from the channels.
 		for channel in self.channels.values():
 			for client in channel.clients:
 				client.send_queue.append(response)
+			channel.clients.remove(self)
 		self.server.clients.pop(self.nick)
 
 	def handle_part(self, params):
@@ -308,13 +308,15 @@ class IRCClient(SocketServer.BaseRequestHandler):
 		Handle a client parting from channel(s).
 		"""
 		for pchannel in params.split(','):
-			print pchannel, self.server.channels, self.channels
-			if pchannel in self.server.channels:
+			if pchannel.strip() in self.server.channels:
+				# Send message to all clients in all channels user is in, and
+				# remove the user from the channels.
 				channel = self.server.channels.get(pchannel.strip())
 				response = ':%s PART :%s' % (self.client_ident(), pchannel)
 				if channel:
 					for client in channel.clients:
 						client.send_queue.append(response)
+				print channel.clients
 				channel.clients.remove(self)
 				self.channels.pop(pchannel)
 			else:
@@ -327,14 +329,14 @@ class IRCClient(SocketServer.BaseRequestHandler):
 		"""
 		print "Clients:", self.server.clients
 		for client in self.server.clients.values():
-			print "    ", client
+			print "	", client
 			for channel in client.channels.values():
-				print "        ", channel.name
+				print "		", channel.name
 		print "Channels:", self.server.channels
 		for channel in self.server.channels.values():
-			print "    ", channel.name, channel
+			print "	", channel.name, channel
 			for client in channel.clients:
-				print "        ", client.nick, client
+				print "		", client.nick, client
 
 	def client_ident(self):
 		"""
@@ -357,11 +359,11 @@ class IRCServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 		SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
 
 class Daemon:
-    """
+	"""
 	Daemonize the current process (detach it from the console).
-    """
+	"""
 
-    def __init__(self):
+	def __init__(self):
 		# Fork a child and end the parent (detach from parent)
 		try:
 			pid = os.fork()
