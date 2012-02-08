@@ -36,6 +36,8 @@
 #       if len(ready_to_read) == 1 and ready_to_read[0] == self.request:
 #   error: [Errno 104] Connection reset by peer
 #   ----------------------------------------
+# - PING timeouts
+# - Allow all numerical commands.
 
 # 
 # Permission is hereby granted, free of charge, to any person
@@ -252,36 +254,38 @@ class IRCClient(SocketServer.BaseRequestHandler):
         Handle the JOINing of a user to a channel. Valid channel names start
         with a # and consist of a-z, A-Z, 0-9 and/or '_'.
         """
-        channel_name = params
+        channel_names = params.split(' ', 1)[0] # Ignore keys
+        for channel_name in channel_names.split(','):
+            r_channel_name = channel_name.strip()
 
-        # Valid channel name?
-        if not re.match('^#([a-zA-Z0-9_])+$', channel_name):
-            raise IRCError(ERR_NOSUCHCHANNEL, '%s :No such channel' % (channel_name))
+            # Valid channel name?
+            if not re.match('^#([a-zA-Z0-9_])+$', r_channel_name):
+                raise IRCError(ERR_NOSUCHCHANNEL, '%s :No such channel' % (r_channel_name))
 
-        # Add user to the channel (create new channel if not exists)
-        channel = self.server.channels.setdefault(channel_name, IRCChannel(channel_name))
-        channel.clients.add(self)
+            # Add user to the channel (create new channel if not exists)
+            channel = self.server.channels.setdefault(r_channel_name, IRCChannel(r_channel_name))
+            channel.clients.add(self)
 
-        # Add channel to user's channel list
-        self.channels[channel.name] = channel
+            # Add channel to user's channel list
+            self.channels[channel.name] = channel
 
-        # Send the topic
-        response_join = ':%s TOPIC %s :%s' % (channel.topic_by, channel.name, channel.topic)
-        self.send_queue.append(response_join)
+            # Send the topic
+            response_join = ':%s TOPIC %s :%s' % (channel.topic_by, channel.name, channel.topic)
+            self.send_queue.append(response_join)
 
-        # Send join message to everybody in the channel, including yourself and
-        # send user list of the channel back to the user.
-        response_join = ':%s JOIN :%s' % (self.client_ident(), channel_name)
-        for client in channel.clients:
-            #if client != self: # FIXME: According to specs, this should be done because the user is included in the channel listing sent later.
-            client.send_queue.append(response_join)
+            # Send join message to everybody in the channel, including yourself and
+            # send user list of the channel back to the user.
+            response_join = ':%s JOIN :%s' % (self.client_ident(), r_channel_name)
+            for client in channel.clients:
+                #if client != self: # FIXME: According to specs, this should be done because the user is included in the channel listing sent later.
+                client.send_queue.append(response_join)
 
-        nicks = [client.nick for client in channel.clients]
-        response_userlist = ':%s 353 %s = %s :%s' % (self.server.servername, self.nick, channel.name, ' '.join(nicks))
-        self.send_queue.append(response_userlist)
+            nicks = [client.nick for client in channel.clients]
+            response_userlist = ':%s 353 %s = %s :%s' % (self.server.servername, self.nick, channel.name, ' '.join(nicks))
+            self.send_queue.append(response_userlist)
 
-        response = ':%s 366 %s %s :End of /NAMES list' % (self.server.servername, self.nick, channel.name)
-        self.send_queue.append(response)
+            response = ':%s 366 %s %s :End of /NAMES list' % (self.server.servername, self.nick, channel.name)
+            self.send_queue.append(response)
 
     def handle_privmsg(self, params):
         """
