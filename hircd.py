@@ -3,41 +3,36 @@
 # 
 # Very simple hacky ugly IRC server.
 #
-# Known missing features which might be implemented one day:
-#
-# - starting server when already started doesn't work properly. PID file is not changed, no error messsage is displayed.
-#
-# Things which will never be supported:
-#
-# - Server linking.
-#
-# Bugs:
-# 
-# - Return erro 421 ERR_UNKNOWNCOMMAND on invalid command.
-# - Delete channel if last user leaves.
-# - [ERROR] <socket.error instance at 0x7f9f203dfb90> (better error msg required)
-# - Empty channels are left behind
-# - No Op assigned when new channel is created.
-# - User can /join multiple times (doesn't add more to channel, does say 'joined')
-# - Error
-#   [<socket._socketobject object at 0x26151a0>] [] []
-#   ----------------------------------------
-#   Exception happened during processing of request from ('127.0.0.1', 47830)
-#   Traceback (most recent call last):
-#     File "/usr/lib/python2.6/SocketServer.py", line 560, in process_request_thread
-#       self.finish_request(request, client_address)
-#     File "/usr/lib/python2.6/SocketServer.py", line 322, in finish_request
-#       self.RequestHandlerClass(request, client_address, self)
-#     File "./hircd.py", line 102, in __init__
-#       
-#     File "/usr/lib/python2.6/SocketServer.py", line 617, in __init__
-#       self.handle()
-#     File "./hircd.py", line 120, in handle
-#       if len(ready_to_read) == 1 and ready_to_read[0] == self.request:
-#   error: [Errno 104] Connection reset by peer
-#   ----------------------------------------
-# - PING timeouts
-# - Allow all numerical commands.
+# Todo:
+#   - Encode format for each message and reply with ERR_NEEDMOREPARAMS
+#   - starting server when already started doesn't work properly. PID file is not changed, no error messsage is displayed.
+#   - Return erro 421 ERR_UNKNOWNCOMMAND on invalid command.
+#   - Delete channel if last user leaves.
+#   - [ERROR] <socket.error instance at 0x7f9f203dfb90> (better error msg required)
+#   - Empty channels are left behind
+#   - No Op assigned when new channel is created.
+#   - User can /join multiple times (doesn't add more to channel, does say 'joined')
+#   - Error
+#     [<socket._socketobject object at 0x26151a0>] [] []
+#     ----------------------------------------
+#     Exception happened during processing of request from ('127.0.0.1', 47830)
+#     Traceback (most recent call last):
+#       File "/usr/lib/python2.6/SocketServer.py", line 560, in process_request_thread
+#         self.finish_request(request, client_address)
+#       File "/usr/lib/python2.6/SocketServer.py", line 322, in finish_request
+#         self.RequestHandlerClass(request, client_address, self)
+#       File "./hircd.py", line 102, in __init__
+#         
+#       File "/usr/lib/python2.6/SocketServer.py", line 617, in __init__
+#         self.handle()
+#       File "./hircd.py", line 120, in handle
+#         if len(ready_to_read) == 1 and ready_to_read[0] == self.request:
+#     error: [Errno 104] Connection reset by peer
+#     ----------------------------------------
+#   - PING timeouts
+#   - Allow all numerical commands.
+# Not Todo (Won't be supported)
+#   - Server linking.
 
 # 
 # Permission is hereby granted, free of charge, to any person
@@ -182,7 +177,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
 
     def handle_nick(self, params):
         """
-        Handle the iniital setting of the user's nickname and nick changes.
+        Handle the initial setting of the user's nickname and nick changes.
         """
         nick = params
 
