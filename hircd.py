@@ -31,6 +31,7 @@
 #     ----------------------------------------
 #   - PING timeouts
 #   - Allow all numerical commands.
+#   - Users can send commands to channels they are not in (PART)
 # Not Todo (Won't be supported)
 #   - Server linking.
 
@@ -286,17 +287,21 @@ class IRCClient(SocketServer.BaseRequestHandler):
         """
         Handle sending a private message to a user or channel.
         """
+        # FIXME: ERR_NEEDMOREPARAMS
         target, msg = params.split(' ', 1)
 
         message = ':%s PRIVMSG %s %s' % (self.client_ident(), target, msg)
         if target.startswith('#') or target.startswith('$'):
-            # Message to channel
-            # FIXME: Do not allow msg to channel if user isn't in it.
+            # Message to channel. Check if the channel exists.
             channel = self.server.channels.get(target)
             if channel:
                 if not channel.name in self.channels:
+                    # The user isn't in the channel.
                     raise IRCError(ERR_CANNOTSENDTOCHAN, '%s :Cannot send to channel' % (channel.name))
                 for client in channel.clients:
+                    # Send message to all client in the channel, except the user himself.
+                    # TODO: Abstract this into a seperate method so that not every function has
+                    # to check if the user is in the channel.
                     if client != self:
                         client.send_queue.append(message)
             else:
@@ -309,19 +314,29 @@ class IRCClient(SocketServer.BaseRequestHandler):
             else:
                 raise IRCError(ERR_NOSUCHNICK, 'PRIVMSG :%s' % (target))
 
-    def handle_quit(self, params):
+    def handle_topic(self, params):
         """
-        Handle the client breaking off the connection with a QUIT command.
+        Handle a topic command.
         """
-        response = ':%s QUIT :%s' % (self.client_ident(), params.lstrip(':'))
-        # Send quit message to all clients in all channels user is in, and
-        # remove the user from the channels.
-        for channel in self.channels.values():
-            for client in channel.clients:
-                client.send_queue.append(response)
-            channel.clients.remove(self)
+        if ' ' in params:
+            channel_name = params.split(' ', 1)[0]
+            topic = params.split(' ', 1)[1].lstrip(':')
+        else:
+            channel_name = params
+            topic = None
 
-#        self.server.clients.pop(self.nick)
+        channel = self.server.channels.get(channel_name)
+        if not channel:
+            raise IRCError(ERR_NOSUCHNICK, 'PRIVMSG :%s' % (target))
+        if not channel.name in self.channels:
+            # The user isn't in the channel.
+            raise IRCError(ERR_CANNOTSENDTOCHAN, '%s :Cannot send to channel' % (channel.name))
+
+        if topic:
+            channel.topic = topic
+            channel.topic_by = self.nick
+        message = ':%s TOPIC %s :%s' % (self.client_ident(), channel_name, channel.topic)
+        return(message)
 
     def handle_part(self, params):
         """
@@ -341,6 +356,18 @@ class IRCClient(SocketServer.BaseRequestHandler):
             else:
                 response = ':%s 403 %s :%s' % (self.server.servername, pchannel, pchannel)
                 self.send_queue.append(response)
+
+    def handle_quit(self, params):
+        """
+        Handle the client breaking off the connection with a QUIT command.
+        """
+        response = ':%s QUIT :%s' % (self.client_ident(), params.lstrip(':'))
+        # Send quit message to all clients in all channels user is in, and
+        # remove the user from the channels.
+        for channel in self.channels.values():
+            for client in channel.clients:
+                client.send_queue.append(response)
+            channel.clients.remove(self)
 
     def handle_dump(self, params):
         """
@@ -382,6 +409,9 @@ class IRCClient(SocketServer.BaseRequestHandler):
         logging.info('Connection finished: %s' % (self.client_ident()))
 
     def __repr__(self):
+        """
+        Return a user-readable description of the client
+        """
         return('<%s %s!%s@%s (%s)>' % (
             self.__class__.__name__,
             self.nick,
