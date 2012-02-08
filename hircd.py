@@ -18,6 +18,25 @@
 # - [ERROR] <socket.error instance at 0x7f9f203dfb90> (better error msg required)
 # - Empty channels are left behind
 # - No Op assigned when new channel is created.
+# - User can /join multiple times (doesn't add more to channel, does say 'joined')
+# - Error
+#   [<socket._socketobject object at 0x26151a0>] [] []
+#   ----------------------------------------
+#   Exception happened during processing of request from ('127.0.0.1', 47830)
+#   Traceback (most recent call last):
+#     File "/usr/lib/python2.6/SocketServer.py", line 560, in process_request_thread
+#       self.finish_request(request, client_address)
+#     File "/usr/lib/python2.6/SocketServer.py", line 322, in finish_request
+#       self.RequestHandlerClass(request, client_address, self)
+#     File "./hircd.py", line 102, in __init__
+#       
+#     File "/usr/lib/python2.6/SocketServer.py", line 617, in __init__
+#       self.handle()
+#     File "./hircd.py", line 120, in handle
+#       if len(ready_to_read) == 1 and ready_to_read[0] == self.request:
+#   error: [Errno 104] Connection reset by peer
+#   ----------------------------------------
+
 # 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
@@ -106,8 +125,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
 
         while True:
             buf = ''
-            ready_to_read, ready_to_write, in_error = select.select([self.request], [], [], 1)
-            print ready_to_read, ready_to_write, in_error
+            ready_to_read, ready_to_write, in_error = select.select([self.request], [], [], 0.1)
 
             # Write any commands to the client
             while self.send_queue:
@@ -158,7 +176,6 @@ class IRCClient(SocketServer.BaseRequestHandler):
                             logging.debug('to %s: %s' % (self.client_ident(), response))
                             self.request.send(response + '\r\n')
 
-        self.disconnect()
         self.request.close()
 
     def handle_nick(self, params):
@@ -219,6 +236,9 @@ class IRCClient(SocketServer.BaseRequestHandler):
         self.user = user
         self.mode = mode
         self.realname = realname
+        return('')
+        #response = ':localhost 375 :-MOTD START\r\n:localhost 372 :This is the MOTD\r\n:localhost 376 :End of MOTD'
+        #return(response)
 
     def handle_ping(self, params):
         """
@@ -301,7 +321,8 @@ class IRCClient(SocketServer.BaseRequestHandler):
             for client in channel.clients:
                 client.send_queue.append(response)
             channel.clients.remove(self)
-        self.server.clients.pop(self.nick)
+
+#        self.server.clients.pop(self.nick)
 
     def handle_part(self, params):
         """
@@ -316,7 +337,6 @@ class IRCClient(SocketServer.BaseRequestHandler):
                 if channel:
                     for client in channel.clients:
                         client.send_queue.append(response)
-                print channel.clients
                 channel.clients.remove(self)
                 self.channels.pop(pchannel)
             else:
@@ -344,25 +364,33 @@ class IRCClient(SocketServer.BaseRequestHandler):
         """
         return('%s!%s@%s' % (self.nick, self.user, self.server.servername))
 
-    def disconnect(self):
+    def finish(self):
         """
-        Disconnect the client. This is called if the client suddenly
-        disconnected without properly saying goodbye (QUIT).
+        The client conection is finished. Do some cleanup to ensure that the
+        client doesn't linger around in any channel or the client list, in case
+        the client didn't properly close the connection with PART and QUIT.
         """
         logging.info('Client disconnected: %s' % (self.client_ident()))
-
         response = ':%s QUIT :EOF from client' % (self.client_ident())
-        # Send quit message to all clients in all channels user is in, and
-        # remove the user from the channels.
         for channel in self.channels.values():
-            for client in channel.clients:
-                client.send_queue.append(response)
-            channel.clients.remove(self)
+            if self in channel.clients:
+                # Client is gone without properly QUITing or PARTing this
+                # channel.
+                for client in channel.clients:
+                    client.send_queue.append(response)
+                channel.clients.remove(self)
         self.server.clients.pop(self.nick)
+        logging.info('Connection finished: %s' % (self.client_ident()))
 
-    def finish(self):
-        """FINISH HIM!"""
-        pass
+    def __repr__(self):
+        return('<%s %s!%s@%s (%s)>' % (
+            self.__class__.__name__,
+            self.nick,
+            self.user,
+            self.host[0],
+            self.realname,
+            )
+        )
 
 class IRCServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     daemon_threads = True
