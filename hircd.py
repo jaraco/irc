@@ -156,10 +156,8 @@ class IRCClient(SocketServer.BaseRequestHandler):
                                 params = ''
                             handler = getattr(self, 'handle_%s' % (command.lower()), None)
                             if not handler:
-                                logging.info('No handler for command: %s' % (line))
+                                logging.info('No handler for command: %s. Full line: %s' % (command, line))
                                 raise IRCError(ERR_UNKNOWNCOMMAND, '%s :Unknown command' % (command))
-                                # FIXME: Raise an error here and send it to the client.
-                                break
                             response = handler(params)
                         except AttributeError, e:
                             raise e
@@ -240,8 +238,6 @@ class IRCClient(SocketServer.BaseRequestHandler):
         self.mode = mode
         self.realname = realname
         return('')
-        #response = ':localhost 375 :-MOTD START\r\n:localhost 372 :This is the MOTD\r\n:localhost 376 :End of MOTD'
-        #return(response)
 
     def handle_ping(self, params):
         """
