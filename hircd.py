@@ -6,7 +6,6 @@
 # Todo:
 #   - Encode format for each message and reply with ERR_NEEDMOREPARAMS
 #   - starting server when already started doesn't work properly. PID file is not changed, no error messsage is displayed.
-#   - Return erro 421 ERR_UNKNOWNCOMMAND on invalid command.
 #   - Delete channel if last user leaves.
 #   - [ERROR] <socket.error instance at 0x7f9f203dfb90> (better error msg required)
 #   - Empty channels are left behind
