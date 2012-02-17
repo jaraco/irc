@@ -76,6 +76,7 @@ RPL_WELCOME          = '001'
 ERR_NOSUCHNICK       = '401'
 ERR_NOSUCHCHANNEL    = '403'
 ERR_CANNOTSENDTOCHAN = '404'
+ERR_UNKNOWNCOMMAND   = '421'
 ERR_ERRONEUSNICKNAME = '432'
 ERR_NICKNAMEINUSE    = '433'
 ERR_NEEDMOREPARAMS   = '461'
@@ -155,8 +156,9 @@ class IRCClient(SocketServer.BaseRequestHandler):
                                 params = ''
                             handler = getattr(self, 'handle_%s' % (command.lower()), None)
                             if not handler:
-                                # FIXME: Raise an error here and send it to the client.
                                 logging.info('No handler for command: %s' % (line))
+                                raise IRCError(ERR_UNKNOWNCOMMAND, '%s :Unknown command' % (command))
+                                # FIXME: Raise an error here and send it to the client.
                                 break
                             response = handler(params)
                         except AttributeError, e:
@@ -192,11 +194,14 @@ class IRCClient(SocketServer.BaseRequestHandler):
                 # Someone else is using the nick
                 raise IRCError(ERR_NICKNAMEINUSE, 'NICK :%s' % (nick))
             else:
-                # Nick is available, register and send welcome
+                # Nick is available, register, send welcome and MOTD.
                 self.nick = nick
                 self.server.clients[nick] = self
                 response = ':%s %s %s :%s' % (self.server.servername, RPL_WELCOME, self.nick, SRV_WELCOME)
-                return(response)
+                self.send_queue.append(response)
+                response = ':%s 376 %s :End of MOTD command.' % (self.server.servername, self.nick)
+                self.send_queue.append(response)
+                return()
         else:
             if self.server.clients.get(nick, None) == self:
                 # Already registered to user
