@@ -1,4 +1,5 @@
-# Copyright (C) 1999--2002  Joel Rosdahl
+# Copyright (C) 1999-2002  Joel Rosdahl
+# Portions Copyright © 2011 Jason R. Coombs
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -15,8 +16,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 #
 # keltus <keltus@users.sourceforge.net>
-#
-# $Id$
 
 """irclib -- Internet Relay Chat (IRC) protocol client library.
 
@@ -66,7 +65,6 @@ import re
 import select
 import socket
 import string
-import sys
 import time
 import types
 
@@ -168,7 +166,7 @@ class IRC:
         self.fn_to_add_timeout = fn_to_add_timeout
         self.connections = []
         self.handlers = {}
-        self.delayed_commands = [] # list of DelayedCommands
+        self.delayed_commands = []  # list of DelayedCommands
 
         self.add_global_handler("ping", _ping_ponger, -42)
 
@@ -343,11 +341,11 @@ class IRC:
     def _handle_event(self, connection, event):
         """[Internal]"""
         h = self.handlers
-        th = h.get("all_events", []) + h.get(event.eventtype(),[])
-        th.sort()
-        for handler in th: #h.get("all_events", []) + h.get(event.eventtype(), []):
+        th = sorted(h.get("all_events", []) + h.get(event.eventtype(), []))
+        for handler in th:
             if handler[1](connection, event) == "NO MORE":
                 return
+
     def _remove_connection(self, connection):
         """[Internal]"""
         self.connections.remove(connection)
@@ -381,7 +379,7 @@ class PeriodicCommand(DelayedCommand):
     seconds.
     """
     def next(self):
-        return PeriodicCommand(self.at+self.delay, self.function,
+        return PeriodicCommand(self.at + self.delay, self.function,
             self.arguments)
 
 _rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
@@ -395,15 +393,16 @@ class Connection:
         self.irclibobj = irclibobj
 
     def _get_socket():
-        raise IRCError, "Not overridden"
+        raise IRCError("Not overridden")
 
     ##############################
     ### Convenience wrappers.
 
     def execute_at(self, at, function, arguments=()):
         self.irclibobj.execute_at(at, function, arguments)
+
     def execute_delayed(self, delay, function, arguments=(),
-                        persistant=False):
+            persistant=False):
         self.irclibobj.execute_delayed(delay, function, arguments,
                                        persistant)
 class ServerConnectionError(IRCError):
@@ -488,7 +487,7 @@ class ServerConnection(Connection):
         except socket.error, x:
             self.socket.close()
             self.socket = None
-            raise ServerConnectionError, "Couldn't connect to socket: %s" % x
+            raise ServerConnectionError("Couldn't connect to socket: %s" % x)
         self.connected = 1
         if self.irclibobj.fn_to_add_socket:
             self.irclibobj.fn_to_add_socket(self.socket)
@@ -540,10 +539,10 @@ class ServerConnection(Connection):
 
         try:
             if self.ssl:
-                new_data = self.ssl.read(2**14)
+                new_data = self.ssl.read(2 ** 14)
             else:
-                new_data = self.socket.recv(2**14)
-        except socket.error, x:
+                new_data = self.socket.recv(2 ** 14)
+        except socket.error:
             # The server hung up.
             self.disconnect("Connection reset by peer")
             return
@@ -712,7 +711,7 @@ class ServerConnection(Connection):
 
         try:
             self.socket.close()
-        except socket.error, x:
+        except socket.error:
             pass
         self.socket = None
         self._handle_event(Event("disconnect", self.server, "", [message]))
@@ -837,7 +836,7 @@ class ServerConnection(Connection):
         The string will be padded with appropriate CR LF.
         """
         if self.socket is None:
-            raise ServerNotConnectedError, "Not connected."
+            raise ServerNotConnectedError("Not connected.")
         try:
             if self.ssl:
                 self.ssl.write(string + "\r\n")
@@ -845,7 +844,7 @@ class ServerConnection(Connection):
                 self.socket.send(string + "\r\n")
             if DEBUG:
                 print "TO SERVER:", string
-        except socket.error, x:
+        except socket.error:
             # Ouch!
             self.disconnect("Connection reset by peer.")
 
@@ -944,7 +943,7 @@ class DCCConnection(Connection):
         try:
             self.socket.connect((self.peeraddress, self.peerport))
         except socket.error, x:
-            raise DCCConnectionError, "Couldn't connect to socket: %s" % x
+            raise DCCConnectionError("Couldn't connect to socket: %s" % x)
         self.connected = 1
         if self.irclibobj.fn_to_add_socket:
             self.irclibobj.fn_to_add_socket(self.socket)
@@ -969,7 +968,7 @@ class DCCConnection(Connection):
             self.localaddress, self.localport = self.socket.getsockname()
             self.socket.listen(10)
         except socket.error, x:
-            raise DCCConnectionError, "Couldn't bind socket: %s" % x
+            raise DCCConnectionError("Couldn't bind socket: %s" % x)
         return self
 
     def disconnect(self, message=""):
@@ -985,7 +984,7 @@ class DCCConnection(Connection):
         self.connected = 0
         try:
             self.socket.close()
-        except socket.error, x:
+        except socket.error:
             pass
         self.socket = None
         self.irclibobj._handle_event(
@@ -1010,8 +1009,8 @@ class DCCConnection(Connection):
             return
 
         try:
-            new_data = self.socket.recv(2**14)
-        except socket.error, x:
+            new_data = self.socket.recv(2 ** 14)
+        except socket.error:
             # The server hung up.
             self.disconnect("Connection reset by peer")
             return
@@ -1027,7 +1026,7 @@ class DCCConnection(Connection):
 
             # Save the last, unfinished line.
             self.previous_buffer = chunks[-1]
-            if len(self.previous_buffer) > 2**14:
+            if len(self.previous_buffer) > 2 ** 14:
                 # Bad peer! Naughty peer!
                 self.disconnect()
                 return
@@ -1065,7 +1064,7 @@ class DCCConnection(Connection):
                 self.socket.send("\n")
             if DEBUG:
                 print "TO PEER: %s\n" % string
-        except socket.error, x:
+        except socket.error:
             # Ouch!
             self.disconnect("Connection reset by peer.")
 
@@ -1096,15 +1095,16 @@ class SimpleIRCClient:
         self.dcc_connections = []
         self.ircobj.add_global_handler("all_events", self._dispatcher, -10)
         self.ircobj.add_global_handler("dcc_disconnect", self._dcc_disconnect, -10)
+
     def _dispatcher(self, c, e):
         """[Internal]"""
         if DEBUG:
             print("irclib.py:_dispatcher:%s" % e.eventtype())
 
         m = "on_" + e.eventtype()
-        im = "_"+m
         if hasattr(self, m):
             getattr(self, m)(c, e)
+
     def _dcc_disconnect(self, c, e):
         self.dcc_connections.remove(c)
 
@@ -1275,14 +1275,14 @@ def _ctcp_dequote(message):
 
         messages = []
         i = 0
-        while i < len(chunks)-1:
+        while i < len(chunks) - 1:
             # Add message if it's non-empty.
             if len(chunks[i]) > 0:
                 messages.append(chunks[i])
 
-            if i < len(chunks)-2:
+            if i < len(chunks) - 2:
                 # Aye!  CTCP tagged data ahead!
-                messages.append(tuple(chunks[i+1].split(" ", 1)))
+                messages.append(tuple(chunks[i + 1].split(" ", 1)))
 
             i = i + 2
 
@@ -1400,7 +1400,7 @@ def _parse_modes(mode_string, unary_modes=""):
         if ch in "+-":
             sign = ch
         elif ch == " ":
-            collecting_arguments = 1
+            pass
         elif ch in unary_modes:
             if len(args) >= arg_count + 1:
                 modes.append([sign, ch, args[arg_count]])
@@ -1540,7 +1540,7 @@ numeric_events = {
     "423": "noadmininfo",
     "424": "fileerror",
     "431": "nonicknamegiven",
-    "432": "erroneusnickname", # Thiss iz how its speld in thee RFC.
+    "432": "erroneusnickname",  # Thiss iz how its speld in thee RFC.
     "433": "nicknameinuse",
     "436": "nickcollision",
     "437": "unavailresource",  # "Nick temporally unavailable"
@@ -1555,7 +1555,7 @@ numeric_events = {
     "462": "alreadyregistered",
     "463": "nopermforhost",
     "464": "passwdmismatch",
-    "465": "yourebannedcreep", # I love this one...
+    "465": "yourebannedcreep",  # I love this one...
     "466": "youwillbebanned",
     "467": "keyset",
     "471": "channelisfull",
@@ -1651,12 +1651,16 @@ class FoldedCase(str):
     """
     def __lt__(self, other):
         return self.lower() < other.lower()
+
     def __gt__(self, other):
         return self.lower() > other.lower()
+
     def __eq__(self, other):
         return self.lower() == other.lower()
+
     def __hash__(self):
         return hash(self.lower())
+
     # cache lower since it's likely to be called frequently.
     def lower(self):
         self._lower = super(FoldedCase, self).lower()

@@ -1,4 +1,5 @@
-# Copyright (C) 1999--2002  Joel Rosdahl
+# Copyright (C) 1999-2002  Joel Rosdahl
+# Portions Copyring © 2011-2012 Jason R. Coombs
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -15,21 +16,18 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 #
 # Joel Rosdahl <joel@rosdahl.net>
-#
-# $Id$
 
-"""ircbot -- Simple IRC bot library.
+"""
+ircbot -- Simple IRC bot library.
 
 This module contains a single-server IRC bot class that can be used to
 write simpler bots.
 """
 
 import sys
-import re
-from UserDict import UserDict
 
 import irclib
-from irclib import (SimpleIRCClient, nm_to_n, irc_lower, all_events,
+from irclib import (SimpleIRCClient, nm_to_n,
     parse_channel_modes, is_channel, ServerConnectionError)
 
 class SingleServerIRCBot(SimpleIRCClient):
@@ -66,7 +64,7 @@ class SingleServerIRCBot(SimpleIRCClient):
         self.channels = IRCDict()
         self.server_list = server_list
         if not reconnection_interval or reconnection_interval < 0:
-            reconnection_interval = 2**31
+            reconnection_interval = 2 ** 31
         self.reconnection_interval = reconnection_interval
 
         self._nickname = nickname
@@ -76,6 +74,7 @@ class SingleServerIRCBot(SimpleIRCClient):
             self.connection.add_global_handler(i,
                                                getattr(self, "_on_" + i),
                                                -20)
+
     def _connected_checker(self):
         """[Internal]"""
         if not self.connection.is_connected():
@@ -300,7 +299,7 @@ class Channel:
             self.voiceddict[after] = self.voiceddict.pop(before)
 
     def set_userdetails(self, nick, details):
-        if self.userdict.has_key(nick):
+        if nick in self.userdict:
             self.userdict[nick] = details
 
     def set_mode(self, mode, value=None):
@@ -364,18 +363,12 @@ class Channel:
 
     def limit(self):
         if self.has_limit():
-            return self.modes[l]
+            return self.modes["l"]
         else:
             return None
 
     def has_key(self):
         return self.has_mode("k")
-
-    def key(self):
-        if self.has_key():
-            return self.modes["k"]
-        else:
-            return None
 
 # from jaraco.util.dictlib
 class KeyTransformingDict(dict):
