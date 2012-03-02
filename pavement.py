@@ -38,6 +38,9 @@ paver.setuputils.setup(
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
     ],
+    setup_requires=[
+        'hgtools',
+    ],
 )
 
 @paver.easy.task
