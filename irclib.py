@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright (C) 1999-2002  Joel Rosdahl
 # Portions Copyright © 2011 Jason R. Coombs
 #
