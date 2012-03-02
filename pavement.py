@@ -11,6 +11,7 @@ paver.setuputils.setup(
     description="IRC (Internet Relay Chat) protocol client library for Python",
     long_description=read_long_description(),
     use_hg_version=True,
+    package_dir={'': 'lib'},
     py_modules=["irclib", "ircbot"],
     author="Joel Rosdahl",
     author_email="joel@rosdahl.net",
