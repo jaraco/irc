@@ -101,7 +101,7 @@ class IRCError(Exception):
     pass
 
 
-class IRC:
+class IRC(object):
     """Class that handles one or several IRC server connections.
 
     When an IRC object has been instantiated, it can be used to create
@@ -383,7 +383,7 @@ class PeriodicCommand(DelayedCommand):
 
 _rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
 
-class Connection:
+class Connection(object):
     """Base class for IRC connections.
 
     Must be overridden.
@@ -423,7 +423,7 @@ class ServerConnection(Connection):
     """
 
     def __init__(self, irclibobj):
-        Connection.__init__(self, irclibobj)
+        super(ServerConnection, self).__init__(irclibobj)
         self.connected = 0  # Not connected yet.
         self.socket = None
         self.ssl = None
@@ -915,7 +915,7 @@ class DCCConnection(Connection):
     method on an IRC object.
     """
     def __init__(self, irclibobj, dcctype):
-        Connection.__init__(self, irclibobj)
+        super(DCCConnection, self).__init__(irclibobj)
         self.connected = 0
         self.passive = 0
         self.dcctype = dcctype
@@ -1067,7 +1067,7 @@ class DCCConnection(Connection):
             # Ouch!
             self.disconnect("Connection reset by peer.")
 
-class SimpleIRCClient:
+class SimpleIRCClient(object):
     """A simple single-server IRC client class.
 
     This is an example of an object-oriented wrapper of the IRC
@@ -1170,7 +1170,7 @@ class SimpleIRCClient:
         self.ircobj.process_forever()
 
 
-class Event:
+class Event(object):
     """Class representing an IRC event."""
     def __init__(self, eventtype, source, target, arguments=None):
         """Constructor of Event objects.

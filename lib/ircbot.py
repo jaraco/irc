@@ -61,7 +61,7 @@ class SingleServerIRCBot(irclib.SimpleIRCClient):
             connections.
         """
 
-        irclib.SimpleIRCClient.__init__(self)
+        super(SingleServerIRCBot, self).__init__()
         self.channels = IRCDict()
         self.server_list = server_list
         if not reconnection_interval or reconnection_interval < 0:
@@ -244,10 +244,10 @@ class SingleServerIRCBot(irclib.SimpleIRCClient):
     def start(self):
         """Start the bot."""
         self._connect()
-        irclib.SimpleIRCClient.start(self)
+        super(SingleServerIRCBot, self).start()
 
 
-class Channel:
+class Channel(object):
     """A class for keeping information about an IRC channel.
 
     This class can be improved a lot.
