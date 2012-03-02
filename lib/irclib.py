@@ -70,16 +70,7 @@ import socket
 import string
 import time
 import types
-
-try:
-    import ssl
-    wrap_socket = ssl.wrap_socket
-except ImportError:
-    def wrap_socket(sock):
-        """
-        Wrap a socket with SSL.
-        """
-        return socket.ssl(sock)
+import ssl as ssl_mod
 
 try:
     import pkg_resources
@@ -129,12 +120,12 @@ class IRC:
 
         irc = irclib.IRC()
         server = irc.server()
-        server.connect(\"irc.some.where\", 6667, \"my_nickname\")
-        server.privmsg(\"a_nickname\", \"Hi there!\")
+        server.connect("irc.some.where", 6667, "my_nickname")
+        server.privmsg("a_nickname", "Hi there!")
         irc.process_forever()
 
     This will connect to the IRC server irc.some.where on port 6667
-    using the nickname my_nickname and send the message \"Hi there!\"
+    using the nickname my_nickname and send the message "Hi there!"
     to the nickname a_nickname.
     """
 
@@ -270,7 +261,7 @@ class IRC:
 
         The handler functions are called in priority order (lowest
         number is highest priority).  If a handler function returns
-        \"NO MORE\", no more handlers will be called.
+        "NO MORE", no more handlers will be called.
         """
         if not event in self.handlers:
             self.handlers[event] = []
@@ -298,7 +289,7 @@ class IRC:
 
         Arguments:
 
-            at -- Execute at this time (standard \"time_t\" time).
+            at -- Execute at this time (standard "time_t" time).
             function -- Function to call.
             arguments -- Arguments to give the function.
         """
@@ -491,7 +482,7 @@ class ServerConnection(Connection):
             self.socket.bind((self.localaddress, self.localport))
             self.socket.connect((self.server, self.port))
             if ssl:
-                self.ssl = wrap_socket(self.socket)
+                self.ssl = ssl_mod.wrap_socket(self.socket)
         except socket.error, x:
             self.socket.close()
             self.socket = None
@@ -1362,12 +1353,12 @@ def parse_nick_modes(mode_string):
     """Parse a nick mode string.
 
     The function returns a list of lists with three members: sign,
-    mode and argument.  The sign is \"+\" or \"-\".  The argument is
+    mode and argument.  The sign is "+" or "-".  The argument is
     always None.
 
     Example:
 
-    >>> parse_nick_modes(\"+ab-c\")
+    >>> parse_nick_modes("+ab-c")
     [['+', 'a', None], ['+', 'b', None], ['-', 'c', None]]
     """
 
@@ -1377,12 +1368,12 @@ def parse_channel_modes(mode_string):
     """Parse a channel mode string.
 
     The function returns a list of lists with three members: sign,
-    mode and argument.  The sign is \"+\" or \"-\".  The argument is
-    None if mode isn't one of \"b\", \"k\", \"l\", \"v\" or \"o\".
+    mode and argument.  The sign is "+" or "-".  The argument is
+    None if mode isn't one of "b", "k", "l", "v" or "o".
 
     Example:
 
-    >>> parse_channel_modes(\"+ab-c foo\")
+    >>> parse_channel_modes("+ab-c foo")
     [['+', 'a', None], ['+', 'b', 'foo'], ['-', 'c', None]]
     """
 
