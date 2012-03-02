@@ -17,11 +17,8 @@ def get_version():
     return VERSION
 
 def read_long_description():
-    f = open('README')
-    try:
+    with open('README') as f:
         data = f.read()
-    finally:
-        f.close()
     return data
 
 setup(
