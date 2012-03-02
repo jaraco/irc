@@ -18,7 +18,7 @@ here:
 
 Requirements:
 
-  * Python 2.3 or newer.
+  * Python 2.6 or newer.
 
 Installation:
 
@@ -104,7 +104,7 @@ NOTE: If you're running one of the examples on a unix command line, you need to 
 Enjoy.
 
 Maintainer:
-keltus <keltus@users.sourceforge.net>
+Jason R. Coombs <jaraco@jaraco.com>
 
 Original Author:
 Joel Rosdahl <joel@rosdahl.net>
