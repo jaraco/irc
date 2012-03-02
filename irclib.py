@@ -19,7 +19,8 @@
 #
 # keltus <keltus@users.sourceforge.net>
 
-"""irclib -- Internet Relay Chat (IRC) protocol client library.
+"""
+irclib -- Internet Relay Chat (IRC) protocol client library.
 
 This library is intended to encapsulate the IRC protocol at a quite
 low level.  It provides an event-driven IRC client framework.  It has
