@@ -1,8 +1,8 @@
 import os
 import re
 
-from paver.easy import *
-from paver.setuputils import setup
+import paver.easy
+import paver.setuputils
 
 def get_version():
     """
@@ -21,7 +21,7 @@ def read_long_description():
         data = f.read()
     return data
 
-setup(
+paver.setuputils.setup(
     name="python-irclib",
     description="IRC (Internet Relay Chat) protocol client library for Python",
     long_description=read_long_description(),
@@ -40,7 +40,7 @@ setup(
     ],
 )
 
-@task
-@needs('generate_setup', 'minilib', 'distutils.command.sdist')
+@paver.easy.task
+@paver.easy.needs('generate_setup', 'minilib', 'distutils.command.sdist')
 def sdist():
     "Override sdist to make sure the setup.py gets generated"
