@@ -25,25 +25,25 @@ def read_long_description():
     return data
 
 setup(
-        name="python-irclib",
-        description="IRC (Internet Relay Chat) protocol client library for Python",
-        long_description=read_long_description(),
-        version=get_version(),
-        py_modules=["irclib", "ircbot"],
-        author="Joel Rosdahl",
-        author_email="joel@rosdahl.net",
-        maintainer="Jason R. Coombs",
-        maintainer_email="jaraco@jaraco.com",
-        url="http://python-irclib.sourceforge.net",
-        classifiers = [
-                "Development Status :: 5 - Production/Stable",
-                "Intended Audience :: Developers",
-                "Programming Language :: Python :: 2.3",
-                "Programming Language :: Python :: 2.4",
-                "Programming Language :: Python :: 2.5",
-                "Programming Language :: Python :: 2.6",
-                "Programming Language :: Python :: 2.7",
-        ],
+    name="python-irclib",
+    description="IRC (Internet Relay Chat) protocol client library for Python",
+    long_description=read_long_description(),
+    version=get_version(),
+    py_modules=["irclib", "ircbot"],
+    author="Joel Rosdahl",
+    author_email="joel@rosdahl.net",
+    maintainer="Jason R. Coombs",
+    maintainer_email="jaraco@jaraco.com",
+    url="http://python-irclib.sourceforge.net",
+    classifiers = [
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "Programming Language :: Python :: 2.3",
+        "Programming Language :: Python :: 2.4",
+        "Programming Language :: Python :: 2.5",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+    ],
 )
 
 @task
