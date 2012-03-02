@@ -29,10 +29,9 @@ write simpler bots.
 import sys
 
 import irclib
-from irclib import (SimpleIRCClient, nm_to_n,
-    parse_channel_modes, is_channel, ServerConnectionError)
+from irclib import nm_to_n
 
-class SingleServerIRCBot(SimpleIRCClient):
+class SingleServerIRCBot(irclib.SimpleIRCClient):
     """A single-server IRC bot class.
 
     The bot tries to reconnect if it is disconnected.
@@ -62,7 +61,7 @@ class SingleServerIRCBot(SimpleIRCClient):
             connections.
         """
 
-        SimpleIRCClient.__init__(self)
+        irclib.SimpleIRCClient.__init__(self)
         self.channels = IRCDict()
         self.server_list = server_list
         if not reconnection_interval or reconnection_interval < 0:
@@ -95,7 +94,7 @@ class SingleServerIRCBot(SimpleIRCClient):
                          self._nickname,
                          password,
                          ircname=self._realname)
-        except ServerConnectionError:
+        except irclib.ServerConnectionError:
             pass
 
     def _on_disconnect(self, c, e):
@@ -124,9 +123,9 @@ class SingleServerIRCBot(SimpleIRCClient):
 
     def _on_mode(self, c, e):
         """[Internal]"""
-        modes = parse_channel_modes(" ".join(e.arguments()))
+        modes = irclib.parse_channel_modes(" ".join(e.arguments()))
         t = e.target()
-        if is_channel(t):
+        if irclib.is_channel(t):
             ch = self.channels[t]
             for mode in modes:
                 if mode[0] == "+":
@@ -245,7 +244,7 @@ class SingleServerIRCBot(SimpleIRCClient):
     def start(self):
         """Start the bot."""
         self._connect()
-        SimpleIRCClient.start(self)
+        irclib.SimpleIRCClient.start(self)
 
 
 class Channel:
