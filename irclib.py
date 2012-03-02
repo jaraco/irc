@@ -81,9 +81,14 @@ except ImportError:
         """
         return socket.ssl(sock)
 
+try:
+    import pkg_resources
+    _pkg = pkg_resources.require('python-irclib')[0]
+    VERSION = tuple(int(res) for res in re.findall('\d+', _pkg.version))
+except Exception:
+    VERSION = ()
 
-VERSION = 0, 5, 0
-DEBUG = 0
+DEBUG = False
 
 # TODO
 # ----
