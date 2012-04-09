@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 1999-2002  Joel Rosdahl
-# Portions Copyright Â© 2011 Jason R. Coombs
+# Portions Copyright © 2011 Jason R. Coombs
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -400,10 +400,12 @@ class Connection(object):
     def execute_at(self, at, function, arguments=()):
         self.irclibobj.execute_at(at, function, arguments)
 
-    def execute_delayed(self, delay, function, arguments=(),
-            persistant=False):
-        self.irclibobj.execute_delayed(delay, function, arguments,
-                                       persistant)
+    def execute_delayed(self, delay, function, arguments=()):
+        self.irclibobj.execute_delayed(delay, function, arguments())
+
+    def execute_every(self, period, function, arguments=()):
+        self.irclibobj.execute_every(period, function, arguments)
+
 class ServerConnectionError(IRCError):
     pass
 
