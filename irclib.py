@@ -391,10 +391,13 @@ class Connection:
 
     def execute_at(self, at, function, arguments=()):
         self.irclibobj.execute_at(at, function, arguments)
-    def execute_delayed(self, delay, function, arguments=(),
-                        persistant=False):
-        self.irclibobj.execute_delayed(delay, function, arguments,
-                                       persistant)
+
+    def execute_delayed(self, delay, function, arguments=()):
+        self.irclibobj.execute_delayed(delay, function, arguments())
+
+    def execute_every(self, period, function, arguments=()):
+        self.irclibobj.execute_every(period, function, arguments)
+
 class ServerConnectionError(IRCError):
     pass
 
