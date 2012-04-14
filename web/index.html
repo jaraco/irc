@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>Python IRC library (AKA python-irclib AKA irclib.py)</title>
+  </head>
+
+  <body text="#000000" link="#0000dd" vlink="#000066" alink="#ffff00" bgcolor="#ffffff">
+    <p>
+      <a href="http://sourceforge.net">
+	<img src="http://sourceforge.net/sflogo.php?group_id=38297" width="88" height="31" border="0" alt="SourceForge Logo">
+      </a>
+    </p>
+
+    <h1>Python IRC library (AKA python-irclib AKA irclib.py)</h1>
+
+    <p>
+      Please see the
+      <a href="http://sourceforge.net/projects/python-irclib/">Project pages</a>
+      (where you can
+      <a href="http://sourceforge.net/projects/python-irclib/">download</a>
+      the library) for information about the project.
+    </p>
+    <p>
+      This library is intended to encapsulate the IRC protocol at a
+      quite low level.  It provides an event-driven IRC client
+      framework.  It has a fairly thorough support for the basic IRC
+      protocol and CTCP, but DCC connection support is not yet
+      implemented.  It actually does CTCP parsing exactly as the CTCP
+      specifications describe it -- I've never seen another IRC client
+      do that!
+    </p>
+    <p>
+      In order to understand how to make an IRC client, I'm afraid you
+      more or less must understand the IRC specifications.  They are
+      available here:
+    </p>
+    <p>
+      <a href="http://www.irchelp.org/irchelp/rfc/">http://www.irchelp.org/irchelp/rfc/</a>
+    </p>
+    <p>
+      The main features of the IRC client framework are:
+
+      <ul>
+        <li>Abstraction of the IRC protocol.</li>
+        <li>Handles multiple simultaneous IRC server connections.</li>
+        <li>Handles server PONGing transparently.</li>
+        <li>Messages to the IRC server are done by calling methods on an IRC
+	connection object.</li>
+        <li>Messages from an IRC server triggers events, which can be caught
+	by event handlers.</li>
+        <li>Reading from and writing to IRC server sockets are normally done
+	by an internal select() loop, but the select()ing may be done by an
+	external main loop.</li>
+        <li>Functions can be registered to execute at specified times by the
+	event-loop.</li>
+        <li>Decodes CTCP tagging correctly (hopefully); I haven't seen any 
+	other IRC client implementation that handles the CTCP specification
+	subtilties.</li>
+        <li>A kind of simple, single-server, object-oriented IRC client class
+	that dispatches events to instance methods is included.</li>
+      </ul>
+    </p>
+    <p>
+      Current limitations:
+      
+      <ul>
+        <li>The IRC protocol shines through the abstraction a bit too much.</li>
+        <li>Data is not written asynchronously to the server, i.e. the write()
+	may block if the TCP buffers are stuffed.</li>
+        <li>There are no support for DCC connections.</li>
+        <li>The author hasn't even read RFC 2810, 2811, 2812 and 2813.</li>
+        <li>Like most projects, documentation is lacking...</li>
+      </ul>
+    </p>
+    <p>
+      Enjoy.
+    </p>
+    <p>
+      Since I seldom use IRC anymore, I will probably not work much on
+      the library.  If you want to help or continue developing the
+      library, please contact me.
+    </p>
+    <p>
+      Joel Rosdahl &lt;joel@rosdahl.net&gt;
+    </p>
+  </body>
+</html>
