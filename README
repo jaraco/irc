@@ -1,9 +1,14 @@
 irclib -- Internet Relay Chat (IRC) protocol client library
 -----------------------------------------------------------
 
-The home of irclib.py is now:
+The home of irclib is now:
 
     http://python-irclib.sourceforge.net
+
+Please see the `Project pages <http://sourceforge.net/projects/python-irclib/>`_
+(where you can
+`download <http://sourceforge.net/project/showfiles.php?group_id=38297>`_
+the library) for information about the project.
 
 This library is intended to encapsulate the IRC protocol at a quite
 low level.  It provides an event-driven IRC client framework.  It has

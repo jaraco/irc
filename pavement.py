@@ -1,3 +1,6 @@
+import os
+import platform
+
 import paver.easy
 import paver.setuputils
 
@@ -28,6 +31,21 @@ paver.setuputils.setup(
         'hgtools',
     ],
 )
+
+@paver.easy.task
+def upload_project_web():
+    """
+    Generate the project web page at sourceforge using the reStructuredText
+    README.
+    """
+    import docutils.core
+    docutils.core.publish_file(source_path='README',
+        destination_path='readme.html', writer_name='html')
+    cmd = 'pscp' if platform.system() == 'Windows' else 'scp'
+    paver.easy.sh('{cmd} readme.html web.sourceforge.net:'
+        '/home/project-web/python-irclib/htdocs/index.html'
+        .format(cmd=cmd))
+    os.remove('readme.html')
 
 @paver.easy.task
 @paver.easy.needs('generate_setup', 'minilib', 'distutils.command.sdist')
