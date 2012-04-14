@@ -24,10 +24,7 @@
       This library is intended to encapsulate the IRC protocol at a
       quite low level.  It provides an event-driven IRC client
       framework.  It has a fairly thorough support for the basic IRC
-      protocol and CTCP, but DCC connection support is not yet
-      implemented.  It actually does CTCP parsing exactly as the CTCP
-      specifications describe it -- I've never seen another IRC client
-      do that!
+      protocol, CTCP and DCC connections.
     </p>
     <p>
       In order to understand how to make an IRC client, I'm afraid you
@@ -36,6 +33,21 @@
     </p>
     <p>
       <a href="http://www.irchelp.org/irchelp/rfc/">http://www.irchelp.org/irchelp/rfc/</a>
+    </p>
+    <p>
+      Requirements:
+
+      <ul>
+        <li>Python 1.5.2 or newer.</li>
+      </ul>
+    </p>
+    <p>
+      Installation:
+
+      <ul>
+        <li>Run "python setup.py install" or copy irclib.py and/or
+        ircbot.py to an appropriate Python module directory.</li>
+      </ul>
     </p>
     <p>
       The main features of the IRC client framework are:
@@ -58,6 +70,7 @@
 	subtilties.</li>
         <li>A kind of simple, single-server, object-oriented IRC client class
 	that dispatches events to instance methods is included.</li>
+        <li>DCC connection support.</li>
       </ul>
     </p>
     <p>
@@ -65,10 +78,12 @@
       
       <ul>
         <li>The IRC protocol shines through the abstraction a bit too much.</li>
-        <li>Data is not written asynchronously to the server, i.e. the write()
-	may block if the TCP buffers are stuffed.</li>
-        <li>There are no support for DCC connections.</li>
-        <li>The author hasn't even read RFC 2810, 2811, 2812 and 2813.</li>
+
+        <li>Data is not written asynchronously to the server (and DCC
+	peers), i.e. the write() may block if the TCP buffers are
+	stuffed.</li>
+        <li>The author hasn't studied the new RFCs (2810, 2811, 2812
+        and 2813) very closely.</li>
         <li>Like most projects, documentation is lacking...</li>
       </ul>
     </p>
