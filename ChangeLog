@@ -1,3 +1,9 @@
+2012-01-21
+    * Released 0.5.0 (last release with Python 2.5 support).
+    * Last update to ChangeLog that includes specific changes and dates.
+      Subsequent changelog entries should include high-level changes
+      relevant to to the version in CHANGES.
+
 2012-01-13 Jason R. Coombs <jaraco@jaraco.com>
     * Add support for periodic commands in irclib (.execute_every).
     * Fix the global event handler priority bug #3165329.
