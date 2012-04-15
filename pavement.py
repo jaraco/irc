@@ -12,7 +12,7 @@ def read_long_description():
     return data
 
 paver.setuputils.setup(
-    name="python-irclib",
+    name="irc",
     description="IRC (Internet Relay Chat) protocol client library for Python",
     long_description=read_long_description(),
     use_hg_version=True,
