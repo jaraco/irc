@@ -3,8 +3,14 @@
 
 * Moved functionality from irclib module to irc.client module.
 * Moved functionality from ircbot module to irc.bot module.
-* Still maintain irclib and ircbot modules for backward-compatibility.
+* Retained irclib and ircbot modules for backward-compatibility. These
+  will be removed in 1.0.
 * Renamed project to simply 'irc'.
+
+To support the new module structure, simply replace references to the irclib
+module with irc.client and ircbot module with irc.bot. This project will
+support that interface through all versions of irc 1.x, so if you've made
+these changes, you can safely depend on `irc >= 0.7, <2.0dev`.
 
 0.6.0
 =====
