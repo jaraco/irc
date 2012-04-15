@@ -1,7 +1,7 @@
 #! -*- coding: utf-8 -*-
 
 # Copyright (C) 1999-2002  Joel Rosdahl
-# Portions Copyring © 2011-2012 Jason R. Coombs
+# Portions Copyright © 2011-2012 Jason R. Coombs
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 # Joel Rosdahl <joel@rosdahl.net>
 
 """
-ircbot -- Simple IRC bot library.
+Simple IRC bot library.
 
 This module contains a single-server IRC bot class that can be used to
 write simpler bots.
@@ -28,10 +28,10 @@ write simpler bots.
 
 import sys
 
-import irclib
-from irclib import nm_to_n
+import irc.client
+from irc.client import nm_to_n
 
-class SingleServerIRCBot(irclib.SimpleIRCClient):
+class SingleServerIRCBot(irc.client.SimpleIRCClient):
     """A single-server IRC bot class.
 
     The bot tries to reconnect if it is disconnected.
@@ -94,7 +94,7 @@ class SingleServerIRCBot(irclib.SimpleIRCClient):
                          self._nickname,
                          password,
                          ircname=self._realname)
-        except irclib.ServerConnectionError:
+        except irc.client.ServerConnectionError:
             pass
 
     def _on_disconnect(self, c, e):
@@ -123,9 +123,9 @@ class SingleServerIRCBot(irclib.SimpleIRCClient):
 
     def _on_mode(self, c, e):
         """[Internal]"""
-        modes = irclib.parse_channel_modes(" ".join(e.arguments()))
+        modes = irc.client.parse_channel_modes(" ".join(e.arguments()))
         t = e.target()
-        if irclib.is_channel(t):
+        if irc.client.is_channel(t):
             ch = self.channels[t]
             for mode in modes:
                 if mode[0] == "+":
@@ -447,5 +447,5 @@ class IRCDict(KeyTransformingDict):
     @staticmethod
     def key_transform(key):
         if isinstance(key, basestring):
-            key = irclib.IRCFoldedCase(key)
+            key = irc.client.IRCFoldedCase(key)
         return key

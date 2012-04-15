@@ -1,6 +1,6 @@
-import irclib
+import irc.client
 
 def test_version():
-	assert 'VERSION' in vars(irclib)
-	assert isinstance(irclib.VERSION, tuple)
-	assert irclib.VERSION, "No VERSION detected."
+	assert 'VERSION' in vars(irc.client)
+	assert isinstance(irc.client.VERSION, tuple)
+	assert irc.client.VERSION, "No VERSION detected."
