@@ -98,13 +98,11 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             pass
 
     def _on_disconnect(self, c, e):
-        """[Internal]"""
         self.channels = IRCDict()
         self.connection.execute_delayed(self.reconnection_interval,
                                         self._connected_checker)
 
     def _on_join(self, c, e):
-        """[Internal]"""
         ch = e.target()
         nick = nm_to_n(e.source())
         if nick == c.get_nickname():
@@ -112,7 +110,6 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         self.channels[ch].add_user(nick)
 
     def _on_kick(self, c, e):
-        """[Internal]"""
         nick = e.arguments()[0]
         channel = e.target()
 
@@ -122,7 +119,6 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.channels[channel].remove_user(nick)
 
     def _on_mode(self, c, e):
-        """[Internal]"""
         modes = irc.client.parse_channel_modes(" ".join(e.arguments()))
         t = e.target()
         if irc.client.is_channel(t):
@@ -138,8 +134,6 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             pass
 
     def _on_namreply(self, c, e):
-        """[Internal]"""
-
         # e.arguments()[0] == "@" for secret channels,
         #                     "*" for private channels,
         #                     "=" for others (public channels)
@@ -157,7 +151,6 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.channels[ch].add_user(nick)
 
     def _on_nick(self, c, e):
-        """[Internal]"""
         before = nm_to_n(e.source())
         after = e.target()
         for ch in self.channels.values():
@@ -165,7 +158,6 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
                 ch.change_nick(before, after)
 
     def _on_part(self, c, e):
-        """[Internal]"""
         nick = nm_to_n(e.source())
         channel = e.target()
 
@@ -175,7 +167,6 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.channels[channel].remove_user(nick)
 
     def _on_quit(self, c, e):
-        """[Internal]"""
         nick = nm_to_n(e.source())
         for ch in self.channels.values():
             if ch.has_user(nick):
@@ -208,7 +199,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
 
         Used when answering a CTCP VERSION request.
         """
-        return "ircbot.py by Joel Rosdahl <joel@rosdahl.net>"
+        return "Python irc.bot (part of irc)"
 
     def jump_server(self, msg="Changing servers"):
         """Connect to a new server, possibly disconnecting from the current.

@@ -1,20 +1,20 @@
 #! /usr/bin/env python
 #
-# Example program using irclib.py.
+# Example program using irc.client.
 #
 # This program is free without restrictions; do anything you like with
 # it.
 #
 # Joel Rosdahl <joel@rosdahl.net>
 
-import irclib
+import irc.client
 import os
 import struct
 import sys
 
-class DCCReceive(irclib.SimpleIRCClient):
+class DCCReceive(irc.client.SimpleIRCClient):
     def __init__(self):
-        irclib.SimpleIRCClient.__init__(self)
+        irc.client.SimpleIRCClient.__init__(self)
         self.received_bytes = 0
 
     def on_ctcp(self, connection, event):
@@ -27,7 +27,7 @@ class DCCReceive(irclib.SimpleIRCClient):
             print "already exists. Refusing to save it."
             self.connection.quit()
         self.file = open(self.filename, "w")
-        peeraddress = irclib.ip_numstr_to_quad(args[2])
+        peeraddress = irc.client.ip_numstr_to_quad(args[2])
         peerport = int(args[3])
         self.dcc = self.dcc_connect(peeraddress, peerport, "raw")
 
@@ -68,7 +68,7 @@ def main():
     c = DCCReceive()
     try:
         c.connect(server, port, nickname)
-    except irclib.ServerConnectionError, x:
+    except irc.client.ServerConnectionError, x:
         print x
         sys.exit(1)
     c.start()

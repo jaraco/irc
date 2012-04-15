@@ -1,22 +1,22 @@
 #! /usr/bin/env python
 #
-# Example program using irclib.py.
+# Example program using irc.client.
 #
 # This program is free without restrictions; do anything you like with
 # it.
 #
 # Joel Rosdahl <joel@rosdahl.net>
 
-import irclib
+import irc.client
 import sys
 
-class IRCCat(irclib.SimpleIRCClient):
+class IRCCat(irc.client.SimpleIRCClient):
     def __init__(self, target):
-        irclib.SimpleIRCClient.__init__(self)
+        irc.client.SimpleIRCClient.__init__(self)
         self.target = target
 
     def on_welcome(self, connection, event):
-        if irclib.is_channel(self.target):
+        if irc.client.is_channel(self.target):
             connection.join(self.target)
         else:
             self.send_it()
@@ -33,7 +33,7 @@ class IRCCat(irclib.SimpleIRCClient):
             if not line:
                 break
             self.connection.privmsg(self.target, line)
-        self.connection.quit("Using irclib.py")
+        self.connection.quit("Using irc.client.py")
 
 def main():
     if len(sys.argv) != 4:
@@ -57,7 +57,7 @@ def main():
     c = IRCCat(target)
     try:
         c.connect(server, port, nickname)
-    except irclib.ServerConnectionError, x:
+    except irc.client.ServerConnectionError, x:
         print x
         sys.exit(1)
     c.start()

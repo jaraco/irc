@@ -1,17 +1,17 @@
 #! /usr/bin/env python
 #
-# Example program using irclib.py.
+# Example program using irc.client.
 #
 # This program is free without restrictions; do anything you like with
 # it.
 #
 # Joel Rosdahl <joel@rosdahl.net>
 
-import irclib
+import irc.client
 import sys
 
 def on_connect(connection, event):
-    if irclib.is_channel(target):
+    if irc.client.is_channel(target):
         connection.join(target)
     else:
         while 1:
@@ -19,7 +19,7 @@ def on_connect(connection, event):
             if not line:
                 break
             connection.privmsg(target, line)
-        connection.quit("Using irclib.py")
+        connection.quit("Using irc.client.py")
 
 def on_join(connection, event):
     while 1:
@@ -27,12 +27,13 @@ def on_join(connection, event):
         if not line:
             break
         connection.privmsg(target, line)
-    connection.quit("Using irclib.py")
+    connection.quit("Using irc.client.py")
 
 def on_disconnect(connection, event):
     raise SystemExit()
 
 def main():
+    global target
     if len(sys.argv) != 4:
         print "Usage: irccat <server[:port]> <nickname> <target>"
         print "\ntarget is a nickname or a channel."
@@ -51,10 +52,10 @@ def main():
     else:
         port = 6667
 
-    irc = irclib.IRC()
+    client = irc.client.IRC()
     try:
-        c = irc.server().connect(server, port, nickname)
-    except irclib.ServerConnectionError, x:
+        c = client.server().connect(server, port, nickname)
+    except irc.client.ServerConnectionError, x:
         print x
         raise SystemExit(1)
 
@@ -62,7 +63,7 @@ def main():
     c.add_global_handler("join", on_join)
     c.add_global_handler("disconnect", on_disconnect)
 
-    irc.process_forever()
+    client.process_forever()
 
 if __name__ == '__main__':
     main()

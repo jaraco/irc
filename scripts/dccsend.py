@@ -1,20 +1,20 @@
 #! /usr/bin/env python
 #
-# Example program using irclib.py.
+# Example program using irc.client.
 #
 # This program is free without restrictions; do anything you like with
 # it.
 #
 # Joel Rosdahl <joel@rosdahl.net>
 
-import irclib
+import irc.client
 import os
 import struct
 import sys
 
-class DCCSend(irclib.SimpleIRCClient):
+class DCCSend(irc.client.SimpleIRCClient):
     def __init__(self, receiver, filename):
-        irclib.SimpleIRCClient.__init__(self)
+        irc.client.SimpleIRCClient.__init__(self)
         self.receiver = receiver
         self.filename = filename
         self.filesize = os.path.getsize(self.filename)
@@ -25,7 +25,7 @@ class DCCSend(irclib.SimpleIRCClient):
         self.dcc = self.dcc_listen("raw")
         self.connection.ctcp("DCC", self.receiver, "SEND %s %s %d %d" % (
             os.path.basename(self.filename),
-            irclib.ip_quad_to_numstr(self.dcc.localaddress),
+            irc.client.ip_quad_to_numstr(self.dcc.localaddress),
             self.dcc.localport,
             self.filesize))
 
@@ -82,7 +82,7 @@ def main():
     c = DCCSend(receiver, filename)
     try:
         c.connect(server, port, nickname)
-    except irclib.ServerConnectionError, x:
+    except irc.client.ServerConnectionError, x:
         print x
         sys.exit(1)
     c.start()

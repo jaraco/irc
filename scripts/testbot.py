@@ -1,13 +1,13 @@
 #! /usr/bin/env python
 #
-# Example program using ircbot.py.
+# Example program using irc.bot.
 #
 # Joel Rosdahl <joel@rosdahl.net>
 
 """A simple example bot.
 
 This is an example bot that uses the SingleServerIRCBot class from
-ircbot.py.  The bot enters a channel and listens for commands in
+irc.bot.  The bot enters a channel and listens for commands in
 private messages and channel traffic.  Commands in channel messages
 are given by prefixing the text by the bot name followed by a colon.
 It also responds to DCC CHAT invitations and echos data sent in such
@@ -25,12 +25,12 @@ The known commands are:
     dcc -- Let the bot invite you to a DCC CHAT connection.
 """
 
-from ircbot import SingleServerIRCBot
-from irclib import nm_to_n, nm_to_h, irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
+import irc.bot
+from irc.client import nm_to_n, irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
 
-class TestBot(SingleServerIRCBot):
+class TestBot(irc.bot.SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
-        SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
+        irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
         self.channel = channel
 
     def on_nicknameinuse(self, c, e):

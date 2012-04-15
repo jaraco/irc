@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# Example program using irclib.py.
+# Example program using irc.client.
 #
 # Copyright (C) 1999-2002  Joel Rosdahl
 #
@@ -59,14 +59,8 @@
 #     |   `-lineone.uk.eu.dal.net
 #     `-omega.ca.us.dal.net
 
-import irclib
+import irc.client
 import sys
-
-if len(sys.argv) != 3:
-    print "Usage: servermap <server[:port]> <nickname>"
-    sys.exit(1)
-
-links = []
 
 def on_connect(connection, event):
     sys.stdout.write("\nGetting links...")
@@ -105,7 +99,7 @@ def on_endoflinks(connection, event):
     print "%d servers (%d leaves and %d hubs)\n" % (len(links), len(links)-hubs, hubs)
 
     print_tree(0, [], connection.get_server_name(), m)
-    connection.quit("Using irclib.py")
+    connection.quit("Using irc.client.py")
 
 def on_disconnect(connection, event):
     sys.exit(0)
@@ -134,31 +128,43 @@ def print_tree(level, active_levels, root, map, last=0):
             print_tree(level+1, active_levels[:]+[level], r, map)
         print_tree(level+1, active_levels[:], list[-1], map, 1)
 
-s = sys.argv[1].split(":", 1)
-server = s[0]
-if len(s) == 2:
-    try:
-        port = int(s[1])
-    except ValueError:
-        print "Error: Erroneous port."
+def main():
+    global links
+
+    if len(sys.argv) != 3:
+        print "Usage: servermap <server[:port]> <nickname>"
         sys.exit(1)
-else:
-    port = 6667
-nickname = sys.argv[2]
 
-irc = irclib.IRC()
-sys.stdout.write("Connecting to server...")
-sys.stdout.flush()
-try:
-    c = irc.server().connect(server, port, nickname)
-except irclib.ServerConnectionError, x:
-    print x
-    sys.exit(1)
+    links = []
 
-c.add_global_handler("welcome", on_connect)
-c.add_global_handler("passwdmismatch", on_passwdmismatch)
-c.add_global_handler("links", on_links)
-c.add_global_handler("endoflinks", on_endoflinks)
-c.add_global_handler("disconnect", on_disconnect)
+    s = sys.argv[1].split(":", 1)
+    server = s[0]
+    if len(s) == 2:
+        try:
+            port = int(s[1])
+        except ValueError:
+            print "Error: Erroneous port."
+            sys.exit(1)
+    else:
+        port = 6667
+    nickname = sys.argv[2]
 
-irc.process_forever()
+    client = irc.client.IRC()
+    sys.stdout.write("Connecting to server...")
+    sys.stdout.flush()
+    try:
+        c = client.server().connect(server, port, nickname)
+    except irc.client.ServerConnectionError, x:
+        print x
+        sys.exit(1)
+
+    c.add_global_handler("welcome", on_connect)
+    c.add_global_handler("passwdmismatch", on_passwdmismatch)
+    c.add_global_handler("links", on_links)
+    c.add_global_handler("endoflinks", on_endoflinks)
+    c.add_global_handler("disconnect", on_disconnect)
+
+    client.process_forever()
+
+if __name__ == '__main__':
+    main()

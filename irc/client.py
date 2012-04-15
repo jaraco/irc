@@ -20,7 +20,7 @@
 # keltus <keltus@users.sourceforge.net>
 
 """
-irclib -- Internet Relay Chat (IRC) protocol client library.
+Internet Relay Chat (IRC) protocol client library.
 
 This library is intended to encapsulate the IRC protocol at a quite
 low level.  It provides an event-driven IRC client framework.  It has
@@ -97,8 +97,7 @@ DEBUG = False
 # dropping of the connection triggers the disconnect event.
 
 class IRCError(Exception):
-    """Represents an IRC exception."""
-    pass
+    "An IRC exception"
 
 
 class IRC(object):
@@ -114,15 +113,15 @@ class IRC(object):
 
     The methods of most interest for an IRC client writer are server,
     add_global_handler, remove_global_handler, execute_at,
-    execute_delayed, process_once and process_forever.
+    execute_delayed, execute_every, process_once, and process_forever.
 
     Here is an example:
 
-        irc = irclib.IRC()
-        server = irc.server()
+        client = irc.client.IRC()
+        server = client.server()
         server.connect("irc.some.where", 6667, "my_nickname")
         server.privmsg("a_nickname", "Hi there!")
-        irc.process_forever()
+        client.process_forever()
 
     This will connect to the IRC server irc.some.where on port 6667
     using the nickname my_nickname and send the message "Hi there!"
