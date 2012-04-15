@@ -1,7 +1,7 @@
 Internet Relay Chat (IRC) protocol client library
 -------------------------------------------------
 
-The home of irclib is now:
+The home of irclib is:
 
     http://python-irclib.sourceforge.net
 
@@ -23,10 +23,14 @@ here:
 
 Requirements:
 
-  * Python 2.6 or newer.
+  * Python 2.6 or newer (but not Python 3 yet).
 
 Installation:
 
+  You have several options to install the IRC project.
+
+  * Use "easy_install irc" or "pip install irc" to grab the latest
+    version from the cheeseshop (recommended).
   * Run "python setup.py install" (from the source distribution) or
   * Run "paver install" (from repo checkout, requires paver) or
   * Copy irc directory to appropriate site-packages directory.
@@ -71,6 +75,10 @@ The following files might be of interest:
     The library itself.  Read the code along with comments and
     docstrings to get a grip of what it does.  Use it at your own risk
     and read the source, Luke!
+
+  * irc/bot.py
+
+    An IRC bot implementation.
 
 Example scripts in the scripts directory:
 
