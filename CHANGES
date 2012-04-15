@@ -1,3 +1,11 @@
+0.7.0
+=====
+
+* Moved functionality from irclib module to irc.client module.
+* Moved functionality from ircbot module to irc.bot module.
+* Still maintain irclib and ircbot modules for backward-compatibility.
+* Renamed project to simply 'irc'.
+
 0.6.0
 =====
 
