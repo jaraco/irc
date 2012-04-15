@@ -1,5 +1,5 @@
-irclib -- Internet Relay Chat (IRC) protocol client library
------------------------------------------------------------
+Internet Relay Chat (IRC) protocol client library
+-------------------------------------------------
 
 The home of irclib is now:
 
@@ -27,8 +27,9 @@ Requirements:
 
 Installation:
 
-  * Run "python setup.py install" or copy irclib.py and/or ircbot.py
-    to an appropriate Python module directory.
+  * Run "python setup.py install" (from the source distribution) or
+  * Run "paver install" (from repo checkout, requires paver) or
+  * Copy irc directory to appropriate site-packages directory.
 
 The main features of the IRC client framework are:
 
@@ -65,15 +66,17 @@ distribution.
 
 The following files might be of interest:
 
-  * irclib.py
+  * irc/client.py
 
     The library itself.  Read the code along with comments and
     docstrings to get a grip of what it does.  Use it at your own risk
     and read the source, Luke!
 
+Example scripts in the scripts directory:
+
   * irccat
 
-    A simple example of how to use irclib.py.  irccat reads text from
+    A simple example of how to use the IRC client.  irccat reads text from
     stdin and writes it to a specified user or channel on an IRC
     server.
 
@@ -87,10 +90,10 @@ The following files might be of interest:
     finds out what other IRC servers there are in the net and prints
     a tree-like map of their interconnections.
 
-  * testbot.py
+  * testbot
 
     An example bot that uses the SingleServerIRCBot class from
-    ircbot.py.  The bot enters a channel and listens for commands in
+    irc.bot.  The bot enters a channel and listens for commands in
     private messages or channel traffic.  It also accepts DCC
     invitations and echos back sent DCC chat messages.
 
