@@ -12,6 +12,11 @@ module with irc.client and ircbot module with irc.bot. This project will
 support that interface through all versions of irc 1.x, so if you've made
 these changes, you can safely depend on `irc >= 0.7, <2.0dev`.
 
+0.6.2
+=====
+
+* Fixed incorrect usage of Connection.execute_delayed (again).
+
 0.6.0
 =====
 
