@@ -1,3 +1,8 @@
+0.6.2
+=====
+
+* Fixed incorrect usage of Connection.execute_delayed (again).
+
 0.6.0
 =====
 
