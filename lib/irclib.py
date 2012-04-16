@@ -401,7 +401,7 @@ class Connection(object):
         self.irclibobj.execute_at(at, function, arguments)
 
     def execute_delayed(self, delay, function, arguments=()):
-        self.irclibobj.execute_delayed(delay, function, arguments())
+        self.irclibobj.execute_delayed(delay, function, arguments)
 
     def execute_every(self, period, function, arguments=()):
         self.irclibobj.execute_every(period, function, arguments)
