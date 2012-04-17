@@ -17,4 +17,4 @@ def test_delayed_command_order():
 		irclib.DelayedCommand(delay, null, tuple())
 		for delay in delays
 	])
-	assert [c.delay for c in cmds] == sorted(delays)
+	assert [c.delay.seconds for c in cmds] == sorted(delays)
