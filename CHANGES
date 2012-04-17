@@ -12,6 +12,13 @@ module with irc.client and ircbot module with irc.bot. This project will
 support that interface through all versions of irc 1.x, so if you've made
 these changes, you can safely depend on `irc >= 0.7, <2.0dev`.
 
+0.6.3
+=====
+
+* Fixed failing test where DelayedCommands weren't being sorted properly.
+  DelayedCommand a now subclass of the DateTime object, where the command's
+  due time is the datetime. Fixed issue #3518508.
+
 0.6.2
 =====
 

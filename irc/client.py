@@ -71,6 +71,7 @@ import string
 import time
 import types
 import ssl as ssl_mod
+import datetime
 
 try:
     import pkg_resources
@@ -320,7 +321,7 @@ class IRC(object):
     def _schedule_command(self, command):
         bisect.insort(self.delayed_commands, command)
         if self.fn_to_add_timeout:
-            self.fn_to_add_timeout(command.delay)
+            self.fn_to_add_timeout(total_seconds(command.delay))
 
     def dcc(self, dcctype="chat"):
         """Creates and returns a DCCConnection object.
@@ -350,26 +351,35 @@ class IRC(object):
         if self.fn_to_remove_socket:
             self.fn_to_remove_socket(connection._get_socket())
 
-class DelayedCommand(object):
+class DelayedCommand(datetime.datetime):
     """
-    A three-tuple describing a command to be executed after delay seconds.
+    A command to be executed after some delay (seconds or timedelta).
     """
-    def __init__(self, delay, function, arguments):
-        self.at = time.time() + delay
-        self.delay = delay
-        self.function = function
-        self.arguments = arguments
+    def __new__(cls, delay, function, arguments):
+        if not isinstance(delay, datetime.timedelta):
+            delay = datetime.timedelta(seconds=delay)
+        at = datetime.datetime.utcnow() + delay
+        cmd = datetime.datetime.__new__(DelayedCommand, at.year,
+            at.month, at.day, at.hour, at.minute, at.second,
+            at.microsecond, at.tzinfo)
+        cmd.delay = delay
+        cmd.function = function
+        cmd.arguments = arguments
+        return cmd
 
     def at_time(cls, at, function, arguments):
         """
-        Construct a DelayedCommand to come due at `at`.
+        Construct a DelayedCommand to come due at `at`, where `at` may be
+        a datetime or timestamp.
         """
-        delay = at - time.time()
+        if isinstance(at, int):
+            at = datetime.datetime.utcfromtimestamp(at)
+        delay = at - datetime.datetime.utcnow()
         return cls(delay, function, arguments)
     at_time = classmethod(at_time)
 
     def due(self):
-        return time.time() >= self.at
+        return datetime.datetime.utcnow() >= self
 
 class PeriodicCommand(DelayedCommand):
     """
@@ -377,7 +387,7 @@ class PeriodicCommand(DelayedCommand):
     seconds.
     """
     def next(self):
-        return PeriodicCommand(self.at + self.delay, self.function,
+        return PeriodicCommand(self.delay, self.function,
             self.arguments)
 
 _rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
@@ -1695,3 +1705,14 @@ class IRCFoldedCase(FoldedCase):
 # for compatibility
 def irc_lower(str):
     return IRCFoldedCase(str).lower()
+
+def total_seconds(td):
+    """
+    Python 2.7 adds a total_seconds method to timedelta objects.
+    See http://docs.python.org/library/datetime.html#datetime.timedelta.total_seconds
+    """
+    try:
+        result = td.total_seconds()
+    except AttributeError:
+        result = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
+    return result
