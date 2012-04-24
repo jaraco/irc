@@ -1,5 +1,10 @@
-0.7.0
+0.7.1
 =====
+
+* Added missing events. Fixes #3515578.
+
+0.7
+===
 
 * Moved functionality from irclib module to irc.client module.
 * Moved functionality from ircbot module to irc.bot module.

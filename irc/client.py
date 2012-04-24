@@ -1588,7 +1588,6 @@ numeric_events = {
 }
 
 generated_events = [
-    # Generated events
     "dcc_connect",
     "dcc_disconnect",
     "dccmsg",
@@ -1598,7 +1597,6 @@ generated_events = [
 ]
 
 protocol_events = [
-    # IRC protocol events
     "error",
     "join",
     "kick",
@@ -1612,6 +1610,9 @@ protocol_events = [
     "quit",
     "invite",
     "pong",
+    "action",
+    "topic",
+    "nick",
 ]
 
 all_events = generated_events + protocol_events + numeric_events.values()
