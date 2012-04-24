@@ -1,3 +1,8 @@
+0.8
+===
+
+* Added ServerConnection.reconnect method. Fixes #3515580.
+
 0.7.1
 =====
 

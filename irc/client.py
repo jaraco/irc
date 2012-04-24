@@ -78,6 +78,8 @@ try:
 except ImportError:
     pass
 
+from . import functools as irc_functools
+
 DEBUG = False
 
 # set the version tuple
@@ -440,10 +442,12 @@ class ServerConnection(Connection):
 
     def __init__(self, irclibobj):
         super(ServerConnection, self).__init__(irclibobj)
-        self.connected = 0  # Not connected yet.
+        self.connected = False
         self.socket = None
         self.ssl = None
 
+    # save the method args to allow for easier reconnection.
+    @irc_functools.save_method_args
     def connect(self, server, port, nickname, password=None, username=None,
             ircname=None, localaddress="", localport=0, ssl=False, ipv6=False):
         """Connect/reconnect to a server.
@@ -451,23 +455,14 @@ class ServerConnection(Connection):
         Arguments:
 
             server -- Server name.
-
             port -- Port number.
-
             nickname -- The nickname.
-
             password -- Password (if any).
-
             username -- The username.
-
             ircname -- The IRC name ("realname").
-
             localaddress -- Bind the connection to a specific local IP address.
-
             localport -- Bind the connection to a specific local port.
-
             ssl -- Enable support for ssl.
-
             ipv6 -- Enable support for ipv6.
 
         This function can be called to reconnect a closed connection.
@@ -490,6 +485,7 @@ class ServerConnection(Connection):
         self.localaddress = localaddress
         self.localport = localport
         self.localhost = socket.gethostname()
+        self.ipv6 = ipv6
         if ipv6:
             self.socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
         else:
@@ -499,11 +495,11 @@ class ServerConnection(Connection):
             self.socket.connect((self.server, self.port))
             if ssl:
                 self.ssl = ssl_mod.wrap_socket(self.socket)
-        except socket.error, x:
+        except socket.error as err:
             self.socket.close()
             self.socket = None
-            raise ServerConnectionError("Couldn't connect to socket: %s" % x)
-        self.connected = 1
+            raise ServerConnectionError("Couldn't connect to socket: %s" % err)
+        self.connected = True
         if self.irclibobj.fn_to_add_socket:
             self.irclibobj.fn_to_add_socket(self.socket)
 
@@ -513,6 +509,12 @@ class ServerConnection(Connection):
         self.nick(self.nickname)
         self.user(self.username, self.ircname)
         return self
+
+    def reconnect(self):
+        """
+        Reconnect with the last arguments passed to self.connect()
+        """
+        self.connect(*self._connect_saved.args, **self._connect_saved.kwargs)
 
     def close(self):
         """Close the connection.
