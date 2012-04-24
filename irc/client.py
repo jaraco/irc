@@ -75,12 +75,17 @@ import datetime
 
 try:
     import pkg_resources
-    _pkg = pkg_resources.require('python-irclib')[0]
-    VERSION = tuple(int(res) for res in re.findall('\d+', _pkg.version))
-except Exception:
-    VERSION = ()
+except ImportError:
+    pass
 
 DEBUG = False
+
+# set the version tuple
+try:
+    VERSION = tuple(int(res) for res in re.findall('\d+',
+        pkg_resources.require('irc')[0].version))
+except Exception:
+    VERSION = ()
 
 # TODO
 # ----
@@ -440,7 +445,7 @@ class ServerConnection(Connection):
         self.ssl = None
 
     def connect(self, server, port, nickname, password=None, username=None,
-                ircname=None, localaddress="", localport=0, ssl=False, ipv6=False):
+            ircname=None, localaddress="", localport=0, ssl=False, ipv6=False):
         """Connect/reconnect to a server.
 
         Arguments:
