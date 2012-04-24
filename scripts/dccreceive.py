@@ -26,7 +26,7 @@ class DCCReceive(irc.client.SimpleIRCClient):
             print "A file named", self.filename,
             print "already exists. Refusing to save it."
             self.connection.quit()
-        self.file = open(self.filename, "w")
+        self.file = open(self.filename, "wb")
         peeraddress = irc.client.ip_numstr_to_quad(args[2])
         peerport = int(args[3])
         self.dcc = self.dcc_connect(peeraddress, peerport, "raw")
