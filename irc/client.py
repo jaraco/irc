@@ -72,6 +72,7 @@ import time
 import types
 import ssl as ssl_mod
 import datetime
+import struct
 
 try:
     import pkg_resources
@@ -1330,9 +1331,9 @@ def ip_numstr_to_quad(num):
     '192.168.0.1'
     """
     n = long(num)
-    p = map(str, map(int, [n >> 24 & 0xFF, n >> 16 & 0xFF,
-                           n >> 8 & 0xFF, n & 0xFF]))
-    return ".".join(p)
+    packed = struct.pack('>L', n)
+    bytes = struct.unpack('BBBB', packed)
+    return ".".join(map(str, bytes))
 
 def ip_quad_to_numstr(quad):
     """
@@ -1342,11 +1343,9 @@ def ip_quad_to_numstr(quad):
     >>> ip_quad_to_numstr('192.168.0.1')
     '3232235521'
     """
-    p = map(long, quad.split("."))
-    s = str((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3])
-    if s[-1] == "L":
-        s = s[:-1]
-    return s
+    bytes = map(long, quad.split("."))
+    packed = struct.pack('BBBB', *bytes)
+    return str(struct.unpack('>L', packed)[0])
 
 def nm_to_n(s):
     """Get the nick part of a nickmask.
