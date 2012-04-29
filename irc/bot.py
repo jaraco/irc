@@ -29,7 +29,7 @@ write simpler bots.
 import sys
 
 import irc.client
-from irc.client import nm_to_n
+from irc.client import NickMask
 
 class SingleServerIRCBot(irc.client.SimpleIRCClient):
     """A single-server IRC bot class.
@@ -104,7 +104,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
 
     def _on_join(self, c, e):
         ch = e.target()
-        nick = nm_to_n(e.source())
+        nick = e.source().nick
         if nick == c.get_nickname():
             self.channels[ch] = Channel()
         self.channels[ch].add_user(nick)
@@ -151,14 +151,14 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.channels[ch].add_user(nick)
 
     def _on_nick(self, c, e):
-        before = nm_to_n(e.source())
+        before = e.source().nick
         after = e.target()
         for ch in self.channels.values():
             if ch.has_user(before):
                 ch.change_nick(before, after)
 
     def _on_part(self, c, e):
-        nick = nm_to_n(e.source())
+        nick = e.source().nick
         channel = e.target()
 
         if nick == c.get_nickname():
@@ -167,7 +167,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.channels[channel].remove_user(nick)
 
     def _on_quit(self, c, e):
-        nick = nm_to_n(e.source())
+        nick = e.source().nick
         for ch in self.channels.values():
             if ch.has_user(nick):
                 ch.remove_user(nick)
@@ -219,13 +219,12 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         Replies to VERSION and PING requests and relays DCC requests
         to the on_dccchat method.
         """
+        nick = e.source().nick
         if e.arguments()[0] == "VERSION":
-            c.ctcp_reply(nm_to_n(e.source()),
-                         "VERSION " + self.get_version())
+            c.ctcp_reply(nick, "VERSION " + self.get_version())
         elif e.arguments()[0] == "PING":
             if len(e.arguments()) > 1:
-                c.ctcp_reply(nm_to_n(e.source()),
-                             "PING " + e.arguments()[1])
+                c.ctcp_reply(nick, "PING " + e.arguments()[1])
         elif e.arguments()[0] == "DCC" and e.arguments()[1].split(" ", 1)[0] == "CHAT":
             self.on_dccchat(c, e)
 

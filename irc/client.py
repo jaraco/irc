@@ -609,7 +609,7 @@ class ServerConnection(Connection):
                 command = numeric_events[command]
 
             if command == "nick":
-                if nm_to_n(prefix) == self.real_nickname:
+                if NickMask(prefix).nick == self.real_nickname:
                     self.real_nickname = arguments[0]
             elif command == "welcome":
                 # Record the nickname in case the client changed nick
@@ -640,14 +640,14 @@ class ServerConnection(Connection):
                         if DEBUG:
                             print "command: %s, source: %s, target: %s, arguments: %s" % (
                                 command, prefix, target, m)
-                        self._handle_event(Event(command, prefix, target, m))
+                        self._handle_event(Event(command, NickMask(prefix), target, m))
                         if command == "ctcp" and m[0] == "ACTION":
                             self._handle_event(Event("action", prefix, target, m[1:]))
                     else:
                         if DEBUG:
                             print "command: %s, source: %s, target: %s, arguments: %s" % (
                                 command, prefix, target, [m])
-                        self._handle_event(Event(command, prefix, target, [m]))
+                        self._handle_event(Event(command, NickMask(prefix), target, [m]))
             else:
                 target = None
 
@@ -666,7 +666,7 @@ class ServerConnection(Connection):
                 if DEBUG:
                     print "command: %s, source: %s, target: %s, arguments: %s" % (
                         command, prefix, target, arguments)
-                self._handle_event(Event(command, prefix, target, arguments))
+                self._handle_event(Event(command, NickMask(prefix), target, arguments))
 
     def _handle_event(self, event):
         """[Internal]"""
@@ -1347,34 +1347,31 @@ def ip_quad_to_numstr(quad):
     packed = struct.pack('BBBB', *bytes)
     return str(struct.unpack('>L', packed)[0])
 
-def nm_to_n(s):
-    """Get the nick part of a nickmask.
-
-    (The source of an Event is a nickmask.)
+class NickMask(str):
     """
-    return s.split("!")[0]
-
-def nm_to_uh(s):
-    """Get the userhost part of a nickmask.
-
-    (The source of an Event is a nickmask.)
+    A nickmask (the source of an Event)
     """
-    return s.split("!")[1]
+    @property
+    def nick(self):
+        return self.split("!")[0]
 
-def nm_to_h(s):
-    """Get the host part of a nickmask.
+    @property
+    def userhost(self):
+        return self.split("!")[1]
 
-    (The source of an Event is a nickmask.)
-    """
-    return s.split("@")[1]
+    @property
+    def host(self):
+        return self.split("@")[1]
 
-def nm_to_u(s):
-    """Get the user part of a nickmask.
+    @property
+    def user(self):
+        return self.userhost.split("@"[0])
 
-    (The source of an Event is a nickmask.)
-    """
-    s = s.split("!")[1]
-    return s.split("@")[0]
+# for backward compatibility
+def nm_to_n(s): return NickMask(s).nick
+def nm_to_uh(s): return NickMask(s).userhost
+def nm_to_h(s): return NickMask(s).host
+def nm_to_u(s): return NickMask(s).user
 
 def parse_nick_modes(mode_string):
     """Parse a nick mode string.

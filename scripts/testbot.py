@@ -26,7 +26,7 @@ The known commands are:
 """
 
 import irc.bot
-from irc.client import nm_to_n, irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
+from irc.client import irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
 
 class TestBot(irc.bot.SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
@@ -64,7 +64,7 @@ class TestBot(irc.bot.SingleServerIRCBot):
             self.dcc_connect(address, port)
 
     def do_command(self, e, cmd):
-        nick = nm_to_n(e.source())
+        nick = e.source().nick
         c = self.connection
 
         if cmd == "disconnect":
