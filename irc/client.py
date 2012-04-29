@@ -1320,18 +1320,28 @@ def is_channel(string):
     return string and string[0] in "#&+!"
 
 def ip_numstr_to_quad(num):
-    """Convert an IP number as an integer given in ASCII
-    representation (e.g. '3232235521') to an IP address string
-    (e.g. '192.168.0.1')."""
+    """
+    Convert an IP number as an integer given in ASCII
+    representation to an IP address string.
+
+    >>> ip_numstr_to_quad('3232235521')
+    '192.168.0.1'
+    >>> ip_numstr_to_quad(3232235521)
+    '192.168.0.1'
+    """
     n = long(num)
     p = map(str, map(int, [n >> 24 & 0xFF, n >> 16 & 0xFF,
                            n >> 8 & 0xFF, n & 0xFF]))
     return ".".join(p)
 
 def ip_quad_to_numstr(quad):
-    """Convert an IP address string (e.g. '192.168.0.1') to an IP
-    number as an integer given in ASCII representation
-    (e.g. '3232235521')."""
+    """
+    Convert an IP address string (e.g. '192.168.0.1') to an IP
+    number as a base-10 integer given in ASCII representation.
+
+    >>> ip_quad_to_numstr('192.168.0.1')
+    '3232235521'
+    """
     p = map(long, quad.split("."))
     s = str((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3])
     if s[-1] == "L":
