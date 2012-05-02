@@ -1,3 +1,11 @@
+0.9
+===
+
+* Fix file saving using dccreceive.py on Windows. Fixes #2863199.
+* Created NickMask class from nm_to_* functions. Now if a source is
+  a NickMask, one can access the .nick, .host, and .user attributes.
+* Use correct attribute for saved connect args. Fixes #3523057.
+
 0.8
 ===
 
