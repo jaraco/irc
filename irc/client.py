@@ -515,7 +515,7 @@ class ServerConnection(Connection):
         """
         Reconnect with the last arguments passed to self.connect()
         """
-        self.connect(*self._connect_saved.args, **self._connect_saved.kwargs)
+        self.connect(*self._saved_connect.args, **self._saved_connect.kwargs)
 
     def close(self):
         """Close the connection.
