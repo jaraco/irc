@@ -17,8 +17,6 @@ paver.setuputils.setup(
     long_description=read_long_description(),
     use_hg_version=True,
     packages=setuptools.find_packages(),
-    package_dir={'': 'lib', 'irc': 'irc'},
-    py_modules=["irclib", "ircbot"],
     author="Joel Rosdahl",
     author_email="joel@rosdahl.net",
     maintainer="Jason R. Coombs",

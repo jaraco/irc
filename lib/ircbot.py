@@ -1,1 +1,0 @@
-from irc.bot import *
