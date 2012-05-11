@@ -63,6 +63,8 @@ Current limitations:
 .. [IRC specifications] http://www.irchelp.org/irchelp/rfc/
 """
 
+from __future__ import absolute_import
+
 import bisect
 import re
 import select
@@ -81,6 +83,8 @@ except ImportError:
 
 from . import functools as irc_functools
 from . import events
+from . import util
+from . import strings
 
 DEBUG = False
 
@@ -330,7 +334,7 @@ class IRC(object):
     def _schedule_command(self, command):
         bisect.insort(self.delayed_commands, command)
         if self.fn_to_add_timeout:
-            self.fn_to_add_timeout(total_seconds(command.delay))
+            self.fn_to_add_timeout(util.total_seconds(command.delay))
 
     def dcc(self, dcctype="chat"):
         """Creates and returns a DCCConnection object.
@@ -813,7 +817,7 @@ class ServerConnection(Connection):
 
     def part(self, channels, message=""):
         """Send a PART command."""
-        channels = always_iterable(channels)
+        channels = util.always_iterable(channels)
         cmd_parts = [
             'PART',
             ','.join(channels),
@@ -1247,8 +1251,8 @@ def mask_matches(nick, mask):
 
     Returns true if the nick matches, otherwise false.
     """
-    nick = irc_lower(nick)
-    mask = irc_lower(mask)
+    nick = strings.lower(nick)
+    mask = strings.lower(mask)
     mask = mask.replace("\\", "\\\\")
     for ch in ".$|[](){}+":
         mask = mask.replace(ch, "\\" + ch)
@@ -1445,103 +1449,4 @@ protocol_events = events.protocol
 numeric_events = events.numeric
 all_events = events.all
 
-# from jaraco.util.itertools
-def always_iterable(item):
-    """
-    Given an object, always return an iterable. If the item is not
-    already iterable, return a tuple containing only the item.
-
-    >>> always_iterable([1,2,3])
-    [1, 2, 3]
-    >>> always_iterable('foo')
-    ('foo',)
-    >>> always_iterable(None)
-    (None,)
-    >>> always_iterable(xrange(10))
-    xrange(10)
-    """
-    if isinstance(item, basestring) or not hasattr(item, '__iter__'):
-        item = item,
-    return item
-
-# from jaraco.util.string
-class FoldedCase(str):
-    """
-    A case insensitive string class; behaves just like str
-    except compares equal when the only variation is case.
-    >>> s = FoldedCase('hello world')
-
-    >>> s == 'Hello World'
-    True
-
-    >>> 'Hello World' == s
-    True
-
-    >>> s.index('O')
-    4
-
-    >>> s.split('O')
-    ['hell', ' w', 'rld']
-
-    >>> names = map(FoldedCase, ['GAMMA', 'alpha', 'Beta'])
-    >>> names.sort()
-    >>> names
-    ['alpha', 'Beta', 'GAMMA']
-    """
-    def __lt__(self, other):
-        return self.lower() < other.lower()
-
-    def __gt__(self, other):
-        return self.lower() > other.lower()
-
-    def __eq__(self, other):
-        return self.lower() == other.lower()
-
-    def __hash__(self):
-        return hash(self.lower())
-
-    # cache lower since it's likely to be called frequently.
-    def lower(self):
-        self._lower = super(FoldedCase, self).lower()
-        self.lower = lambda: self._lower
-        return self._lower
-
-    def index(self, sub):
-        return self.lower().index(sub.lower())
-
-    def split(self, splitter=' ', maxsplit=0):
-        pattern = re.compile(re.escape(splitter), re.I)
-        return pattern.split(self, maxsplit)
-
-class IRCFoldedCase(FoldedCase):
-    """
-    A version of FoldedCase that honors the IRC specification for lowercased
-    strings (RFC 1459).
-
-    >>> IRCFoldedCase('Foo^').lower()
-    'foo~'
-    >>> IRCFoldedCase('[this]') == IRCFoldedCase('{THIS}')
-    True
-    """
-    translation = string.maketrans(
-        string.ascii_uppercase + r"[]\^",
-        string.ascii_lowercase + r"{}|~",
-    )
-
-    def lower(self):
-        return self.translate(self.translation)
-
-# for compatibility
-def irc_lower(str):
-    return IRCFoldedCase(str).lower()
-
-def total_seconds(td):
-    """
-    Python 2.7 adds a total_seconds method to timedelta objects.
-    See http://docs.python.org/library/datetime.html#datetime.timedelta.total_seconds
-    """
-    try:
-        result = td.total_seconds()
-    except AttributeError:
-        result = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
-    return result
+irc_lower = strings.lower
