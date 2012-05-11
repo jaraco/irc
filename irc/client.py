@@ -413,6 +413,8 @@ class PeriodicCommandFixedDelay(PeriodicCommand):
     @classmethod
     def at_time(cls, at, delay, function, arguments):
         cmd = cls.at_time(at, function, arguments)
+        if not isinstance(delay, datetime.timedelta):
+            delay = datetime.timedelta(seconds=delay)
         cmd.delay = delay
         return cmd
 
