@@ -85,6 +85,7 @@ from . import functools as irc_functools
 from . import events
 from . import util
 from . import strings
+from . import modes
 
 DEBUG = False
 
@@ -1378,72 +1379,14 @@ def nm_to_uh(s): return NickMask(s).userhost
 def nm_to_h(s): return NickMask(s).host
 def nm_to_u(s): return NickMask(s).user
 
-def parse_nick_modes(mode_string):
-    """Parse a nick mode string.
-
-    The function returns a list of lists with three members: sign,
-    mode and argument.  The sign is "+" or "-".  The argument is
-    always None.
-
-    Example:
-
-    >>> parse_nick_modes("+ab-c")
-    [['+', 'a', None], ['+', 'b', None], ['-', 'c', None]]
-    """
-
-    return _parse_modes(mode_string, "")
-
-def parse_channel_modes(mode_string):
-    """Parse a channel mode string.
-
-    The function returns a list of lists with three members: sign,
-    mode and argument.  The sign is "+" or "-".  The argument is
-    None if mode isn't one of "b", "k", "l", "v" or "o".
-
-    Example:
-
-    >>> parse_channel_modes("+ab-c foo")
-    [['+', 'a', None], ['+', 'b', 'foo'], ['-', 'c', None]]
-    """
-
-    return _parse_modes(mode_string, "bklvo")
-
-def _parse_modes(mode_string, unary_modes=""):
-    """[Internal]"""
-    modes = []
-    arg_count = 0
-
-    # State variable.
-    sign = ""
-
-    a = mode_string.split()
-    if len(a) == 0:
-        return []
-    else:
-        mode_part, args = a[0], a[1:]
-
-    if mode_part[0] not in "+-":
-        return []
-    for ch in mode_part:
-        if ch in "+-":
-            sign = ch
-        elif ch == " ":
-            pass
-        elif ch in unary_modes:
-            if len(args) >= arg_count + 1:
-                modes.append([sign, ch, args[arg_count]])
-                arg_count = arg_count + 1
-            else:
-                modes.append([sign, ch, None])
-        else:
-            modes.append([sign, ch, None])
-    return modes
-
 def _ping_ponger(connection, event):
-    """[Internal]"""
+    "A global handler for the 'ping' event"
     connection.pong(event.target())
 
 # for backward compatibility
+parse_nick_modes = modes.parse_nick_modes
+parse_channel_modes = modes.parse_channel_modes
+
 generated_events = events.generated
 protocol_events = events.protocol
 numeric_events = events.numeric

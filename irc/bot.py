@@ -31,6 +31,7 @@ from __future__ import absolute_import
 import sys
 
 import irc.client
+import irc.modes
 from .dict import IRCDict
 
 class SingleServerIRCBot(irc.client.SimpleIRCClient):
@@ -121,7 +122,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.channels[channel].remove_user(nick)
 
     def _on_mode(self, c, e):
-        modes = irc.client.parse_channel_modes(" ".join(e.arguments()))
+        modes = irc.modes.parse_channel_modes(" ".join(e.arguments()))
         t = e.target()
         if irc.client.is_channel(t):
             ch = self.channels[t]
