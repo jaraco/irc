@@ -24,7 +24,7 @@ def total_seconds(td):
 
     >>> import datetime
     >>> total_seconds(datetime.timedelta(hours=24))
-    86400
+    86400.0
     """
     try:
         result = td.total_seconds()
