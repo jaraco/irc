@@ -1,3 +1,15 @@
+2.0
+===
+
+* DelayedCommands now use the local time for calculating 'at' and 'due'
+  times. This will be more friendly for simple servers. Servers that expect
+  UTC times should either run in UTC or override DelayedCommand.now to
+  return an appropriate time object for 'now'. For example::
+
+    def startup_bot():
+        irc.client.DelayedCommand.now = irc.client.DelayedCommand.utcnow
+        ...
+
 1.1
 ===
 

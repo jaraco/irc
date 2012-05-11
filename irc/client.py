@@ -368,11 +368,14 @@ class IRC(object):
 class DelayedCommand(datetime.datetime):
     """
     A command to be executed after some delay (seconds or timedelta).
+
+    Clients may override .now() to have dates interpreted in a different
+    manner, such as to use UTC or to have timezone-aware times.
     """
     def __new__(cls, delay, function, arguments):
         if not isinstance(delay, datetime.timedelta):
             delay = datetime.timedelta(seconds=delay)
-        at = datetime.datetime.utcnow() + delay
+        at = cls.now() + delay
         cmd = datetime.datetime.__new__(DelayedCommand, at.year,
             at.month, at.day, at.hour, at.minute, at.second,
             at.microsecond, at.tzinfo)
@@ -385,15 +388,16 @@ class DelayedCommand(datetime.datetime):
     def at_time(cls, at, function, arguments):
         """
         Construct a DelayedCommand to come due at `at`, where `at` may be
-        a datetime or timestamp.
+        a datetime or timestamp. If `at` is a timestamp, it will be
+        interpreted as a naive local timestamp.
         """
         if isinstance(at, int):
-            at = datetime.datetime.utcfromtimestamp(at)
-        delay = at - datetime.datetime.utcnow()
+            at = datetime.datetime.fromtimestamp(at)
+        delay = at - cls.now()
         return cls(delay, function, arguments)
 
     def due(self):
-        return datetime.datetime.utcnow() >= self
+        return self.now() >= self
 
 class PeriodicCommand(DelayedCommand):
     """
