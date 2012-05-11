@@ -381,6 +381,7 @@ class DelayedCommand(datetime.datetime):
         cmd.arguments = arguments
         return cmd
 
+    @classmethod
     def at_time(cls, at, function, arguments):
         """
         Construct a DelayedCommand to come due at `at`, where `at` may be
@@ -390,7 +391,6 @@ class DelayedCommand(datetime.datetime):
             at = datetime.datetime.utcfromtimestamp(at)
         delay = at - datetime.datetime.utcnow()
         return cls(delay, function, arguments)
-    at_time = classmethod(at_time)
 
     def due(self):
         return datetime.datetime.utcnow() >= self
@@ -403,6 +403,18 @@ class PeriodicCommand(DelayedCommand):
     def next(self):
         return PeriodicCommand(self.delay, self.function,
             self.arguments)
+
+class PeriodicCommandFixedDelay(PeriodicCommand):
+    """
+    Like a periodic command, but don't calculate the delay based on
+    the current time. Instead use a fixed delay following the initial
+    run.
+    """
+    @classmethod
+    def at_time(cls, at, delay, function, arguments):
+        cmd = cls.at_time(at, function, arguments)
+        cmd.delay = delay
+        return cmd
 
 _rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
 

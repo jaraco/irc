@@ -1,3 +1,10 @@
+1.1
+===
+
+* Added irc.client.PeriodicCommandFixedDelay. Schedule this command
+  to have a function executed at a specific time and then at periodic
+  intervals thereafter.
+
 1.0
 ===
 
