@@ -377,7 +377,7 @@ class DelayedCommand(datetime.datetime):
         if not isinstance(delay, datetime.timedelta):
             delay = datetime.timedelta(seconds=delay)
         at = cls.now() + delay
-        cmd = datetime.datetime.__new__(DelayedCommand, at.year,
+        cmd = datetime.datetime.__new__(cls, at.year,
             at.month, at.day, at.hour, at.minute, at.second,
             at.microsecond, at.tzinfo)
         cmd.delay = delay

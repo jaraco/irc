@@ -1,3 +1,4 @@
+import datetime
 import random
 
 import irc.client
@@ -18,3 +19,17 @@ def test_delayed_command_order():
 		for delay in delays
 	])
 	assert [c.delay.seconds for c in cmds] == sorted(delays)
+
+def test_periodic_command_fixed_delay():
+	"""
+	Test that we can construct a periodic command with a fixed initial
+	delay.
+	"""
+	fd = irc.client.PeriodicCommandFixedDelay.at_time(
+		at = datetime.datetime.now(),
+		delay = datetime.timedelta(seconds=2),
+		function = lambda: None,
+		arguments = [],
+		)
+	assert fd.due() == True
+	assert fd.next().due() == False
