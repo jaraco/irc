@@ -386,6 +386,10 @@ class DelayedCommand(datetime.datetime):
         return cmd
 
     @classmethod
+    def now(self, tzinfo=None):
+        return datetime.datetime.now(tzinfo)
+
+    @classmethod
     def at_time(cls, at, function, arguments):
         """
         Construct a DelayedCommand to come due at `at`, where `at` may be
