@@ -75,6 +75,7 @@ import types
 import ssl as ssl_mod
 import datetime
 import struct
+import logging
 
 try:
     import pkg_resources
@@ -87,7 +88,7 @@ from . import util
 from . import strings
 from . import modes
 
-DEBUG = False
+log = logging.getLogger(__name__)
 
 # set the version tuple
 try:
@@ -416,7 +417,8 @@ class PeriodicCommandFixedDelay(PeriodicCommand):
     """
     @classmethod
     def at_time(cls, at, delay, function, arguments):
-        cmd = cls.at_time(at, function, arguments)
+        cmd = super(PeriodicCommandFixedDelay, cls).at_time(
+            at, function, arguments)
         if not isinstance(delay, datetime.timedelta):
             delay = datetime.timedelta(seconds=delay)
         cmd.delay = delay
@@ -599,8 +601,7 @@ class ServerConnection(Connection):
         self.previous_buffer = lines.pop()
 
         for line in lines:
-            if DEBUG:
-                print "FROM SERVER:", line
+            log.debug("FROM SERVER: %s", line)
 
             if not line:
                 continue
@@ -661,16 +662,14 @@ class ServerConnection(Connection):
                             command = "ctcpreply"
 
                         m = list(m)
-                        if DEBUG:
-                            print "command: %s, source: %s, target: %s, arguments: %s" % (
-                                command, prefix, target, m)
+                        log.debug("command: %s, source: %s, target: %s, "
+                            "arguments: %s", command, prefix, target, m)
                         self._handle_event(Event(command, NickMask(prefix), target, m))
                         if command == "ctcp" and m[0] == "ACTION":
                             self._handle_event(Event("action", prefix, target, m[1:]))
                     else:
-                        if DEBUG:
-                            print "command: %s, source: %s, target: %s, arguments: %s" % (
-                                command, prefix, target, [m])
+                        log.debug("command: %s, source: %s, target: %s, "
+                            "arguments: %s", command, prefix, target, [m])
                         self._handle_event(Event(command, NickMask(prefix), target, [m]))
             else:
                 target = None
@@ -687,9 +686,8 @@ class ServerConnection(Connection):
                     if not is_channel(target):
                         command = "umode"
 
-                if DEBUG:
-                    print "command: %s, source: %s, target: %s, arguments: %s" % (
-                        command, prefix, target, arguments)
+                log.debug("command: %s, source: %s, target: %s, "
+                    "arguments: %s", command, prefix, target, arguments)
                 self._handle_event(Event(command, NickMask(prefix), target, arguments))
 
     def _handle_event(self, event):
@@ -884,8 +882,7 @@ class ServerConnection(Connection):
                 self.ssl.write(string + "\r\n")
             else:
                 self.socket.send(string + "\r\n")
-            if DEBUG:
-                print "TO SERVER:", string
+            log.debug("TO SERVER: %s", string)
         except socket.error:
             # Ouch!
             self.disconnect("Connection reset by peer.")
@@ -1042,9 +1039,8 @@ class DCCConnection(Connection):
             self.socket.close()
             self.socket = conn
             self.connected = 1
-            if DEBUG:
-                print "DCC connection from %s:%d" % (
-                    self.peeraddress, self.peerport)
+            log.debug("DCC connection from %s:%d", self.peeraddress,
+                self.peerport)
             self.irclibobj._handle_event(
                 self,
                 Event("dcc_connect", self.peeraddress, None, None))
@@ -1080,12 +1076,10 @@ class DCCConnection(Connection):
         prefix = self.peeraddress
         target = None
         for chunk in chunks:
-            if DEBUG:
-                print "FROM PEER:", chunk
+            log.debug("FROM PEER: %s", chunk)
             arguments = [chunk]
-            if DEBUG:
-                print "command: %s, source: %s, target: %s, arguments: %s" % (
-                    command, prefix, target, arguments)
+            log.debug("command: %s, source: %s, target: %s, arguments: %s",
+                command, prefix, target, arguments)
             self.irclibobj._handle_event(
                 self,
                 Event(command, prefix, target, arguments))
@@ -1104,8 +1098,7 @@ class DCCConnection(Connection):
             self.socket.send(string)
             if self.dcctype == "chat":
                 self.socket.send("\n")
-            if DEBUG:
-                print "TO PEER: %s\n" % string
+            log.debug("TO PEER: %s\n", string)
         except socket.error:
             # Ouch!
             self.disconnect("Connection reset by peer.")
@@ -1140,8 +1133,7 @@ class SimpleIRCClient(object):
 
     def _dispatcher(self, c, e):
         """[Internal]"""
-        if DEBUG:
-            print("irclib.py:_dispatcher:%s" % e.eventtype())
+        log.debug("_dispatcher: %s", e.eventtype())
 
         m = "on_" + e.eventtype()
         if hasattr(self, m):
