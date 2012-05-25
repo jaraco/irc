@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 1999-2002  Joel Rosdahl
-# Portions Copyright © 2011 Jason R. Coombs
+# Portions Copyright Â© 2011 Jason R. Coombs
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
