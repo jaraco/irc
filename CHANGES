@@ -1,3 +1,9 @@
+2.0.1
+=====
+
+* Issue #3541414 - The ServerConnection and DCCConnection now encode any
+  strings as UTF-8 before transmitting.
+
 2.0
 ===
 
