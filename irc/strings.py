@@ -4,7 +4,7 @@ import re
 import string
 
 # from jaraco.util.string
-class FoldedCase(str):
+class FoldedCase(unicode):
     """
     A case insensitive string class; behaves just like str
     except compares equal when the only variation is case.
@@ -20,21 +20,31 @@ class FoldedCase(str):
     4
 
     >>> s.split('O')
-    ['hell', ' w', 'rld']
+    [u'hell', u' w', u'rld']
 
-    >>> names = map(FoldedCase, ['GAMMA', 'alpha', 'Beta'])
-    >>> names.sort()
-    >>> names
-    ['alpha', 'Beta', 'GAMMA']
+    >>> sorted(map(FoldedCase, ['GAMMA', 'alpha', 'Beta']))
+    [u'alpha', u'Beta', u'GAMMA']
+
+    It's still possible to compare against non-FoldedCase dicts
+    >>> s == None
+    False
+    >>> s == 1
+    False
     """
     def __lt__(self, other):
-        return self.lower() < other.lower()
+        if hasattr(other, 'lower'):
+            other = other.lower()
+        return self.lower() < other
 
     def __gt__(self, other):
-        return self.lower() > other.lower()
+        if hasattr(other, 'lower'):
+            other = other.lower()
+        return self.lower() > other
 
     def __eq__(self, other):
-        return self.lower() == other.lower()
+        if hasattr(other, 'lower'):
+            other = other.lower()
+        return self.lower() == other
 
     def __hash__(self):
         return hash(self.lower())

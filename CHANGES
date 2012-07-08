@@ -3,6 +3,8 @@
 
 * Issue #3541414 - The ServerConnection and DCCConnection now encode any
   strings as UTF-8 before transmitting.
+* Issue #3527371 - Updated strings.FoldedCase to support comparison against
+  objects of other types.
 
 2.0
 ===
