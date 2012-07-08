@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 1999-2002  Joel Rosdahl
-# Portions Copyright © 2011 Jason R. Coombs
+# Copyright © 2011-2012 Jason R. Coombs
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -879,13 +879,12 @@ class ServerConnection(Connection):
 
         The string will be padded with appropriate CR LF.
         """
+        bytes = string.encode('utf-8') + '\r\n'
+        sender = self.ssl.write if self.ssl else self.socket.send
         if self.socket is None:
             raise ServerNotConnectedError("Not connected.")
         try:
-            if self.ssl:
-                self.ssl.write(string + "\r\n")
-            else:
-                self.socket.send(string + "\r\n")
+            sender(bytes)
             log.debug("TO SERVER: %s", string)
         except socket.error:
             # Ouch!
@@ -1098,8 +1097,9 @@ class DCCConnection(Connection):
         The string will be padded with appropriate LF if it's a DCC
         CHAT session.
         """
+        bytes = string.encode('utf-8')
         try:
-            self.socket.send(string)
+            self.socket.send(bytes)
             if self.dcctype == "chat":
                 self.socket.send("\n")
             log.debug("TO PEER: %s\n", string)
