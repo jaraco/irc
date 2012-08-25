@@ -76,6 +76,7 @@ import ssl as ssl_mod
 import datetime
 import struct
 import logging
+import itertools
 
 try:
     import pkg_resources
@@ -200,10 +201,9 @@ class IRC(object):
 
         See documentation for IRC.__init__.
         """
-        for s in sockets:
-            for c in self.connections:
-                if s == c._get_socket():
-                    c.process_data()
+        for s, c in itertools.product(sockets, self.connections):
+            if s == c._get_socket():
+                c.process_data()
 
     def process_timeout(self):
         """Called when a timeout notification is due.
