@@ -201,6 +201,7 @@ class IRC(object):
 
         See documentation for IRC.__init__.
         """
+        log.log(logging.DEBUG-2, "process_data()")
         for s, c in itertools.product(sockets, self.connections):
             if s == c._get_socket():
                 c.process_data()
@@ -231,6 +232,7 @@ class IRC(object):
         incoming data, if there are any.  If that seems boring, look
         at the process_forever method.
         """
+        log.log(logging.DEBUG-2, "process_once()")
         sockets = map(lambda x: x._get_socket(), self.connections)
         sockets = filter(lambda x: x != None, sockets)
         if sockets:
@@ -249,6 +251,7 @@ class IRC(object):
 
             timeout -- Parameter to pass to process_once.
         """
+        log.debug("process_forever(timeout=%s)", timeout)
         while 1:
             self.process_once(timeout)
 
@@ -499,6 +502,9 @@ class ServerConnection(Connection):
 
         Returns the ServerConnection object.
         """
+        log.debug("connect(server=%r, port=%r, nickname=%r, ...)", server,
+            port, nickname)
+
         if self.connected:
             self.disconnect("Changing servers")
 
