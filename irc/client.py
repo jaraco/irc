@@ -759,6 +759,7 @@ class ServerConnection(Connection):
         self.quit(message)
 
         try:
+            self.socket.shutdown()
             self.socket.close()
         except socket.error:
             pass
@@ -1030,6 +1031,7 @@ class DCCConnection(Connection):
 
         self.connected = 0
         try:
+            self.socket.shutdown()
             self.socket.close()
         except socket.error:
             pass
