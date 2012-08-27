@@ -1,3 +1,8 @@
+2.0.2
+=====
+
+* Fix socket.shutdown usage.
+
 2.0.1
 =====
 
