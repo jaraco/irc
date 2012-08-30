@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from . import strings
 
 # from jaraco.util.dictlib
@@ -51,24 +53,24 @@ class IRCDict(KeyTransformingDict):
 
     The dict maintains the original case:
     >>> d.keys()
-    ['A', '[This]']
+    [u'A', u'[This]']
 
     But the keys can be referenced with a different case
     >>> d['a']
-    'foo'
+    u'foo'
 
     >>> d['{this}']
-    'that'
+    u'that'
 
     >>> d['{THIS}']
-    'that'
+    u'that'
 
     >>> '{thiS]' in d
     True
 
     This should work for operations like delete and pop as well.
     >>> d.pop('A')
-    'foo'
+    u'foo'
     >>> del d['{This}']
     >>> len(d)
     0

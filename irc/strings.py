@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import re
 import string
@@ -68,14 +68,14 @@ class IRCFoldedCase(FoldedCase):
     strings (RFC 1459).
 
     >>> IRCFoldedCase('Foo^').lower()
-    'foo~'
+    u'foo~'
     >>> IRCFoldedCase('[this]') == IRCFoldedCase('{THIS}')
     True
     """
-    translation = string.maketrans(
-        string.ascii_uppercase + r"[]\^",
-        string.ascii_lowercase + r"{}|~",
-    )
+    translation = dict(zip(
+        map(ord, string.ascii_uppercase + r"[]\^"),
+        map(ord, string.ascii_lowercase + r"{}|~"),
+    ))
 
     def lower(self):
         return self.translate(self.translation)

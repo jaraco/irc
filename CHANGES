@@ -1,3 +1,9 @@
+2.0.3
+=====
+
+* Improved Unicode support. Fixes failing tests and errors lowering Unicode
+  channel names.
+
 2.0.2
 =====
 
