@@ -14,6 +14,9 @@
 
 * Issue #3541414 - The ServerConnection and DCCConnection now encode any
   strings as UTF-8 before transmitting.
+  NOTE: This backward-incompatible change should have resulted in a 3.0
+  release, but was not recognized as backward-incompatible until following
+  the release.
 * Issue #3527371 - Updated strings.FoldedCase to support comparison against
   objects of other types.
 * Shutdown the sockets before closing.
