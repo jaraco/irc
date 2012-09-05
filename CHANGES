@@ -1,31 +1,25 @@
-2.0.4
-=====
-
-* Re-release of irc 2.0 (without the changes from 2.0.1-2.0.3) for
-  correct compatibility indication.
-
-2.0.3
-=====
+3.0
+===
 
 * Improved Unicode support. Fixes failing tests and errors lowering Unicode
   channel names.
-
-2.0.2
-=====
-
-* Fix socket.shutdown usage.
-
-2.0.1
-=====
-
 * Issue #3541414 - The ServerConnection and DCCConnection now encode any
   strings as UTF-8 before transmitting.
-  NOTE: This backward-incompatible change should have resulted in a 3.0
-  release, but was not recognized as backward-incompatible until following
-  the release.
 * Issue #3527371 - Updated strings.FoldedCase to support comparison against
   objects of other types.
 * Shutdown the sockets before closing.
+
+Applications that are currently encoding unicode as UTF-8 before passing the
+strings to `ServerConnection.send_raw` need to be updated to send Unicode
+or ASCII.
+
+2.0.4
+=====
+
+This release officially deprecates 2.0.1-2.0.3 in favor of 3.0.
+
+* Re-release of irc 2.0 (without the changes from 2.0.1-2.0.3) for
+  correct compatibility indication.
 
 2.0
 ===
