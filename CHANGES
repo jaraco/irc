@@ -1,3 +1,9 @@
+2.0.4
+=====
+
+* Re-release of irc 2.0 (without the changes from 2.0.1-2.0.3) for
+  correct compatibility indication.
+
 2.0.3
 =====
 
