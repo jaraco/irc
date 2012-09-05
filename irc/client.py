@@ -265,9 +265,8 @@ class IRC(object):
 
         Arguments:
 
-            event -- Event type (a string).  Check the values of the
-            numeric_events dictionary in irclib.py for possible event
-            types.
+            event -- Event type (a string).  Check the values of
+            numeric_events for possible event types.
 
             handler -- Callback function.
 
