@@ -52,3 +52,11 @@ def upload_project_web():
 @paver.easy.needs('generate_setup', 'minilib', 'distutils.command.sdist')
 def sdist():
     "Override sdist to make sure the setup.py gets generated"
+
+def upload():
+    # this is the technique used to upload the dist to sourceforge
+    raise NotImplementedError('code is not functional - just here for '
+        'reference')
+    scp = 'pscp' if platform.system() == 'Windows' else 'scp'
+    sf_dest = 'frs.sourceforge.net:/home/frs/project/python-irclib'
+    cmd = '{scp} dist/{name} {sf_dest}'
