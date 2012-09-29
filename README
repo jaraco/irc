@@ -8,7 +8,7 @@ The home of irclib is:
 You can `download project releases from PyPI
 <http://pypi.python.org/pypi/irc>`_.
 
-Some content is still available at the `foundational SourceForge site
+Some legacy content is still available at the `foundational SourceForge site
 <http://sourceforge.net/projects/python-irclib/>`_.
 
 This library is intended to encapsulate the IRC protocol at a quite
