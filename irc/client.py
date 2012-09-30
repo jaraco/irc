@@ -865,13 +865,12 @@ class ServerConnection(Connection):
 
     def privmsg(self, target, text):
         """Send a PRIVMSG command."""
-        # Should limit len(text) here!
         self.send_raw("PRIVMSG %s :%s" % (target, text))
 
     def privmsg_many(self, targets, text):
         """Send a PRIVMSG command to multiple targets."""
-        # Should limit len(text) here!
-        self.send_raw("PRIVMSG %s :%s" % (",".join(targets), text))
+        target = ','.join(targets)
+        return self.privmsg(target, text)
 
     def quit(self, message=""):
         """Send a QUIT command."""
@@ -884,7 +883,15 @@ class ServerConnection(Connection):
 
         The string will be padded with appropriate CR LF.
         """
+        # The string should not contain any carriage return other than the
+        # one added here.
+        if '\n' in string:
+            raise ValueError("Carriage returns not allowed in privmsg(text)")
         bytes = string.encode('utf-8') + '\r\n'
+        # According to the RFC http://tools.ietf.org/html/rfc2812#page-6,
+        # clients should not transmit more than 512 bytes.
+        if len(bytes) > 512:
+            raise ValueError("Messages limited to 512 bytes")
         sender = self.ssl.write if self.ssl else self.socket.send
         if self.socket is None:
             raise ServerNotConnectedError("Not connected.")

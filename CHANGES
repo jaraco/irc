@@ -1,3 +1,10 @@
+3.0.1
+=====
+
+# Added error checking when sending a message - for both message length and
+  embedded carriage returns. Fixes #4.
+* Updated README.
+
 3.0
 ===
 
