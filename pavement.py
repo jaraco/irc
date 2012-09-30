@@ -53,7 +53,7 @@ def upload_project_web():
 def sdist():
     "Override sdist to make sure the setup.py gets generated"
 
-def upload():
+def upload_sf():
     # this is the technique used to upload the dist to sourceforge
     raise NotImplementedError('code is not functional - just here for '
         'reference')
