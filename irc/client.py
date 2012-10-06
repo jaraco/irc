@@ -233,8 +233,7 @@ class IRC(object):
         at the process_forever method.
         """
         log.log(logging.DEBUG-2, "process_once()")
-        sockets = map(lambda x: x._get_socket(), self.connections)
-        sockets = filter(lambda x: x != None, sockets)
+        sockets = [x._get_socket() for x in self.connections if x is not None]
         if sockets:
             (i, o, e) = select.select(sockets, [], [], timeout)
             self.process_data(i)
@@ -663,7 +662,7 @@ class ServerConnection(Connection):
                         command = "privnotice"
 
                 for m in messages:
-                    if type(m) is types.TupleType:
+                    if isinstance(m, tuple):
                         if command in ["privmsg", "pubmsg"]:
                             command = "ctcp"
                         else:
@@ -996,7 +995,7 @@ class DCCConnection(Connection):
         self.passive = 0
         try:
             self.socket.connect((self.peeraddress, self.peerport))
-        except socket.error, x:
+        except socket.error as x:
             raise DCCConnectionError("Couldn't connect to socket: %s" % x)
         self.connected = 1
         if self.irclibobj.fn_to_add_socket:
@@ -1021,7 +1020,7 @@ class DCCConnection(Connection):
             self.socket.bind((socket.gethostbyname(socket.gethostname()), 0))
             self.localaddress, self.localport = self.socket.getsockname()
             self.socket.listen(10)
-        except socket.error, x:
+        except socket.error as x:
             raise DCCConnectionError("Couldn't bind socket: %s" % x)
         return self
 
