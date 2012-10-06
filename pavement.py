@@ -31,6 +31,8 @@ paver.setuputils.setup(
     setup_requires=[
         'hgtools',
     ],
+    use_2to3=True,
+    # TODO: skip NextFixer
 )
 
 @paver.easy.task
