@@ -589,10 +589,8 @@ class ServerConnection(Connection):
         """[Internal]"""
 
         try:
-            if self.ssl:
-                new_data = self.ssl.read(2 ** 14)
-            else:
-                new_data = self.socket.recv(2 ** 14)
+            reader = self.ssl.read if self.ssl else self.socket.recv
+            new_data = reader(2 ** 14)
         except socket.error:
             # The server hung up.
             self.disconnect("Connection reset by peer")
