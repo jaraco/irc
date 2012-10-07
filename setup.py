@@ -29,6 +29,7 @@ setup_params = dict(
     use_2to3_exclude_fixers=[
         'lib2to3.fixes.fix_import',
         'lib2to3.fixes.fix_next',
+        'lib2to3.fixes.fix_print',
     ],
 )
 
