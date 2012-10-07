@@ -1,0 +1,33 @@
+import setuptools
+
+def read_long_description():
+    with open('README') as f:
+        data = f.read()
+    return data
+
+setup_params = dict(
+    name="irc",
+    description="IRC (Internet Relay Chat) protocol client library for Python",
+    long_description=read_long_description(),
+    use_hg_version=True,
+    packages=setuptools.find_packages(),
+    author="Joel Rosdahl",
+    author_email="joel@rosdahl.net",
+    maintainer="Jason R. Coombs",
+    maintainer_email="jaraco@jaraco.com",
+    url="http://python-irclib.sourceforge.net",
+    classifiers = [
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+    ],
+    setup_requires=[
+        'hgtools',
+    ],
+    use_2to3=True,
+    # TODO: skip NextFixer
+)
+
+if __name__ == '__main__':
+	setuptools.setup(**setup_params)
