@@ -1,3 +1,8 @@
+3.1.1
+=====
+
+* Fix some issues with bytes/unicode on Python 3
+
 3.1
 ===
 
