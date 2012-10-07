@@ -1,7 +1,13 @@
+3.1
+===
+
+* Distribute using setuptools rather than paver.
+* Minor tweaks for Python 3 support. Now installs on Python 3.
+
 3.0.1
 =====
 
-# Added error checking when sending a message - for both message length and
+* Added error checking when sending a message - for both message length and
   embedded carriage returns. Fixes #4.
 * Updated README.
 
