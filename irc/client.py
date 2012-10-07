@@ -462,7 +462,7 @@ class ServerNotConnectedError(ServerConnectionError):
 
 # Huh!?  Crrrrazy EFNet doesn't follow the RFC: their ircd seems to
 # use \n as message separator!  :P
-_linesep_regexp = re.compile("\r?\n")
+_linesep_regexp = re.compile(b"\r?\n")
 
 class ServerConnection(Connection):
     """This class represents an IRC server connection.
@@ -506,7 +506,7 @@ class ServerConnection(Connection):
         if self.connected:
             self.disconnect("Changing servers")
 
-        self.previous_buffer = ""
+        self.previous_buffer = b""
         self.handlers = {}
         self.real_server_name = ""
         self.real_nickname = nickname
@@ -608,6 +608,8 @@ class ServerConnection(Connection):
         self.previous_buffer = lines.pop()
 
         for line in lines:
+            line = line.decode('utf-8')
+
             log.debug("FROM SERVER: %s", line)
 
             if not line:
