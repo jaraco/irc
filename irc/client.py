@@ -460,9 +460,49 @@ class ServerNotConnectedError(ServerConnectionError):
     pass
 
 
-# Huh!?  Crrrrazy EFNet doesn't follow the RFC: their ircd seems to
-# use \n as message separator!  :P
-_linesep_regexp = re.compile(b"\r?\n")
+class LineBuffer(object):
+    r"""
+    Buffer bytes read in from a connection and serve complete lines back.
+
+    >>> b = LineBuffer()
+    >>> len(b)
+    0
+
+    >>> b.feed(b'foo\nbar')
+    >>> len(b)
+    7
+    >>> list(b.lines())
+    [u'foo']
+    >>> len(b)
+    3
+
+    >>> b.feed(b'bar\r\nbaz\n')
+    >>> list(b.lines())
+    [u'barbar', u'baz']
+    >>> len(b)
+    0
+    """
+    line_sep_exp = re.compile(b'\r?\n')
+    encoding = 'utf-8'
+
+    def __init__(self):
+        self.buffer = b''
+
+    def feed(self, bytes):
+        self.buffer += bytes
+
+    def lines(self):
+        lines = self.line_sep_exp.split(self.buffer)
+        # save the last, unfinished, possibly empty line
+        self.buffer = lines.pop()
+        return (line.decode(self.encoding) for line in lines)
+
+    def __iter__(self):
+        return self.lines()
+
+    def __len__(self):
+        return len(self.buffer)
+
 
 class ServerConnection(Connection):
     """This class represents an IRC server connection.
@@ -506,7 +546,7 @@ class ServerConnection(Connection):
         if self.connected:
             self.disconnect("Changing servers")
 
-        self.previous_buffer = b""
+        self.buffer = LineBuffer()
         self.handlers = {}
         self.real_server_name = ""
         self.real_nickname = nickname
@@ -600,14 +640,9 @@ class ServerConnection(Connection):
             self.disconnect("Connection reset by peer")
             return
 
-        lines = _linesep_regexp.split(self.previous_buffer + new_data)
+        self.buffer.feed(new_data)
 
-        # Save the last, unfinished line.
-        self.previous_buffer = lines.pop()
-
-        for line in lines:
-            line = line.decode('utf-8')
-
+        for line in self.buffer:
             log.debug("FROM SERVER: %s", line)
 
             if not line:
@@ -989,7 +1024,7 @@ class DCCConnection(Connection):
         self.peeraddress = socket.gethostbyname(address)
         self.peerport = port
         self.socket = None
-        self.previous_buffer = ""
+        self.buffer = LineBuffer()
         self.handlers = {}
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.passive = 0
@@ -1012,7 +1047,7 @@ class DCCConnection(Connection):
         peer, the peer address and port are available as
         self.peeraddress and self.peerport.
         """
-        self.previous_buffer = ""
+        self.buffer = LineBuffer()
         self.handlers = {}
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.passive = 1
@@ -1073,17 +1108,14 @@ class DCCConnection(Connection):
             return
 
         if self.dcctype == "chat":
-            # The specification says lines are terminated with LF, but
-            # it seems safer to handle CR LF terminations too.
-            chunks = _linesep_regexp.split(self.previous_buffer + new_data)
+            self.buffer.feed(new_data)
 
-            # Save the last, unfinished line.
-            self.previous_buffer = chunks[-1]
-            if len(self.previous_buffer) > 2 ** 14:
+            chunks = list(self.buffer)
+
+            if len(self.buffer) > 2 ** 14:
                 # Bad peer! Naughty peer!
                 self.disconnect()
                 return
-            chunks = chunks[:-1]
         else:
             chunks = [new_data]
 
