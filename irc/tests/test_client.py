@@ -43,7 +43,7 @@ def test_privmsg_sends_msg(socket_mod):
 	server.connect('foo', 6667, 'bestnick')
 	server.privmsg('#best-channel', 'You are great')
 	socket_mod.socket.return_value.send.assert_called_with(
-		'PRIVMSG #best-channel :You are great\r\n')
+		b'PRIVMSG #best-channel :You are great\r\n')
 
 @mock.patch('irc.client.socket')
 def test_privmsg_fails_on_embedded_carriage_returns(socket_mod):

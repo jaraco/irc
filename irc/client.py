@@ -886,7 +886,7 @@ class ServerConnection(Connection):
         # one added here.
         if '\n' in string:
             raise ValueError("Carriage returns not allowed in privmsg(text)")
-        bytes = string.encode('utf-8') + '\r\n'
+        bytes = string.encode('utf-8') + b'\r\n'
         # According to the RFC http://tools.ietf.org/html/rfc2812#page-6,
         # clients should not transmit more than 512 bytes.
         if len(bytes) > 512:
