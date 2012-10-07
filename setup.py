@@ -26,8 +26,11 @@ setup_params = dict(
         'hgtools',
     ],
     use_2to3=True,
-    # TODO: skip NextFixer
+    use_2to3_exclude_fixers=[
+        'lib2to3.fixes.fix_import',
+        'lib2to3.fixes.fix_next',
+    ],
 )
 
 if __name__ == '__main__':
-	setuptools.setup(**setup_params)
+    setuptools.setup(**setup_params)
