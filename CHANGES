@@ -1,3 +1,9 @@
+3.2
+===
+
+* Implemented thread safety via a reentrant lock guarding shared state in IRC
+  objects.
+
 3.1.1
 =====
 
