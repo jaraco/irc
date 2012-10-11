@@ -616,10 +616,11 @@ class ServerConnection(Connection):
         This method closes the connection permanently; after it has
         been called, the object is unusable.
         """
-
-        self.disconnect("Closing object")
-        self.irclibobj._remove_connection(self)
-
+        # Without this thread lock, there is a window during which
+        # select() can find a closed socket, leading to an EBADF error.
+        with self.irclibobj.mutex:
+            self.disconnect("Closing object")
+            self.irclibobj._remove_connection(self)
     def _get_socket(self):
         """[Internal]"""
         return self.socket
