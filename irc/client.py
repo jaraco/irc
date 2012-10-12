@@ -501,6 +501,13 @@ class LineBuffer(object):
     [u'barbar', u'baz']
     >>> len(b)
     0
+
+    Some clients will feed latin-1 or other encodings. This client assumes
+    UTF-8 and any other encodings will produce the "replacement character",
+    �.
+    >>> b.feed(b'Ol\xe9\n')
+    >>> list(b.lines())
+    [u'Ol\ufffd']
     """
     line_sep_exp = re.compile(b'\r?\n')
     encoding = 'utf-8'
@@ -515,7 +522,10 @@ class LineBuffer(object):
         lines = self.line_sep_exp.split(self.buffer)
         # save the last, unfinished, possibly empty line
         self.buffer = lines.pop()
-        return (line.decode(self.encoding) for line in lines)
+        return (
+            line.decode(self.encoding, errors='replace')
+            for line in lines
+        )
 
     def __iter__(self):
         return self.lines()
