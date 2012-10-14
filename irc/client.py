@@ -523,7 +523,7 @@ class LineBuffer(object):
         # save the last, unfinished, possibly empty line
         self.buffer = lines.pop()
         return (
-            line.decode(self.encoding, errors='replace')
+            line.decode(self.encoding, 'replace')
             for line in lines
         )
 
