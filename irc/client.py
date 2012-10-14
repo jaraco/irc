@@ -71,7 +71,6 @@ import select
 import socket
 import string
 import time
-import types
 import ssl as ssl_mod
 import datetime
 import struct
