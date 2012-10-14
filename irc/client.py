@@ -71,7 +71,7 @@ import select
 import socket
 import string
 import time
-import ssl as ssl_mod
+import warnings
 import datetime
 import struct
 import logging
@@ -88,6 +88,7 @@ from . import events
 from . import util
 from . import strings
 from . import modes
+from . import connection
 
 log = logging.getLogger(__name__)
 
@@ -544,12 +545,12 @@ class ServerConnection(Connection):
         super(ServerConnection, self).__init__(irclibobj)
         self.connected = False
         self.socket = None
-        self.ssl = None
 
     # save the method args to allow for easier reconnection.
     @irc_functools.save_method_args
     def connect(self, server, port, nickname, password=None, username=None,
-            ircname=None, localaddress="", localport=0, ssl=False, ipv6=False):
+            ircname=None, localaddress="", localport=0, ssl=False, ipv6=False,
+            connect_factory=connection.Factory):
         """Connect/reconnect to a server.
 
         Arguments:
@@ -560,6 +561,11 @@ class ServerConnection(Connection):
             password -- Password (if any).
             username -- The username.
             ircname -- The IRC name ("realname").
+            server_address -- The remote host/port of the server.
+            connect_factory -- A callable that takes the server address and
+                returns a connection (with a socket interface).
+
+        Deprecated Arguments:
             localaddress -- Bind the connection to a specific local IP address.
             localport -- Bind the connection to a specific local port.
             ssl -- Enable support for ssl.
@@ -572,6 +578,13 @@ class ServerConnection(Connection):
         log.debug("connect(server=%r, port=%r, nickname=%r, ...)", server,
             port, nickname)
 
+        if localaddress or localport or ssl or ipv6:
+            warnings.warn("localaddress, localport, ssl, and ipv6 parameters "
+                "are deprecated. Use connect_factory instead.",
+                DeprecationWarning)
+            connect_factory.use_legacy_params(localaddress, localport, ssl,
+                ipv6)
+
         if self.connected:
             self.disconnect("Changing servers")
 
@@ -581,25 +594,15 @@ class ServerConnection(Connection):
         self.real_nickname = nickname
         self.server = server
         self.port = port
+        self.server_address = (server, port)
         self.nickname = nickname
         self.username = username or nickname
         self.ircname = ircname or nickname
         self.password = password
-        self.localaddress = localaddress
-        self.localport = localport
-        self.localhost = socket.gethostname()
-        self.ipv6 = ipv6
-        if ipv6:
-            self.socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-        else:
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connect_factory = connect_factory
         try:
-            self.socket.bind((self.localaddress, self.localport))
-            self.socket.connect((self.server, self.port))
-            if ssl:
-                self.ssl = ssl_mod.wrap_socket(self.socket)
+            self.socket = self.connect_factory(self.server_address)
         except socket.error as err:
-            self.socket.close()
             self.socket = None
             raise ServerConnectionError("Couldn't connect to socket: %s" % err)
         self.connected = True
@@ -630,6 +633,7 @@ class ServerConnection(Connection):
         with self.irclibobj.mutex:
             self.disconnect("Closing object")
             self.irclibobj._remove_connection(self)
+
     def _get_socket(self):
         """[Internal]"""
         return self.socket
@@ -659,7 +663,7 @@ class ServerConnection(Connection):
         """[Internal]"""
 
         try:
-            reader = self.ssl.read if self.ssl else self.socket.recv
+            reader = getattr(self.socket, 'read', self.socket.recv)
             new_data = reader(2 ** 14)
         except socket.error:
             # The server hung up.
@@ -956,9 +960,9 @@ class ServerConnection(Connection):
         # clients should not transmit more than 512 bytes.
         if len(bytes) > 512:
             raise ValueError("Messages limited to 512 bytes")
-        sender = self.ssl.write if self.ssl else self.socket.send
         if self.socket is None:
             raise ServerNotConnectedError("Not connected.")
+        sender = getattr(self.socket, 'write', self.socket.send)
         try:
             sender(bytes)
             log.debug("TO SERVER: %s", string)
@@ -1220,37 +1224,9 @@ class SimpleIRCClient(object):
     def _dcc_disconnect(self, c, e):
         self.dcc_connections.remove(c)
 
-    def connect(self, server, port, nickname, password=None, username=None,
-                ircname=None, localaddress="", localport=0, ssl=False, ipv6=False):
-        """Connect/reconnect to a server.
-
-        Arguments:
-
-            server -- Server name.
-
-            port -- Port number.
-
-            nickname -- The nickname.
-
-            password -- Password (if any).
-
-            username -- The username.
-
-            ircname -- The IRC name.
-
-            localaddress -- Bind the connection to a specific local IP address.
-
-            localport -- Bind the connection to a specific local port.
-
-            ssl -- Enable support for ssl.
-
-            ipv6 -- Enable support for ipv6.
-
-        This function can be called to reconnect a closed connection.
-        """
-        self.connection.connect(server, port, nickname,
-                                password, username, ircname,
-                                localaddress, localport, ssl, ipv6)
+    def connect(self, *args, **kwargs):
+        """Connect using the underlying connection"""
+        self.connection.connect(*args, **kwargs)
 
     def dcc_connect(self, address, port, dcctype="chat"):
         """Connect to a DCC peer.

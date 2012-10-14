@@ -1,3 +1,34 @@
+3.3
+===
+
+* Added `connection` module with a Factory for creating socket connections.
+* Added `connect_factory` parameter to the ServerConnection.
+
+It's now possible to create connections with custom SSL parameters or other
+socket wrappers. For example, to create a connection with a custom SSL cert::
+
+    import ssl
+    import irc.client
+    import irc.connection
+    import functools
+
+    irc = irc.client.IRC()
+    server = irc.server()
+    wrapper = functools.partial(ssl.wrap_socket, ssl_cert=my_cert())
+    server.connect(connect_factory = irc.connection.Factory(wrapper=wrapper))
+
+With this release, many of the parameters to `ServerConnection.connect` are
+now deprecated:
+
+    - localaddress
+    - localport
+    - ssl
+    - ipv6
+
+Instead, one should pass the appropriate values to a `connection.Factory`
+instance and pass that factory to the .connect method. Backwards-compatibility
+will be maintained for these parameters until the release of irc 4.0.
+
 3.2.3
 =====
 
