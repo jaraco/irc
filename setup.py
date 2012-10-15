@@ -1,9 +1,13 @@
+import sys
+
 import setuptools
 
 def read_long_description():
     with open('README') as f:
         data = f.read()
     return data
+
+importlib_req = ['importlib'] if sys.version_info < (2,7) else []
 
 setup_params = dict(
     name="irc",
@@ -23,6 +27,8 @@ setup_params = dict(
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
     ],
+    install_requires=[
+    ] + importlib_req,
     setup_requires=[
         'hgtools',
     ],
