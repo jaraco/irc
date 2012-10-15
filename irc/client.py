@@ -550,7 +550,7 @@ class ServerConnection(Connection):
     @irc_functools.save_method_args
     def connect(self, server, port, nickname, password=None, username=None,
             ircname=None, localaddress="", localport=0, ssl=False, ipv6=False,
-            connect_factory=connection.Factory):
+            connect_factory=connection.Factory()):
         """Connect/reconnect to a server.
 
         Arguments:
