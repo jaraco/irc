@@ -15,7 +15,7 @@ def on_connect(connection, event):
         connection.join(target)
     else:
         while 1:
-            line = sys.stdin.readline()
+            line = sys.stdin.readline().strip()
             if not line:
                 break
             connection.privmsg(target, line)
@@ -23,7 +23,7 @@ def on_connect(connection, event):
 
 def on_join(connection, event):
     while 1:
-        line = sys.stdin.readline()
+        line = sys.stdin.readline().strip()
         if not line:
             break
         connection.privmsg(target, line)

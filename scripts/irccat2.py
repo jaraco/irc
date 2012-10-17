@@ -29,7 +29,7 @@ class IRCCat(irc.client.SimpleIRCClient):
 
     def send_it(self):
         while 1:
-            line = sys.stdin.readline()
+            line = sys.stdin.readline().strip()
             if not line:
                 break
             self.connection.privmsg(self.target, line)
