@@ -510,7 +510,7 @@ class LineBuffer(object):
     [u'Ol\ufffd']
     """
     line_sep_exp = re.compile(b'\r?\n')
-    encoding = 'utf-8'
+    decoder = lambda line: line.decode('utf-8', 'replace')
 
     def __init__(self):
         self.buffer = b''
@@ -522,10 +522,7 @@ class LineBuffer(object):
         lines = self.line_sep_exp.split(self.buffer)
         # save the last, unfinished, possibly empty line
         self.buffer = lines.pop()
-        return (
-            line.decode(self.encoding, 'replace')
-            for line in lines
-        )
+        return (self.decoder(line) for line in lines)
 
     def __iter__(self):
         return self.lines()

@@ -1,3 +1,14 @@
+3.4
+===
+
+* LineBuffer now allows customization of the decoding (including disabling
+  decoding altogether). To disable decoding of incoming lines, invoke the
+  following at some point before the connection is established::
+
+    irc.client.LineBuffer.decoder = lambda line: line
+
+  This fixes #5.
+
 3.3
 ===
 
