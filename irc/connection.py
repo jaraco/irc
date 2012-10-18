@@ -2,7 +2,11 @@
 from __future__ import absolute_import
 
 import socket
-import importlib
+try:
+    from importlib import import_module
+except ImportError:
+    # for Python 2.6 compatibility
+    import_module = __import__
 
 identity = lambda x: x
 
@@ -41,8 +45,7 @@ class Factory(object):
         if localaddress or localport:
             self.bind_address = (localaddress, localport)
         if ssl:
-            ssl_mod = importlib.importmodule('ssl')
-            self.wrapper = ssl_mod.wrap_socket
+            self.wrapper = import_module('ssl').wrap_socket
         if ipv6:
             self.family = socket.AF_INET6
 
