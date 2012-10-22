@@ -492,25 +492,22 @@ class LineBuffer(object):
     >>> len(b)
     7
     >>> list(b.lines())
-    [u'foo']
+    ['foo']
     >>> len(b)
     3
 
     >>> b.feed(b'bar\r\nbaz\n')
     >>> list(b.lines())
-    [u'barbar', u'baz']
+    ['barbar', 'baz']
     >>> len(b)
     0
 
-    Some clients will feed latin-1 or other encodings. This client assumes
-    UTF-8 and any other encodings will produce the "replacement character",
-    �.
+    The buffer will not perform any decoding.
     >>> b.feed(b'Ol\xe9\n')
     >>> list(b.lines())
-    [u'Ol\ufffd']
+    ['Ol\xe9']
     """
     line_sep_exp = re.compile(b'\r?\n')
-    decoder = lambda line: line.decode('utf-8', 'replace')
 
     def __init__(self):
         self.buffer = b''
@@ -522,7 +519,7 @@ class LineBuffer(object):
         lines = self.line_sep_exp.split(self.buffer)
         # save the last, unfinished, possibly empty line
         self.buffer = lines.pop()
-        return (self.decoder(line) for line in lines)
+        return lines
 
     def __iter__(self):
         return self.lines()
@@ -530,13 +527,44 @@ class LineBuffer(object):
     def __len__(self):
         return len(self.buffer)
 
+class DecodingLineBuffer(LineBuffer):
+    r"""
+    Like LineBuffer, but decode the output (default assumes UTF-8).
+
+    >>> b = DecodingLineBuffer()
+    >>> b.feed(b'bar\r\nbaz\nOl\xc3\xa9\n')
+    >>> list(b.lines())
+    [u'bar', u'baz', u'Ol\xe9']
+    >>> len(b)
+    0
+
+    Some clients will feed latin-1 or other encodings. If your client should
+    support docoding from these clients (and not raise a UnicodeDecodeError),
+    set errors='replace':
+
+    >>> rb = DecodingLineBuffer()
+    >>> b.errors = 'replace'
+    >>> b.feed(b'Ol\xe9\n')
+    >>> list(b.lines())
+    [u'Ol\ufffd']
+    """
+    encoding = 'utf-8'
+    errors = 'strict'
+
+    def lines(self):
+        return (line.decode(self.encoding, self.errors)
+            for line in super(DecodingLineBuffer, self).lines())
+
 
 class ServerConnection(Connection):
-    """This class represents an IRC server connection.
+    """
+    An IRC server connection.
 
     ServerConnection objects are instantiated by calling the server
     method on an IRC object.
     """
+
+    buffer_class = DecodingLineBuffer
 
     def __init__(self, irclibobj):
         super(ServerConnection, self).__init__(irclibobj)
@@ -585,7 +613,7 @@ class ServerConnection(Connection):
         if self.connected:
             self.disconnect("Changing servers")
 
-        self.buffer = LineBuffer()
+        self.buffer = self.buffer_class()
         self.handlers = {}
         self.real_server_name = ""
         self.real_nickname = nickname

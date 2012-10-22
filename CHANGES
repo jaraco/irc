@@ -1,13 +1,22 @@
+3.4.1
+=====
+
+3.4 never worked - the decoding customization feature was improperly
+implemented and never tested.
+
+* The ServerConnection now allows custom classes to be supplied to customize
+  the decoding of incoming lines. For example, to disable the decoding of incoming lines,
+  replace the `buffer_class` on the ServerConnection with a version that
+  passes through the lines directly::
+
+    irc.client.ServerConnection.buffer_class = irc.client.LineBuffer
+
+  This fixes #5.
+
 3.4
 ===
 
-* LineBuffer now allows customization of the decoding (including disabling
-  decoding altogether). To disable decoding of incoming lines, invoke the
-  following at some point before the connection is established::
-
-    irc.client.LineBuffer.decoder = lambda line: line
-
-  This fixes #5.
+*Broken Release*
 
 3.3
 ===
