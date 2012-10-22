@@ -30,5 +30,5 @@ def total_seconds(td):
         result = td.total_seconds()
     except AttributeError:
         seconds = td.seconds + td.days * 24 * 3600
-        result = (td.microseconds + seconds * 10**6) / 10**6
+        result = float((td.microseconds + seconds * 10**6) / 10**6)
     return result
