@@ -39,11 +39,13 @@ def test_periodic_command_fixed_delay():
 
 @mock.patch('irc.connection.socket')
 def test_privmsg_sends_msg(socket_mod):
-	pytest.xfail("Fails because server finds 'write' method on mock socket")
 	server = irc.client.IRC().server()
 	server.connect('foo', 6667, 'bestnick')
+	# make sure the mock object doesn't have a write method or it will treat
+	#  it as an SSL connection and never call .send.
+	del server.socket.write
 	server.privmsg('#best-channel', 'You are great')
-	socket_mod.socket.return_value.send.assert_called_with(
+	server.socket.send.assert_called_with(
 		b'PRIVMSG #best-channel :You are great\r\n')
 
 @mock.patch('irc.connection.socket')
