@@ -37,7 +37,7 @@ def test_periodic_command_fixed_delay():
 	assert fd.due() == True
 	assert fd.next().due() == False
 
-@mock.patch('irc.client.socket')
+@mock.patch('irc.connection.socket')
 def test_privmsg_sends_msg(socket_mod):
 	server = irc.client.IRC().server()
 	server.connect('foo', 6667, 'bestnick')
@@ -45,7 +45,7 @@ def test_privmsg_sends_msg(socket_mod):
 	socket_mod.socket.return_value.send.assert_called_with(
 		b'PRIVMSG #best-channel :You are great\r\n')
 
-@mock.patch('irc.client.socket')
+@mock.patch('irc.connection.socket')
 def test_privmsg_fails_on_embedded_carriage_returns(socket_mod):
 	server = irc.client.IRC().server()
 	server.connect('foo', 6667, 'bestnick')
