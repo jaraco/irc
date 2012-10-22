@@ -11,6 +11,9 @@ You can `download project releases from PyPI
 Some legacy content is still available at the `foundational SourceForge site
 <http://sourceforge.net/projects/python-irclib/>`_.
 
+Tests are `continuously run <https://travis-ci.org/#!/jaraco/irc>`_ using
+Travis-CI.
+
 This library is intended to encapsulate the IRC protocol at a quite
 low level.  It provides an event-driven IRC client framework.  It has
 a fairly thorough support for the basic IRC protocol, CTCP and DCC
