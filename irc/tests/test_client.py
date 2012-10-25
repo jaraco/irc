@@ -54,3 +54,9 @@ def test_privmsg_fails_on_embedded_carriage_returns(socket_mod):
 	server.connect('foo', 6667, 'bestnick')
 	with pytest.raises(ValueError):
 		server.privmsg('#best-channel', 'You are great\nSo are you')
+
+@mock.patch('irc.connection.socket')
+def test_connect_with_legacy_params(socket_mod):
+	server = irc.client.IRC().server()
+	server.connect('foo', 6667, 'bestnick', ssl=True)
+	import pytest; pytest.set_trace()
