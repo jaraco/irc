@@ -506,6 +506,13 @@ class LineBuffer(object):
     >>> b.feed(b'Ol\xe9\n')
     >>> list(b.lines())
     ['Ol\xe9']
+
+    The LineBuffer should also act as an iterable.
+    >>> b.feed('iterate\nthis\n')
+    >>> for line in b:
+    ...    print(line)
+    iterate
+    this
     """
     line_sep_exp = re.compile(b'\r?\n')
 
@@ -519,7 +526,7 @@ class LineBuffer(object):
         lines = self.line_sep_exp.split(self.buffer)
         # save the last, unfinished, possibly empty line
         self.buffer = lines.pop()
-        return lines
+        return iter(lines)
 
     def __iter__(self):
         return self.lines()
