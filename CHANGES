@@ -1,3 +1,10 @@
+3.4.2
+=====
+
+* Issue #6: Fix AttributeError when legacy parameters are passed to
+  `ServerConnection.connect`.
+* Issue #7: Fix TypeError on `iter(LineBuffer)`.
+
 3.4.1
 =====
 
