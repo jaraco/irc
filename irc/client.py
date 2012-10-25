@@ -614,7 +614,7 @@ class ServerConnection(Connection):
             warnings.warn("localaddress, localport, ssl, and ipv6 parameters "
                 "are deprecated. Use connect_factory instead.",
                 DeprecationWarning)
-            connect_factory.use_legacy_params(localaddress, localport, ssl,
+            connect_factory.from_legacy_params(localaddress, localport, ssl,
                 ipv6)
 
         if self.connected:
