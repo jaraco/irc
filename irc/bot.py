@@ -34,6 +34,12 @@ import irc.client
 import irc.modes
 from .dict import IRCDict
 
+class ServerSpec(object):
+    def __init__(self, host, port=6667, password=None):
+        self.host = host
+        self.port = port
+        self.password = password
+
 class SingleServerIRCBot(irc.client.SimpleIRCClient):
     """A single-server IRC bot class.
 
@@ -44,15 +50,16 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
     have operator or voice modes.  The "database" is kept in the
     self.channels attribute, which is an IRCDict of Channels.
     """
-    def __init__(self, server_list, nickname, realname, reconnection_interval=60,
-            **connect_params):
+    def __init__(self, server_list, nickname, realname,
+            reconnection_interval=60, **connect_params):
         """Constructor for SingleServerIRCBot objects.
 
         Arguments:
 
-            server_list -- A list of tuples (server, port) that
-                           defines which servers the bot should try to
-                           connect to.
+            server_list -- A list of ServerSpec objects or tuples of
+                           parameters suitable for constructing ServerSpec
+                           objects. Defines the list of servers the bot will
+                           use (in order).
 
             nickname -- The bot's nickname.
 
@@ -71,7 +78,16 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         super(SingleServerIRCBot, self).__init__()
         self.__connect_params = connect_params
         self.channels = IRCDict()
-        self.server_list = server_list
+        self.server_list = [
+            ServerSpec(*server)
+                if isinstance(server, (tuple, list))
+                else server
+            for server in server_list
+        ]
+        assert all(
+            isinstance(server, ServerSpec)
+            for server in self.server_list
+        )
         if not reconnection_interval or reconnection_interval < 0:
             reconnection_interval = 2 ** 31
         self.reconnection_interval = reconnection_interval
@@ -80,9 +96,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         self._realname = realname
         for i in ["disconnect", "join", "kick", "mode",
                   "namreply", "nick", "part", "quit"]:
-            self.connection.add_global_handler(i,
-                                               getattr(self, "_on_" + i),
-                                               -20)
+            self.connection.add_global_handler(i, getattr(self, "_on_" + i),
+                -20)
 
     def _connected_checker(self):
         """[Internal]"""
@@ -92,18 +107,14 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.jump_server()
 
     def _connect(self):
-        """[Internal]"""
-        password = None
-        if len(self.server_list[0]) > 2:
-            password = self.server_list[0][2]
+        """
+        Establish a connection to the server at the front of the server_list.
+        """
+        server = self.server_list[0]
         try:
-            self.connect(self.server_list[0][0],
-                         self.server_list[0][1],
-                         self._nickname,
-                         password,
-                         ircname=self._realname,
-                         **self.__connect_params
-            )
+            self.connect(server.host, server.port, self._nickname,
+                server.password, ircname=self._realname,
+                **self.__connect_params)
         except irc.client.ServerConnectionError:
             pass
 
