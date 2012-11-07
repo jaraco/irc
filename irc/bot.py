@@ -35,6 +35,20 @@ import irc.modes
 from .dict import IRCDict
 
 class ServerSpec(object):
+    """
+    An IRC server specification.
+
+    >>> spec = ServerSpec('localhost')
+    >>> spec.host
+    'localhost'
+    >>> spec.port
+    6667
+    >>> spec.password
+
+    >>> spec = ServerSpec('127.0.0.1', 6697, 'fooP455')
+    >>> spec.password
+    'fooP455'
+    """
     def __init__(self, host, port=6667, password=None):
         self.host = host
         self.port = port
