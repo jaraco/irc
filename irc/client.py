@@ -116,6 +116,12 @@ except Exception:
 class IRCError(Exception):
     "An IRC exception"
 
+class InvalidCharacters(ValueError):
+    "Invalid characters were encountered in the message"
+
+class MessageTooLong(ValueError):
+    "Message is too long"
+
 
 class IRC(object):
     """Class that handles one or several IRC server connections.
@@ -986,12 +992,14 @@ class ServerConnection(Connection):
         # The string should not contain any carriage return other than the
         # one added here.
         if '\n' in string:
-            raise ValueError("Carriage returns not allowed in privmsg(text)")
+            raise InvalidCharacters(
+                "Carriage returns not allowed in privmsg(text)")
         bytes = string.encode('utf-8') + b'\r\n'
         # According to the RFC http://tools.ietf.org/html/rfc2812#page-6,
         # clients should not transmit more than 512 bytes.
         if len(bytes) > 512:
-            raise ValueError("Messages limited to 512 bytes including CR/LF")
+            raise MessageTooLong(
+                "Messages limited to 512 bytes including CR/LF")
         if self.socket is None:
             raise ServerNotConnectedError("Not connected.")
         sender = getattr(self.socket, 'write', self.socket.send)
