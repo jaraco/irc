@@ -250,6 +250,7 @@ class IRC(object):
         with self.mutex:
             log.log(logging.DEBUG-2, "process_once()")
             sockets = [x._get_socket() for x in self.connections if x is not None]
+            sockets = [x for x in sockets if x is not None]
             if sockets:
                 (i, o, e) = select.select(sockets, [], [], timeout)
                 self.process_data(i)
