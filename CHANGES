@@ -1,3 +1,10 @@
+4.0
+===
+
+* Removed deprecated arguments to ServerConnection.connect. See notes on the
+  3.3 release on how to use the connect_factory parameter if your application
+  requires ssl, ipv6, or other connection customization.
+
 3.6.1
 =====
 

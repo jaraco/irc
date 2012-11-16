@@ -588,8 +588,7 @@ class ServerConnection(Connection):
     # save the method args to allow for easier reconnection.
     @irc_functools.save_method_args
     def connect(self, server, port, nickname, password=None, username=None,
-            ircname=None, localaddress="", localport=0, ssl=False, ipv6=False,
-            connect_factory=connection.Factory()):
+            ircname=None, connect_factory=connection.Factory()):
         """Connect/reconnect to a server.
 
         Arguments:
@@ -604,25 +603,12 @@ class ServerConnection(Connection):
             connect_factory -- A callable that takes the server address and
                 returns a connection (with a socket interface).
 
-        Deprecated Arguments:
-            localaddress -- Bind the connection to a specific local IP address.
-            localport -- Bind the connection to a specific local port.
-            ssl -- Enable support for ssl.
-            ipv6 -- Enable support for ipv6.
-
         This function can be called to reconnect a closed connection.
 
         Returns the ServerConnection object.
         """
         log.debug("connect(server=%r, port=%r, nickname=%r, ...)", server,
             port, nickname)
-
-        if localaddress or localport or ssl or ipv6:
-            warnings.warn("localaddress, localport, ssl, and ipv6 parameters "
-                "are deprecated. Use connect_factory instead.",
-                DeprecationWarning)
-            connect_factory.from_legacy_params(localaddress, localport, ssl,
-                ipv6)
 
         if self.connected:
             self.disconnect("Changing servers")
