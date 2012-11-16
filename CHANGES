@@ -11,6 +11,9 @@ change addresses issue #2. In particular:
  - Event.target() -> Event.target
  - Event.arguments() -> Event.arguments
 
+The `nm_to_*` functions were removed. Instead, use the NickMask class
+attributes.
+
 Also, the parameter name when constructing an event was renamed from
 `eventtype` to simply `type`.
 

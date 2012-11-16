@@ -1443,12 +1443,6 @@ class NickMask(str):
     def user(self):
         return self.userhost.split("@"[0])
 
-# for backward compatibility
-def nm_to_n(s): return NickMask(s).nick
-def nm_to_uh(s): return NickMask(s).userhost
-def nm_to_h(s): return NickMask(s).host
-def nm_to_u(s): return NickMask(s).user
-
 def _ping_ponger(connection, event):
     "A global handler for the 'ping' event"
     connection.pong(event.target)
