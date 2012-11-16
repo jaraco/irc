@@ -83,10 +83,11 @@ try:
 except ImportError:
     pass
 
-from . import functools as irc_functools
-from . import util
-from . import strings
 from . import connection
+from . import events
+from . import functools as irc_functools
+from . import strings
+from . import util
 
 log = logging.getLogger(__name__)
 
@@ -680,7 +681,7 @@ class ServerConnection(Connection):
         return self.real_nickname
 
     def process_data(self):
-        """[Internal]"""
+        "read and process input from self.socket"
 
         try:
             reader = getattr(self.socket, 'read', self.socket.recv)
@@ -726,8 +727,7 @@ class ServerConnection(Connection):
                     arguments.append(a[1])
 
             # Translate numerics into more readable strings.
-            if command in numeric_events:
-                command = numeric_events[command]
+            command = events.numeric.get(command, command)
 
             if command == "nick":
                 if NickMask(prefix).nick == self.real_nickname:
