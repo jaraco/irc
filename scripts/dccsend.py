@@ -40,7 +40,7 @@ class DCCSend(irc.client.SimpleIRCClient):
         self.connection.quit()
 
     def on_dccmsg(self, connection, event):
-        acked = struct.unpack("!I", event.arguments()[0])[0]
+        acked = struct.unpack("!I", event.arguments[0])[0]
         if acked == self.filesize:
             self.dcc.disconnect()
             self.connection.quit()
@@ -51,7 +51,7 @@ class DCCSend(irc.client.SimpleIRCClient):
         sys.exit(0)
 
     def on_nosuchnick(self, connection, event):
-        print "No such nickname:", event.arguments()[0]
+        print "No such nickname:", event.arguments[0]
         self.connection.quit()
 
     def send_chunk(self):

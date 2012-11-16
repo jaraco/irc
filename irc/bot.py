@@ -138,15 +138,15 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
                                         self._connected_checker)
 
     def _on_join(self, c, e):
-        ch = e.target()
-        nick = e.source().nick
+        ch = e.target
+        nick = e.source.nick
         if nick == c.get_nickname():
             self.channels[ch] = Channel()
         self.channels[ch].add_user(nick)
 
     def _on_kick(self, c, e):
-        nick = e.arguments()[0]
-        channel = e.target()
+        nick = e.arguments[0]
+        channel = e.target
 
         if nick == c.get_nickname():
             del self.channels[channel]
@@ -154,8 +154,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.channels[channel].remove_user(nick)
 
     def _on_mode(self, c, e):
-        modes = irc.modes.parse_channel_modes(" ".join(e.arguments()))
-        t = e.target()
+        modes = irc.modes.parse_channel_modes(" ".join(e.arguments))
+        t = e.target
         if irc.client.is_channel(t):
             ch = self.channels[t]
             for mode in modes:
@@ -169,14 +169,14 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             pass
 
     def _on_namreply(self, c, e):
-        # e.arguments()[0] == "@" for secret channels,
+        # e.arguments[0] == "@" for secret channels,
         #                     "*" for private channels,
         #                     "=" for others (public channels)
-        # e.arguments()[1] == channel
-        # e.arguments()[2] == nick list
+        # e.arguments[1] == channel
+        # e.arguments[2] == nick list
 
-        ch = e.arguments()[1]
-        for nick in e.arguments()[2].split():
+        ch = e.arguments[1]
+        for nick in e.arguments[2].split():
             if nick[0] == "@":
                 nick = nick[1:]
                 self.channels[ch].set_mode("o", nick)
@@ -186,15 +186,15 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.channels[ch].add_user(nick)
 
     def _on_nick(self, c, e):
-        before = e.source().nick
-        after = e.target()
+        before = e.source.nick
+        after = e.target
         for ch in self.channels.values():
             if ch.has_user(before):
                 ch.change_nick(before, after)
 
     def _on_part(self, c, e):
-        nick = e.source().nick
-        channel = e.target()
+        nick = e.source.nick
+        channel = e.target
 
         if nick == c.get_nickname():
             del self.channels[channel]
@@ -202,7 +202,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.channels[channel].remove_user(nick)
 
     def _on_quit(self, c, e):
-        nick = e.source().nick
+        nick = e.source.nick
         for ch in self.channels.values():
             if ch.has_user(nick):
                 ch.remove_user(nick)
@@ -254,13 +254,13 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         Replies to VERSION and PING requests and relays DCC requests
         to the on_dccchat method.
         """
-        nick = e.source().nick
-        if e.arguments()[0] == "VERSION":
+        nick = e.source.nick
+        if e.arguments[0] == "VERSION":
             c.ctcp_reply(nick, "VERSION " + self.get_version())
-        elif e.arguments()[0] == "PING":
-            if len(e.arguments()) > 1:
-                c.ctcp_reply(nick, "PING " + e.arguments()[1])
-        elif e.arguments()[0] == "DCC" and e.arguments()[1].split(" ", 1)[0] == "CHAT":
+        elif e.arguments[0] == "PING":
+            if len(e.arguments) > 1:
+                c.ctcp_reply(nick, "PING " + e.arguments[1])
+        elif e.arguments[0] == "DCC" and e.arguments[1].split(" ", 1)[0] == "CHAT":
             self.on_dccchat(c, e)
 
     def on_dccchat(self, c, e):

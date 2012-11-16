@@ -1,3 +1,18 @@
+5.0
+===
+
+Another backward-incompatible change. In irc 5.0, many of the unnecessary
+getter functions have been removed and replaced with simple attributes. In
+particular:
+
+ - Event.eventtype() -> Event.type
+ - Event.source() -> Event.source
+ - Event.target() -> Event.target
+ - Event.arguments() -> Event.arguments
+
+Also, the parameter name when constructing an event was renamed from
+`eventtype` to simply `type`.
+
 4.0
 ===
 

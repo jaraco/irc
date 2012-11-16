@@ -18,7 +18,7 @@ class DCCReceive(irc.client.SimpleIRCClient):
         self.received_bytes = 0
 
     def on_ctcp(self, connection, event):
-        args = event.arguments()[1].split()
+        args = event.arguments[1].split()
         if args[0] != "SEND":
             return
         self.filename = os.path.basename(args[1])
@@ -32,7 +32,7 @@ class DCCReceive(irc.client.SimpleIRCClient):
         self.dcc = self.dcc_connect(peeraddress, peerport, "raw")
 
     def on_dccmsg(self, connection, event):
-        data = event.arguments()[0]
+        data = event.arguments[0]
         self.file.write(data)
         self.received_bytes = self.received_bytes + len(data)
         self.dcc.privmsg(struct.pack("!I", self.received_bytes))

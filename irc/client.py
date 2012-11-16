@@ -381,7 +381,7 @@ class IRC(object):
         """[Internal]"""
         with self.mutex:
             h = self.handlers
-            th = sorted(h.get("all_events", []) + h.get(event.eventtype(), []))
+            th = sorted(h.get("all_events", []) + h.get(event.type, []))
             for handler in th:
                 if handler[1](connection, event) == "NO MORE":
                     return
@@ -794,8 +794,8 @@ class ServerConnection(Connection):
     def _handle_event(self, event):
         """[Internal]"""
         self.irclibobj._handle_event(self, event)
-        if event.eventtype() in self.handlers:
-            for fn in self.handlers[event.eventtype()]:
+        if event.type in self.handlers:
+            for fn in self.handlers[event.type]:
                 fn(self, event)
 
     def is_connected(self):
@@ -1242,9 +1242,9 @@ class SimpleIRCClient(object):
 
     def _dispatcher(self, c, e):
         """[Internal]"""
-        log.debug("_dispatcher: %s", e.eventtype())
+        log.debug("_dispatcher: %s", e.type)
 
-        m = "on_" + e.eventtype()
+        m = "on_" + e.type
         if hasattr(self, m):
             getattr(self, m)(c, e)
 
@@ -1287,43 +1287,27 @@ class SimpleIRCClient(object):
 
 
 class Event(object):
-    """Class representing an IRC event."""
-    def __init__(self, eventtype, source, target, arguments=None):
-        """Constructor of Event objects.
+    "An IRC event."
+    def __init__(self, type, source, target, arguments=None):
+        """
+        Constructor of Event objects.
 
         Arguments:
 
-            eventtype -- A string describing the event.
+            type -- A string describing the event.
 
             source -- The originator of the event (a nick mask or a server).
 
             target -- The target of the event (a nick or a channel).
 
-            arguments -- Any event specific arguments.
+            arguments -- Any event-specific arguments.
         """
-        self._eventtype = eventtype
-        self._source = source
-        self._target = target
-        if arguments:
-            self._arguments = arguments
-        else:
-            self._arguments = []
-
-    def eventtype(self):
-        """Get the event type."""
-        return self._eventtype
-
-    def source(self):
-        """Get the event source."""
-        return self._source
-
-    def target(self):
-        """Get the event target."""
-        return self._target
-
-    def arguments(self):
-        """Get the event arguments."""
-        return self._arguments
+        self.type = type
+        self.source = source
+        self.target = target
+        if arguments is None:
+            arguments = []
+        self.arguments = arguments
 
 _LOW_LEVEL_QUOTE = "\020"
 _CTCP_LEVEL_QUOTE = "\134"
@@ -1472,7 +1456,7 @@ def nm_to_u(s): return NickMask(s).user
 
 def _ping_ponger(connection, event):
     "A global handler for the 'ping' event"
-    connection.pong(event.target())
+    connection.pong(event.target)
 
 # for backward compatibility
 parse_nick_modes = modes.parse_nick_modes
