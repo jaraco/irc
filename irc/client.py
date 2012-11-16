@@ -77,6 +77,7 @@ import struct
 import logging
 import itertools
 import threading
+import abc
 
 try:
     import pkg_resources
@@ -217,7 +218,7 @@ class IRC(object):
         with self.mutex:
             log.log(logging.DEBUG-2, "process_data()")
             for s, c in itertools.product(sockets, self.connections):
-                if s == c._get_socket():
+                if s == c.socket:
                     c.process_data()
 
     def process_timeout(self):
@@ -249,7 +250,7 @@ class IRC(object):
         """
         with self.mutex:
             log.log(logging.DEBUG-2, "process_once()")
-            sockets = [x._get_socket() for x in self.connections if x is not None]
+            sockets = [x.socket for x in self.connections if x is not None]
             sockets = [x for x in sockets if x is not None]
             if sockets:
                 (i, o, e) = select.select(sockets, [], [], timeout)
@@ -391,7 +392,7 @@ class IRC(object):
         with self.mutex:
             self.connections.remove(connection)
             if self.fn_to_remove_socket:
-                self.fn_to_remove_socket(connection._get_socket())
+                self.fn_to_remove_socket(connection.socket)
 
 class DelayedCommand(datetime.datetime):
     """
@@ -458,15 +459,17 @@ class PeriodicCommandFixedDelay(PeriodicCommand):
 _rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
 
 class Connection(object):
-    """Base class for IRC connections.
-
-    Must be overridden.
     """
+    Base class for IRC connections.
+    """
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractproperty
+    def socket(self):
+        "The socket for this connection"
+
     def __init__(self, irclibobj):
         self.irclibobj = irclibobj
-
-    def _get_socket():
-        raise IRCError("Not overridden")
 
     ##############################
     ### Convenience wrappers.
@@ -579,11 +582,11 @@ class ServerConnection(Connection):
     """
 
     buffer_class = DecodingLineBuffer
+    socket = None
 
     def __init__(self, irclibobj):
         super(ServerConnection, self).__init__(irclibobj)
         self.connected = False
-        self.socket = None
 
     # save the method args to allow for easier reconnection.
     @irc_functools.save_method_args
@@ -628,7 +631,6 @@ class ServerConnection(Connection):
         try:
             self.socket = self.connect_factory(self.server_address)
         except socket.error as err:
-            self.socket = None
             raise ServerConnectionError("Couldn't connect to socket: %s" % err)
         self.connected = True
         if self.irclibobj.fn_to_add_socket:
@@ -658,10 +660,6 @@ class ServerConnection(Connection):
         with self.irclibobj.mutex:
             self.disconnect("Closing object")
             self.irclibobj._remove_connection(self)
-
-    def _get_socket(self):
-        """[Internal]"""
-        return self.socket
 
     def get_server_name(self):
         """Get the (real) server name.
@@ -855,7 +853,7 @@ class ServerConnection(Connection):
             self.socket.close()
         except socket.error:
             pass
-        self.socket = None
+        del self.socket
         self._handle_event(Event("disconnect", self.server, "", [message]))
 
     def globops(self, text):
@@ -1064,6 +1062,8 @@ class DCCConnection(Connection):
     DCCConnection objects are instantiated by calling the dcc
     method on an IRC object.
     """
+    socket = None
+
     def __init__(self, irclibobj, dcctype):
         super(DCCConnection, self).__init__(irclibobj)
         self.connected = 0
@@ -1084,7 +1084,6 @@ class DCCConnection(Connection):
         """
         self.peeraddress = socket.gethostbyname(address)
         self.peerport = port
-        self.socket = None
         self.buffer = LineBuffer()
         self.handlers = {}
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -1136,7 +1135,7 @@ class DCCConnection(Connection):
             self.socket.close()
         except socket.error:
             pass
-        self.socket = None
+        del self.socket
         self.irclibobj._handle_event(
             self,
             Event("dcc_disconnect", self.peeraddress, "", [message]))
@@ -1191,10 +1190,6 @@ class DCCConnection(Connection):
             self.irclibobj._handle_event(
                 self,
                 Event(command, prefix, target, arguments))
-
-    def _get_socket(self):
-        """[Internal]"""
-        return self.socket
 
     def privmsg(self, string):
         """Send data to DCC peer.

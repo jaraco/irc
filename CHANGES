@@ -2,9 +2,10 @@
 ===
 
 Another backward-incompatible change. In irc 5.0, many of the unnecessary
-getter functions have been removed and replaced with simple attributes. In
-particular:
+getter functions have been removed and replaced with simple attributes. This
+change addresses issue #2. In particular:
 
+ - Connection._get_socket() -> Connection.socket (including subclasses)
  - Event.eventtype() -> Event.type
  - Event.source() -> Event.source
  - Event.target() -> Event.target
