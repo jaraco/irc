@@ -71,7 +71,6 @@ import select
 import socket
 import string
 import time
-import warnings
 import datetime
 import struct
 import logging
@@ -85,10 +84,8 @@ except ImportError:
     pass
 
 from . import functools as irc_functools
-from . import events
 from . import util
 from . import strings
-from . import modes
 from . import connection
 
 log = logging.getLogger(__name__)
