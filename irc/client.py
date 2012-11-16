@@ -1446,14 +1446,3 @@ class NickMask(str):
 def _ping_ponger(connection, event):
     "A global handler for the 'ping' event"
     connection.pong(event.target)
-
-# for backward compatibility
-parse_nick_modes = modes.parse_nick_modes
-parse_channel_modes = modes.parse_channel_modes
-
-generated_events = events.generated
-protocol_events = events.protocol
-numeric_events = events.numeric
-all_events = events.all
-
-irc_lower = strings.lower

@@ -26,7 +26,8 @@ The known commands are:
 """
 
 import irc.bot
-from irc.client import irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
+import irc.strings
+from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
 
 class TestBot(irc.bot.SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
@@ -44,7 +45,7 @@ class TestBot(irc.bot.SingleServerIRCBot):
 
     def on_pubmsg(self, c, e):
         a = e.arguments[0].split(":", 1)
-        if len(a) > 1 and irc_lower(a[0]) == irc_lower(self.connection.get_nickname()):
+        if len(a) > 1 and irc.strings.lower(a[0]) == irc.strings.lower(self.connection.get_nickname()):
             self.do_command(e, a[1].strip())
         return
 

@@ -14,6 +14,16 @@ change addresses issue #2. In particular:
 The `nm_to_*` functions were removed. Instead, use the NickMask class
 attributes.
 
+These deprecated function aliases were removed from irc.client::
+
+ - parse_nick_modes -> modes.parse_nick_modes
+ - parse_channel_modes -> modes.parse_channel_modes
+ - generated_events -> events.generated
+ - protocol_events -> events.protocol
+ - numeric_events -> events.numeric
+ - all_events -> events.all
+ - irc_lower -> strings.lower
+
 Also, the parameter name when constructing an event was renamed from
 `eventtype` to simply `type`.
 
