@@ -118,7 +118,9 @@ Example scripts in the scripts directory:
     Sends a file over DCC.
 
 
-NOTE: If you're running one of the examples on a unix command line, you need to escape the # symbol in the channel. For example, use \#test instead of #test.
+NOTE: If you're running one of the examples on a unix command line, you need
+to escape the # symbol in the channel. For example, use `\#test` instead of
+`#test`.
 
 
 Enjoy.
