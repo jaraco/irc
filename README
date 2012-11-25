@@ -25,19 +25,21 @@ here:
 
     http://www.irchelp.org/irchelp/rfc/
 
-Requirements:
+Installation
+============
 
-  * Python 2.6 or newer (including Python 3!).
+IRC requires Python 2.6 or newer (including Python 3).
 
-Installation:
-
-  You have several options to install the IRC project.
+You have several options to install the IRC project.
 
   * Use "easy_install irc" or "pip install irc" to grab the latest
     version from the cheeseshop (recommended).
   * Run "python setup.py install" (from the source distribution) or
   * Run "paver install" (from repo checkout, requires paver) or
   * Copy irc directory to appropriate site-packages directory.
+
+Client Features
+===============
 
 The main features of the IRC client framework are:
 
@@ -89,6 +91,9 @@ The following files might be of interest:
     A basic IRC server implementation. Suitable for testing, but not
     production quality.
 
+Examples
+========
+
 Example scripts in the scripts directory:
 
   * irccat
@@ -127,6 +132,31 @@ NOTE: If you're running one of the examples on a unix command line, you need
 to escape the # symbol in the channel. For example, use \\#test or "#test"
 instead of #test.
 
+Decoding Input
+==============
+
+By default, the IRC library does attempt to decode all incoming streams as
+UTF-8, but the author acknowledges that there are cases where decoding is
+undesirable or a custom decoding option is desirable. To support these cases,
+since irc 3.4.2, the ServerConnection class may be customized. The
+'buffer_class' attribute on the ServerConnection determines what class is used
+for buffering lines from the input stream. By default it is
+DecodingLineBuffer, but may be re-assigned with another class, such as irc
+client.LineBuffer, which does not decode the lines and passes them through as
+byte strings. The 'buffer_class' attribute may be assigned for all instances
+of ServerConnection by overriding the class attribute::
+
+    irc.client.ServerConnection.buffer_class = irc.client.LineBuffer
+
+or it may be overridden on a per-instance basis (as long as it's overridden before the connection is established)::
+
+    server = irc.client.IRC().server()
+    server.buffer_class = irc.client.LineBuffer
+    server.connect()
+
+
+Notes and Contact Info
+======================
 
 Enjoy.
 
