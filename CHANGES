@@ -1,6 +1,8 @@
 5.1
 ===
 
+The IRC library is now licensed under the MIT license.
+
 * Added irc/server.py, based on hircd by Ferry Boender.
 
 5.0

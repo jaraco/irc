@@ -20,6 +20,7 @@ setup_params = dict(
     maintainer="Jason R. Coombs",
     maintainer_email="jaraco@jaraco.com",
     url="http://python-irclib.sourceforge.net",
+    license="MIT",
     classifiers = [
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
