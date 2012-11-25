@@ -1,3 +1,8 @@
+5.1
+===
+
+* Added irc/server.py, based on hircd by Ferry Boender.
+
 5.0
 ===
 
