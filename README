@@ -84,6 +84,11 @@ The following files might be of interest:
 
     An IRC bot implementation.
 
+  * irc/server.py
+
+    A basic IRC server implementation. Suitable for testing, but not
+    production quality.
+
 Example scripts in the scripts directory:
 
   * irccat
