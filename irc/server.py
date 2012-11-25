@@ -1,6 +1,50 @@
-#!/usr/bin/python
+"""
+irc/server.py
 
-# 
+This server has basic support for:
+
+* Connecting
+* Channels
+* Nicknames
+* Public/private messages
+
+It is MISSING support for notably:
+
+* Server linking
+* Modes (user and channel)
+* Proper error reporting
+* Basically everything else
+
+It is mostly useful as a testing tool or perhaps for building something like a
+private proxy on. Do NOT use it in any kind of production code or anything that
+will ever be connected to by the public.
+
+Copyright by Ferry Boender, 2009 - Released under the MIT License
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+"""
+
+#
 # Very simple hacky ugly IRC server.
 #
 # Todo:
@@ -21,7 +65,7 @@
 #       File "/usr/lib/python2.6/SocketServer.py", line 322, in finish_request
 #         self.RequestHandlerClass(request, client_address, self)
 #       File "./hircd.py", line 102, in __init__
-#         
+#
 #       File "/usr/lib/python2.6/SocketServer.py", line 617, in __init__
 #         self.handle()
 #       File "./hircd.py", line 120, in handle
@@ -34,7 +78,7 @@
 # Not Todo (Won't be supported)
 #   - Server linking.
 
-# 
+#
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
 # files (the "Software"), to deal in the Software without
@@ -43,10 +87,10 @@
 # copies of the Software, and to permit persons to whom the
 # Software is furnished to do so, subject to the following
 # conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 # OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -55,7 +99,7 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-# 
+#
 
 import sys
 import optparse
@@ -497,7 +541,7 @@ if __name__ == "__main__":
     configfile = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'hircd.ini')
     logfile = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'hircd.log')
 
-    # 
+    #
     # Logging
     #
     if options.verbose:
