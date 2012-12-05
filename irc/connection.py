@@ -28,6 +28,10 @@ class Factory(object):
         wrapper = functools.partial(ssl.wrap_socket, ssl_cert=get_cert())
         Factory(wrapper=wrapper)(server_address)
 
+    To create an IPv6 connection:
+
+        Factory(ipv6=True)(server_address)
+
     Note that Factory doesn't save the state of the socket itself. The
     caller must do that, as necessary. As a result, the Factory may be
     re-used to create new connections with the same settings.
@@ -36,9 +40,11 @@ class Factory(object):
 
     family = socket.AF_INET
 
-    def __init__(self, bind_address=('', 0), wrapper=identity):
+    def __init__(self, bind_address=('', 0), wrapper=identity, ipv6=False):
         self.bind_address = bind_address
         self.wrapper = wrapper
+        if ipv6:
+            self.family = socket.AF_INET6
 
     def from_legacy_params(self, localaddress='', localport=0, ssl=False,
             ipv6=False):
