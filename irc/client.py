@@ -806,7 +806,7 @@ class ServerConnection(Connection):
         """Send an ADMIN command."""
         self.send_raw(" ".join(["ADMIN", server]).strip())
 
-    def cap(self, subcommand, args=""):
+    def cap(self, subcommand, *args):
         """Send a CAP command.
 
         Arguments:
@@ -817,14 +817,13 @@ class ServerConnection(Connection):
         Example:
 
             .cap('LS')
-            .cap('REQ', 'multi-prefix sasl')
+            .cap('REQ', 'multi-prefix' 'sasl')
             .cap('END')
         """
-        if args:
-            if ' ' in args:
-                self.send_raw("CAP " + subcommand + " :" + args)  # multiple capabilities
-            else:
-                self.send_raw("CAP " + subcommand + " " + args)  # single capability, no :
+        if len(args) > 1:
+            self.send_raw("CAP " + subcommand + " :" + " ".join(args))
+        elif args:
+            self.send_raw("CAP " + subcommand + " " + args[0])
         else:
             self.send_raw("CAP " + subcommand)
 
