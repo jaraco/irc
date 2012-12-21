@@ -821,7 +821,10 @@ class ServerConnection(Connection):
             .cap('END')
         """
         if args:
-            self.send_raw("CAP " + subcommand + " :" + args)
+            if ' ' in args:
+                self.send_raw("CAP " + subcommand + " :" + args)  # multiple capabilities
+            else:
+                self.send_raw("CAP " + subcommand + " " + args)  # single capability, no :
         else:
             self.send_raw("CAP " + subcommand)
 
