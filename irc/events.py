@@ -114,6 +114,7 @@ numeric = {
     "406": "wasnosuchnick",
     "407": "toomanytargets",
     "409": "noorigin",
+    "410": "invalidcapcmd",
     "411": "norecipient",
     "412": "notexttosend",
     "413": "notoplevel",
