@@ -806,6 +806,25 @@ class ServerConnection(Connection):
         """Send an ADMIN command."""
         self.send_raw(" ".join(["ADMIN", server]).strip())
 
+    def cap(self, subcommand, args=""):
+        """Send a CAP command.
+
+        Arguments:
+
+            subcommand -- LS, LIST, REQ
+            args -- capabilities, if required for given subcommand
+
+        Example:
+
+            .cap('LS')
+            .cap('REQ', 'multi-prefix sasl')
+            .cap('END')
+        """
+        if args:
+            self.send_raw("CAP " + subcommand + " :" + args)
+        else:
+            self.send_raw("CAP " + subcommand)
+
     def ctcp(self, ctcptype, target, parameter=""):
         """Send a CTCP command."""
         ctcptype = ctcptype.upper()
