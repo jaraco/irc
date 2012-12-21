@@ -817,7 +817,7 @@ class ServerConnection(Connection):
         Example:
 
             .cap('LS')
-            .cap('REQ', 'multi-prefix' 'sasl')
+            .cap('REQ', 'multi-prefix', 'sasl')
             .cap('END')
         """
         if len(args) > 1:
