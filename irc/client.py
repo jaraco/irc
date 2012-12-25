@@ -361,11 +361,16 @@ class IRC(object):
         return c
 
     def _handle_event(self, connection, event):
-        """[Internal]"""
+        """
+        Handle an Event event incoming on ServerConnection connection.
+        """
         with self.mutex:
             h = self.handlers
-            th = sorted(h.get("all_events", []) + h.get(event.type, []))
-            for handler in th:
+            matching_handlers = sorted(
+                h.get("all_events", []) +
+                h.get(event.type, [])
+            )
+            for handler in matching_handlers:
                 if handler[1](connection, event) == "NO MORE":
                     return
 
