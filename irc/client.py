@@ -807,11 +807,13 @@ class ServerConnection(Connection):
         self.send_raw(" ".join(["ADMIN", server]).strip())
 
     def cap(self, subcommand, *args):
-        """Send a CAP command.
+        """
+        Send a CAP command according to `the spec
+        <http://ircv3.atheme.org/specification/capability-negotiation-3.1>`_.
 
         Arguments:
 
-            subcommand -- LS, LIST, REQ
+            subcommand -- LS, LIST, REQ, ACK, CLEAR, END
             args -- capabilities, if required for given subcommand
 
         Example:
@@ -820,6 +822,9 @@ class ServerConnection(Connection):
             .cap('REQ', 'multi-prefix', 'sasl')
             .cap('END')
         """
+        cap_subcommands = set('LS LIST REQ ACK NAK CLEAR END'.split())
+        client_subcommands = set(cap_subcommands) - set('NAK')
+        assert subcommand in client_subcommands, "invalid subcommand"
         if len(args) > 1:
             self.send_raw("CAP " + subcommand + " :" + " ".join(args))
         elif args:
