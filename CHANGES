@@ -4,6 +4,7 @@
 The IRC library is now licensed under the MIT license.
 
 * Added irc/server.py, based on hircd by Ferry Boender.
+* Added support for CAP command (pull request #10), thanks to Danneh Oaks.
 
 5.0
 ===
