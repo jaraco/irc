@@ -61,6 +61,7 @@ import logging
 import itertools
 import threading
 import abc
+import collections
 
 try:
     import pkg_resources
@@ -105,6 +106,8 @@ class InvalidCharacters(ValueError):
 class MessageTooLong(ValueError):
     "Message is too long"
 
+PrioritizedHandler = collections.NamedTuple('PrioritizedHandler',
+    ('priority', 'callback'))
 
 class IRC(object):
     """Class that handles one or several IRC server connections.
@@ -269,9 +272,10 @@ class IRC(object):
         Arguments:
 
             event -- Event type (a string).  Check the values of
-            numeric_events for possible event types.
+                     numeric_events for possible event types.
 
-            handler -- Callback function.
+            handler -- Callback function taking 'connection' and 'event'
+                       parameters.
 
             priority -- A number (the lower number, the higher priority).
 
@@ -283,9 +287,10 @@ class IRC(object):
         number is highest priority).  If a handler function returns
         "NO MORE", no more handlers will be called.
         """
+        handler = PrioritizedHandler(priority, handler)
         with self.mutex:
             event_handlers = self.handlers.setdefault(event, [])
-            bisect.insort(event_handlers, (priority, handler))
+            bisect.insort(event_handlers, handler)
 
     def remove_global_handler(self, event, handler):
         """Removes a global handler function.
@@ -301,7 +306,7 @@ class IRC(object):
             if not event in self.handlers:
                 return 0
             for h in self.handlers[event]:
-                if handler == h[1]:
+                if handler == h.callback:
                     self.handlers[event].remove(h)
         return 1
 
@@ -371,7 +376,8 @@ class IRC(object):
                 h.get(event.type, [])
             )
             for handler in matching_handlers:
-                if handler[1](connection, event) == "NO MORE":
+                result = handler.callback(connection, event)
+                if result == "NO MORE":
                     return
 
     def _remove_connection(self, connection):
