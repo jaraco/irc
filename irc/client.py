@@ -1255,13 +1255,15 @@ class SimpleIRCClient(object):
         self.ircobj.add_global_handler("all_events", self._dispatcher, -10)
         self.ircobj.add_global_handler("dcc_disconnect", self._dcc_disconnect, -10)
 
-    def _dispatcher(self, c, e):
-        """[Internal]"""
-        log.debug("_dispatcher: %s", e.type)
+    def _dispatcher(self, connection, event):
+        """
+        Dispatch event from connection.
+        """
+        log.debug("_dispatcher: %s", event.type)
 
-        m = "on_" + e.type
+        m = "on_" + event.type
         if hasattr(self, m):
-            getattr(self, m)(c, e)
+            getattr(self, m)(connection, event)
 
     def _dcc_disconnect(self, c, e):
         self.dcc_connections.remove(c)
