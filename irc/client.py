@@ -825,12 +825,25 @@ class ServerConnection(Connection):
         cap_subcommands = set('LS LIST REQ ACK NAK CLEAR END'.split())
         client_subcommands = set(cap_subcommands) - set('NAK')
         assert subcommand in client_subcommands, "invalid subcommand"
-        if len(args) > 1:
-            self.send_raw("CAP " + subcommand + " :" + " ".join(args))
-        elif args:
-            self.send_raw("CAP " + subcommand + " " + args[0])
-        else:
-            self.send_raw("CAP " + subcommand)
+
+        def _multi_parameter(args):
+            """
+            According to the spec::
+
+                If more than one capability is named, the RFC1459 designated
+                sentinel (:) for a multi-parameter argument must be present.
+
+            It's not obvious where the sentinel should be present or if it must
+            be omitted for a single parameter, so follow convention and only
+            include the sentinel prefixed to the first parameter if more than
+            one parameter is present.
+            """
+            if len(args) > 1:
+                return (':' + args[0],) + args[1:]
+            return args
+
+        args = _multi_parameter(args)
+        self.send_raw(' '.join(('CAP', subcommand) + args))
 
     def ctcp(self, ctcptype, target, parameter=""):
         """Send a CTCP command."""
