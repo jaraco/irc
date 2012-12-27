@@ -21,11 +21,12 @@ class FoldedCase(_py2_compat.str):
     >>> s.index('O')
     4
 
-    >>> s.split('O')
-    [u'hell', u' w', u'rld']
+    >>> s.split('O') == ['hell', ' w', 'rld']
+    True
 
-    >>> sorted(map(FoldedCase, ['GAMMA', 'alpha', 'Beta']))
-    [u'alpha', u'Beta', u'GAMMA']
+    >>> in_order = sorted(map(FoldedCase, ['GAMMA', 'alpha', 'Beta']))
+    >>> in_order == ['alpha', 'Beta', 'GAMMA']
+    True
 
     It's still possible to compare against non-FoldedCase dicts
     >>> s == None
@@ -69,8 +70,8 @@ class IRCFoldedCase(FoldedCase):
     A version of FoldedCase that honors the IRC specification for lowercased
     strings (RFC 1459).
 
-    >>> IRCFoldedCase('Foo^').lower()
-    u'foo~'
+    >>> IRCFoldedCase('Foo^').lower() == 'foo~'
+    True
     >>> IRCFoldedCase('[this]') == IRCFoldedCase('{THIS}')
     True
     """
