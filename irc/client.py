@@ -536,12 +536,13 @@ class LineBuffer(object):
         return len(self.buffer)
 
 class DecodingLineBuffer(LineBuffer):
-    ur"""
+    r"""
     Like LineBuffer, but decode the output (default assumes UTF-8).
 
+    >>> utf8_word = b'Ol\xc3\xa9'
     >>> b = DecodingLineBuffer()
-    >>> b.feed(b'bar\r\nbaz\nOl\xc3\xa9\n')
-    >>> list(b.lines()) == ['bar', 'baz', u'Olé']
+    >>> b.feed(b'bar\r\nbaz\n' + utf8_word + b'\n')
+    >>> list(b.lines()) == ['bar', 'baz', utf8_word.decode('utf-8')]
     True
     >>> len(b)
     0
