@@ -1437,7 +1437,7 @@ def ip_numstr_to_quad(num):
     >>> ip_numstr_to_quad(3232235521)
     '192.168.0.1'
     """
-    n = long(num)
+    n = int(num)
     packed = struct.pack('>L', n)
     bytes = struct.unpack('BBBB', packed)
     return ".".join(map(str, bytes))
@@ -1450,7 +1450,7 @@ def ip_quad_to_numstr(quad):
     >>> ip_quad_to_numstr('192.168.0.1')
     '3232235521'
     """
-    bytes = map(long, quad.split("."))
+    bytes = map(int, quad.split("."))
     packed = struct.pack('BBBB', *bytes)
     return str(struct.unpack('>L', packed)[0])
 
