@@ -36,6 +36,7 @@ setup_params = dict(
     ],
     tests_require=[
         'pytest',
+        'mock',
     ],
     use_2to3=True,
     use_2to3_exclude_fixers=[
