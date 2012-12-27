@@ -11,7 +11,7 @@ if py3:
 	str = basestring = str
 	chr = chr
 else:
-	basestring = str
+	basestring = basestring
 	str = unicode
 	chr = unichr
 
