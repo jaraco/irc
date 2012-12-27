@@ -86,10 +86,11 @@ import sys
 import optparse
 import logging
 import os
-import SocketServer
 import socket
 import select
 import re
+
+from . import _py2_compat
 
 SRV_NAME    = "Hircd"
 SRV_VERSION = "0.1"
@@ -125,7 +126,7 @@ class IRCChannel(object):
         self.topic = topic
         self.clients = set()
 
-class IRCClient(SocketServer.BaseRequestHandler):
+class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
     """
     IRC client connect and command handling. Client connection is handled by
     the `handle` method which sets up a two-way communication with the client.
@@ -140,7 +141,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
         self.send_queue = []        # Messages to send to client (strings)
         self.channels = {}          # Channels the client is in
 
-        SocketServer.BaseRequestHandler.__init__(self, request, client_address, server)
+        _py2_compat.socketserver.BaseRequestHandler.__init__(self, request, client_address, server)
 
     def handle(self):
         logging.info('Client connected: %s' % (self.client_ident(), ))
@@ -445,7 +446,8 @@ class IRCClient(SocketServer.BaseRequestHandler):
             )
         )
 
-class IRCServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class IRCServer(_py2_compat.socketserver.ThreadingMixIn,
+        _py2_compat.socketserver.TCPServer):
     daemon_threads = True
     allow_reuse_address = True
 
@@ -453,7 +455,8 @@ class IRCServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
         self.servername = 'localhost'
         self.channels = {} # Existing channels (IRCChannel instances) by channelname
         self.clients = {}  # Connected clients (IRCClient instances) by nickname
-        SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
+        _py2_compat.socketserver.TCPServer.__init__(self, server_address,
+            RequestHandlerClass)
 
 class Daemon:
     """
