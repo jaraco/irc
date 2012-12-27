@@ -1,3 +1,8 @@
+5.1.1
+=====
+
+* Fix error in 2to3 conversion on irc/server.py (issue #11).
+
 5.1
 ===
 
