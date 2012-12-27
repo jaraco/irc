@@ -80,6 +80,8 @@ will ever be connected to by the public.
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
+from __future__ import print_function
+
 import sys
 import optparse
 import logging
@@ -396,16 +398,16 @@ class IRCClient(SocketServer.BaseRequestHandler):
         """
         Dump internal server information for debugging purposes.
         """
-        print "Clients:", self.server.clients
+        print("Clients:", self.server.clients)
         for client in self.server.clients.values():
-            print " ", client
+            print(" ", client)
             for channel in client.channels.values():
-                print "     ", channel.name
-        print "Channels:", self.server.channels
+                print("     ", channel.name)
+        print("Channels:", self.server.channels)
         for channel in self.server.channels.values():
-            print " ", channel.name, channel
+            print(" ", channel.name, channel)
             for client in channel.clients:
-                print "     ", client.nick, client
+                print("     ", client.nick, client)
 
     def client_ident(self):
         """
