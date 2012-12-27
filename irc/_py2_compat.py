@@ -3,15 +3,17 @@ from __future__ import absolute_import
 import sys
 import operator
 
-__all__ = ['str', 'basestring', 'socketserver', 'method_name']
+__all__ = ['str', 'basestring', 'chr', 'socketserver', 'method_name']
 
 py3 = sys.version_info >= (3,0)
 
-try:
+if py3:
+	str = basestring = str
+	chr = chr
+else:
 	basestring = str
 	str = unicode
-except NameError:
-	str = basestring = str
+	chr = unichr
 
 try:
 	import socketserver

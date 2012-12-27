@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from . import strings
+from . import _py2_compat
 
 # from jaraco.util.dictlib
 class KeyTransformingDict(dict):
@@ -77,6 +78,6 @@ class IRCDict(KeyTransformingDict):
     """
     @staticmethod
     def key_transform(key):
-        if isinstance(key, basestring):
+        if isinstance(key, _py2_compat.basestring):
             key = strings.IRCFoldedCase(key)
         return key

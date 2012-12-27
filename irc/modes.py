@@ -49,9 +49,10 @@ def _parse_modes(mode_string, unary_modes=""):
 
     This function never throws an error:
     >>> import random
+    >>> from . import _py2_compat
     >>> def random_text(min_len = 3, max_len = 80):
     ...     len = random.randint(min_len, max_len)
-    ...     chars_to_choose = [unichr(x) for x in range(0,1024)]
+    ...     chars_to_choose = [_py2_compat.chr(x) for x in range(0,1024)]
     ...     chars = (random.choice(chars_to_choose) for x in range(len))
     ...     return u''.join(chars)
     >>> def random_texts(min_len = 3, max_len = 80):
@@ -59,8 +60,8 @@ def _parse_modes(mode_string, unary_modes=""):
     ...         yield random_text(min_len, max_len)
     >>> import itertools
     >>> texts = itertools.islice(random_texts(), 1000)
-    >>> set(type(_parse_modes(text)) for text in texts)
-    set([<type 'list'>])
+    >>> set(type(_parse_modes(text)) for text in texts) == set([list])
+    True
     """
 
     # mode_string must be non-empty and begin with a sign
