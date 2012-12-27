@@ -52,7 +52,7 @@ def _parse_modes(mode_string, unary_modes=""):
     >>> def random_text(min_len = 3, max_len = 80):
     ...     len = random.randint(min_len, max_len)
     ...     chars_to_choose = [unichr(x) for x in range(0,1024)]
-    ...     chars = (random.choice(chars_to_choose) for x in xrange(len))
+    ...     chars = (random.choice(chars_to_choose) for x in range(len))
     ...     return u''.join(chars)
     >>> def random_texts(min_len = 3, max_len = 80):
     ...     while True:

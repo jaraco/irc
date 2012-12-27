@@ -16,7 +16,7 @@ def test_delayed_command_order():
 	delayed commands should be sorted by delay time
 	"""
 	null = lambda: None
-	delays = [random.randint(0, 99) for x in xrange(5)]
+	delays = [random.randint(0, 99) for x in range(5)]
 	cmds = sorted([
 		irc.client.DelayedCommand(delay, null, tuple())
 		for delay in delays

@@ -1,4 +1,6 @@
-from __future__ import division
+from __future__ import division, absolute_import
+
+from . import _py2_compat
 
 # from jaraco.util.itertools
 def always_iterable(item):
@@ -12,10 +14,12 @@ def always_iterable(item):
     ('foo',)
     >>> always_iterable(None)
     (None,)
-    >>> always_iterable(xrange(10))
-    xrange(10)
+    >>> import itertools
+    >>> numbers = itertools.count(10)
+    >>> always_iterable(numbers) is numbers
+    True
     """
-    if isinstance(item, basestring) or not hasattr(item, '__iter__'):
+    if isinstance(item, _py2_compat.basestring) or not hasattr(item, '__iter__'):
         item = item,
     return item
 
