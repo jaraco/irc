@@ -183,13 +183,13 @@ class IRCClient(SocketServer.BaseRequestHandler):
                                 logging.info('No handler for command: %s. Full line: %s' % (command, line))
                                 raise IRCError(ERR_UNKNOWNCOMMAND, '%s :Unknown command' % (command))
                             response = handler(params)
-                        except AttributeError, e:
+                        except AttributeError as e:
                             raise e
                             logging.error('%s' % (e))
-                        except IRCError, e:
+                        except IRCError as e:
                             response = ':%s %s %s' % (self.server.servername, e.code, e.value)
                             logging.error('%s' % (response))
-                        except Exception, e:
+                        except Exception as e:
                             response = ':%s ERROR %s' % (self.server.servername, repr(e))
                             logging.error('%s' % (response))
                             raise
@@ -467,7 +467,7 @@ class Daemon:
             pid = os.fork()
             if pid > 0:
                 sys.exit(0) # End parent
-        except OSError, e:
+        except OSError as e:
             sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
             sys.exit(-2)
 
@@ -483,11 +483,11 @@ class Daemon:
                     f = file('hircd.pid', 'w')
                     f.write(str(pid))
                     f.close()
-                except IOError, e:
+                except IOError as e:
                     logging.error(e)
                     sys.stderr.write(repr(e))
                 sys.exit(0) # End parent
-        except OSError, e:
+        except OSError as e:
             sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
             sys.exit(-2)
 
@@ -546,10 +546,10 @@ if __name__ == "__main__":
             pid = int(f.readline())
             f.close()
             os.unlink('hircd.pid')
-        except ValueError, e:
+        except ValueError as e:
             sys.stderr.write('Error in pid file `hircd.pid`. Aborting\n')
             sys.exit(-1)
-        except IOError, e:
+        except IOError as e:
             pass
 
         if pid:
@@ -587,6 +587,6 @@ if __name__ == "__main__":
         ircserver = IRCServer((options.listen_address, int(options.listen_port)), IRCClient)
         logging.info('Starting hircd on %s:%s' % (options.listen_address, options.listen_port))
         ircserver.serve_forever()
-    except socket.error, e:
+    except socket.error as e:
         logging.error(repr(e))
         sys.exit(-2)
