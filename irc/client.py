@@ -106,7 +106,7 @@ class InvalidCharacters(ValueError):
 class MessageTooLong(ValueError):
     "Message is too long"
 
-PrioritizedHandler = collections.NamedTuple('PrioritizedHandler',
+PrioritizedHandler = collections.namedtuple('PrioritizedHandler',
     ('priority', 'callback'))
 
 class IRC(object):
