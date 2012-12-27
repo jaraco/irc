@@ -189,4 +189,4 @@ protocol = [
     "nick",
 ]
 
-all = generated + protocol + numeric.values()
+all = generated + protocol + list(numeric.values())
