@@ -3,8 +3,10 @@ from __future__ import absolute_import, unicode_literals
 import re
 import string
 
+from . import _py2_compat
+
 # from jaraco.util.string
-class FoldedCase(unicode):
+class FoldedCase(_py2_compat.str):
     """
     A case insensitive string class; behaves just like str
     except compares equal when the only variation is case.
