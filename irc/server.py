@@ -85,7 +85,6 @@ from __future__ import print_function
 import sys
 import optparse
 import logging
-import ConfigParser
 import os
 import SocketServer
 import socket
