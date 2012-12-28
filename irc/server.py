@@ -463,8 +463,10 @@ class IRCServer(_py2_compat.socketserver.ThreadingMixIn,
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-a", "--address", dest="listen_address", action="store", default='127.0.0.1', help="IP to listen on")
-    parser.add_argument("-p", "--port", dest="listen_port", action="store", default='6667', help="Port to listen on")
+    parser.add_argument("-a", "--address", dest="listen_address",
+        default='127.0.0.1', help="IP on which to listen")
+    parser.add_argument("-p", "--port", dest="listen_port", default=6667,
+        type=int, help="Port on which to listen")
     log_util.add_arguments(parser)
 
     return parser.parse_args()
@@ -479,8 +481,10 @@ def main():
     # Start server
     #
     try:
-        ircserver = IRCServer((options.listen_address, int(options.listen_port)), IRCClient)
-        log.info('Starting hircd on %s:%s' % (options.listen_address, options.listen_port))
+        bind_address = options.listen_address, options.listen_port
+        ircserver = IRCServer(bind_address, IRCClient)
+        log.info('Starting hircd on {listen_address}:{listen_port}'.format(
+            **vars(options)))
         ircserver.serve_forever()
     except socket.error as e:
         log.error(repr(e))
