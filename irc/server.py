@@ -83,7 +83,7 @@ will ever be connected to by the public.
 from __future__ import print_function
 
 import sys
-import optparse
+import argparse
 import logging
 import os
 import socket
@@ -501,21 +501,19 @@ class Daemon:
                 pass
 
 def get_args():
-    parser = optparse.OptionParser()
-    parser.set_usage(sys.argv[0] + " [option]")
+    parser = argparse.ArgumentParser()
 
-    parser.add_option("--start", dest="start", action="store_true", default=True, help="Start hircd (default)")
-    parser.add_option("--stop", dest="stop", action="store_true", default=False, help="Stop hircd")
-    parser.add_option("--restart", dest="restart", action="store_true", default=False, help="Restart hircd")
-    parser.add_option("-a", "--address", dest="listen_address", action="store", default='127.0.0.1', help="IP to listen on")
-    parser.add_option("-p", "--port", dest="listen_port", action="store", default='6667', help="Port to listen on")
-    parser.add_option("-V", "--verbose", dest="verbose", action="store_true", default=False, help="Be verbose (show lots of output)")
-    parser.add_option("-l", "--log-stdout", dest="log_stdout", action="store_true", default=False, help="Also log to stdout")
-    parser.add_option("-e", "--errors", dest="errors", action="store_true", default=False, help="Do not intercept errors.")
-    parser.add_option("-f", "--foreground", dest="foreground", action="store_true", default=False, help="Do not go into daemon mode.")
+    parser.add_argument("--start", dest="start", action="store_true", default=True, help="Start hircd (default)")
+    parser.add_argument("--stop", dest="stop", action="store_true", default=False, help="Stop hircd")
+    parser.add_argument("--restart", dest="restart", action="store_true", default=False, help="Restart hircd")
+    parser.add_argument("-a", "--address", dest="listen_address", action="store", default='127.0.0.1', help="IP to listen on")
+    parser.add_argument("-p", "--port", dest="listen_port", action="store", default='6667', help="Port to listen on")
+    parser.add_argument("-V", "--verbose", dest="verbose", action="store_true", default=False, help="Be verbose (show lots of output)")
+    parser.add_argument("-l", "--log-stdout", dest="log_stdout", action="store_true", default=False, help="Also log to stdout")
+    parser.add_argument("-e", "--errors", dest="errors", action="store_true", default=False, help="Do not intercept errors.")
+    parser.add_argument("-f", "--foreground", dest="foreground", action="store_true", default=False, help="Do not go into daemon mode.")
 
-    options, args = parser.parse_args()
-    return options
+    return parser.parse_args()
 
 if __name__ == "__main__":
 
