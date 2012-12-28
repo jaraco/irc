@@ -92,6 +92,7 @@ from . import client
 from . import _py2_compat
 from . import logging as log_util
 from . import events
+from . import buffer
 
 SRV_WELCOME = "Welcome to %s v%s, the ugliest IRC server in the world." % (
     __name__, client.VERSION)
@@ -167,54 +168,50 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             self._handle_incoming()
 
     def _handle_incoming(self):
-        buf = ''
+        buf = buffer.LineBuffer()
         data = self.request.recv(1024)
 
         if not data:
             raise ClientDisconnect()
-        elif len(data) > 0:
-            # There is data. Process it and turn it into line-oriented
-            #  input.
-            buf += str(data)
+        buf.feed(data)
+        for line in buf:
+            self._handle_line(line)
 
-            while buf.find("\n") != -1:
-                line, buf = buf.split("\n", 1)
-                line = line.rstrip()
+    def _handle_line(self, line):
+        response = ''
+        try:
+            log.debug('from %s: %s' % (self.client_ident(),
+                line))
+            if ' ' in line:
+                command, params = line.split(' ', 1)
+            else:
+                command = line
+                params = ''
+            handler = getattr(self,
+                'handle_%s' % (command.lower()), None)
+            if not handler:
+                log.info('No handler for command: %s. '
+                    'Full line: %s' % (command, line))
+                raise IRCError(events.codes['unknowncommand'],
+                    '%s :Unknown command' % (command))
+            response = handler(params)
+        except AttributeError as e:
+            raise e
+            log.error('%s' % (e))
+        except IRCError as e:
+            response = ':%s %s %s' % (self.server.servername,
+                e.code, e.value)
+            log.error('%s' % (response))
+        except Exception as e:
+            response = ':%s ERROR %s' % (self.server.servername,
+                repr(e))
+            log.error('%s' % (response))
+            raise
 
-                response = ''
-                try:
-                    log.debug('from %s: %s' % (self.client_ident(),
-                        line))
-                    if ' ' in line:
-                        command, params = line.split(' ', 1)
-                    else:
-                        command = line
-                        params = ''
-                    handler = getattr(self,
-                        'handle_%s' % (command.lower()), None)
-                    if not handler:
-                        log.info('No handler for command: %s. '
-                            'Full line: %s' % (command, line))
-                        raise IRCError(events.codes['unknowncommand'],
-                            '%s :Unknown command' % (command))
-                    response = handler(params)
-                except AttributeError as e:
-                    raise e
-                    log.error('%s' % (e))
-                except IRCError as e:
-                    response = ':%s %s %s' % (self.server.servername,
-                        e.code, e.value)
-                    log.error('%s' % (response))
-                except Exception as e:
-                    response = ':%s ERROR %s' % (self.server.servername,
-                        repr(e))
-                    log.error('%s' % (response))
-                    raise
-
-                if response:
-                    log.debug('to %s: %s' % (self.client_ident(),
-                        response))
-                    self.request.send(response + '\r\n')
+        if response:
+            log.debug('to %s: %s' % (self.client_ident(),
+                response))
+            self.request.send(response + '\r\n')
 
     def handle_nick(self, params):
         """
