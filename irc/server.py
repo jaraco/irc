@@ -179,28 +179,24 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
     def _handle_line(self, line):
         response = ''
         try:
-            log.debug('from %s: %s' % (self.client_ident(),
-                line))
+            log.debug('from %s: %s' % (self.client_ident(), line))
             command, sep, params = line.partition(' ')
-            handler = getattr(self,
-                'handle_%s' % (command.lower()), None)
+            handler = getattr(self, 'handle_%s' % command.lower(), None)
             if not handler:
                 log.info('No handler for command: %s. '
                     'Full line: %s' % (command, line))
                 raise IRCError(events.codes['unknowncommand'],
-                    '%s :Unknown command' % (command))
+                    '%s :Unknown command' % command)
             response = handler(params)
         except AttributeError as e:
             log.error(_py2_compat.str(e))
             raise
         except IRCError as e:
-            response = ':%s %s %s' % (self.server.servername,
-                e.code, e.value)
-            log.error('%s' % (response))
+            response = ':%s %s %s' % (self.server.servername, e.code, e.value)
+            log.error(response)
         except Exception as e:
-            response = ':%s ERROR %s' % (self.server.servername,
-                repr(e))
-            log.error('%s' % (response))
+            response = ':%s ERROR %r' % (self.server.servername, e)
+            log.error(response)
             raise
 
         if response:
