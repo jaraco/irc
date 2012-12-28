@@ -140,68 +140,76 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
     def handle(self):
         log.info('Client connected: %s', self.client_ident())
 
-        while True:
-            buf = ''
-            ready_to_read, ready_to_write, in_error = select.select(
-                [self.request], [], [], 0.1)
-
-            # Write any commands to the client
-            while self.send_queue:
-                msg = self.send_queue.pop(0)
-                log.debug('to %s: %s' % (self.client_ident(), msg))
-                self.request.send(msg + '\n')
-
-            # See if the client has any commands for us.
-            if len(ready_to_read) == 1 and ready_to_read[0] == self.request:
-                data = self.request.recv(1024)
-
-                if not data:
-                    break
-                elif len(data) > 0:
-                    # There is data. Process it and turn it into line-oriented
-                    #  input.
-                    buf += str(data)
-
-                    while buf.find("\n") != -1:
-                        line, buf = buf.split("\n", 1)
-                        line = line.rstrip()
-
-                        response = ''
-                        try:
-                            log.debug('from %s: %s' % (self.client_ident(),
-                                line))
-                            if ' ' in line:
-                                command, params = line.split(' ', 1)
-                            else:
-                                command = line
-                                params = ''
-                            handler = getattr(self,
-                                'handle_%s' % (command.lower()), None)
-                            if not handler:
-                                log.info('No handler for command: %s. '
-                                    'Full line: %s' % (command, line))
-                                raise IRCError(events.codes['unknowncommand'],
-                                    '%s :Unknown command' % (command))
-                            response = handler(params)
-                        except AttributeError as e:
-                            raise e
-                            log.error('%s' % (e))
-                        except IRCError as e:
-                            response = ':%s %s %s' % (self.server.servername,
-                                e.code, e.value)
-                            log.error('%s' % (response))
-                        except Exception as e:
-                            response = ':%s ERROR %s' % (self.server.servername,
-                                repr(e))
-                            log.error('%s' % (response))
-                            raise
-
-                        if response:
-                            log.debug('to %s: %s' % (self.client_ident(),
-                                response))
-                            self.request.send(response + '\r\n')
+        while self._handle_one():
+            pass
 
         self.request.close()
+
+    def _handle_one(self):
+        """
+        Handle one read/write cycle. Return True unless the client has
+        disconnected.
+        """
+        buf = ''
+        ready_to_read, ready_to_write, in_error = select.select(
+            [self.request], [], [], 0.1)
+
+        # Write any commands to the client
+        while self.send_queue:
+            msg = self.send_queue.pop(0)
+            log.debug('to %s: %s' % (self.client_ident(), msg))
+            self.request.send(msg + '\n')
+
+        # See if the client has any commands for us.
+        if len(ready_to_read) == 1 and ready_to_read[0] == self.request:
+            data = self.request.recv(1024)
+
+            if not data:
+                return False
+            elif len(data) > 0:
+                # There is data. Process it and turn it into line-oriented
+                #  input.
+                buf += str(data)
+
+                while buf.find("\n") != -1:
+                    line, buf = buf.split("\n", 1)
+                    line = line.rstrip()
+
+                    response = ''
+                    try:
+                        log.debug('from %s: %s' % (self.client_ident(),
+                            line))
+                        if ' ' in line:
+                            command, params = line.split(' ', 1)
+                        else:
+                            command = line
+                            params = ''
+                        handler = getattr(self,
+                            'handle_%s' % (command.lower()), None)
+                        if not handler:
+                            log.info('No handler for command: %s. '
+                                'Full line: %s' % (command, line))
+                            raise IRCError(events.codes['unknowncommand'],
+                                '%s :Unknown command' % (command))
+                        response = handler(params)
+                    except AttributeError as e:
+                        raise e
+                        log.error('%s' % (e))
+                    except IRCError as e:
+                        response = ':%s %s %s' % (self.server.servername,
+                            e.code, e.value)
+                        log.error('%s' % (response))
+                    except Exception as e:
+                        response = ':%s ERROR %s' % (self.server.servername,
+                            repr(e))
+                        log.error('%s' % (response))
+                        raise
+
+                    if response:
+                        log.debug('to %s: %s' % (self.client_ident(),
+                            response))
+                        self.request.send(response + '\r\n')
+        return True
 
     def handle_nick(self, params):
         """
