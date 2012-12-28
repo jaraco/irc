@@ -142,6 +142,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
 
     def handle(self):
         log.info('Client connected: %s', self.client_ident())
+        self.buffer = buffer.LineBuffer()
 
         try:
             while True:
@@ -167,13 +168,13 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             self._handle_incoming()
 
     def _handle_incoming(self):
-        buf = buffer.LineBuffer()
         data = self.request.recv(1024)
 
         if not data:
             raise self.Disconnect()
-        buf.feed(data)
-        for line in buf:
+
+        self.buffer.feed(data)
+        for line in self.buffer:
             self._handle_line(line)
 
     def _handle_line(self, line):
