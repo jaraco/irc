@@ -160,8 +160,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         # Write any commands to the client
         while self.send_queue:
             msg = self.send_queue.pop(0)
-            log.debug('to %s: %s' % (self.client_ident(), msg))
-            self.request.send(msg + '\n')
+            self._send(msg)
 
         # See if the client has any commands for us.
         if len(ready_to_read) == 1 and ready_to_read[0] == self.request:
@@ -192,8 +191,8 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                     '%s :Unknown command' % (command))
             response = handler(params)
         except AttributeError as e:
-            raise e
-            log.error('%s' % (e))
+            log.error(_py2_compat.str(e))
+            raise
         except IRCError as e:
             response = ':%s %s %s' % (self.server.servername,
                 e.code, e.value)
@@ -205,9 +204,11 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             raise
 
         if response:
-            log.debug('to %s: %s' % (self.client_ident(),
-                response))
-            self.request.send(response + '\r\n')
+            self._send(response)
+
+    def _send(self, msg):
+        log.debug('to %s: %s', self.client_ident(), msg)
+        self.request.send(msg + '\r\n')
 
     def handle_nick(self, params):
         """
