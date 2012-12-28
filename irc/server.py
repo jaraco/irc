@@ -234,7 +234,8 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             response = ':%s %s %s :%s' % (self.server.servername,
                 events.codes['welcome'], self.nick, SRV_WELCOME)
             self.send_queue.append(response)
-            response = ':%s 376 %s :End of MOTD command.' % (self.server.servername, self.nick)
+            response = ':%s 376 %s :End of MOTD command.' % (
+                self.server.servername, self.nick)
             self.send_queue.append(response)
             return
 
@@ -247,10 +248,13 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
 
         # Send a notification of the nick change to all the clients in
         # the channels the client is in.
-        for channel in self.channels.values():
-            for client in channel.clients:
-                if client != self: # do not send to client itself.
-                    client.send_queue.append(message)
+        other_clients = [client
+            for channel in self.channels.values()
+            for client in channel.clients
+            if client != self
+        ]
+        for client in other_clients:
+            client.send_queue.append(message)
 
         # Send a notification of the nick change to the client itself
         return message
