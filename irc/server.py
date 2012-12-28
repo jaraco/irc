@@ -519,7 +519,7 @@ def get_args():
 if __name__ == "__main__":
 
     options = get_args()
-    log_util.setup()
+    log_util.setup(options)
 
     # Paths
     configfile = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'hircd.ini')
