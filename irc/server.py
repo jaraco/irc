@@ -460,59 +460,12 @@ class IRCServer(_py2_compat.socketserver.ThreadingMixIn,
         _py2_compat.socketserver.TCPServer.__init__(self, server_address,
             RequestHandlerClass)
 
-class Daemon:
-    """
-    Daemonize the current process (detach it from the console).
-    """
-
-    def __init__(self):
-        # Fork a child and end the parent (detach from parent)
-        try:
-            pid = os.fork()
-            if pid > 0:
-                sys.exit(0) # End parent
-        except OSError as e:
-            sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
-            sys.exit(-2)
-
-        # Change some defaults so the daemon doesn't tie up dirs, etc.
-        os.setsid()
-        os.umask(0)
-
-        # Fork a child and end parent (so init now owns process)
-        try:
-            pid = os.fork()
-            if pid > 0:
-                try:
-                    f = file('hircd.pid', 'w')
-                    f.write(str(pid))
-                    f.close()
-                except IOError as e:
-                    log.error(e)
-                    sys.stderr.write(repr(e))
-                sys.exit(0) # End parent
-        except OSError as e:
-            sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
-            sys.exit(-2)
-
-        # Close STDIN, STDOUT and STDERR so we don't tie up the controlling
-        # terminal
-        for fd in (0, 1, 2):
-            try:
-                os.close(fd)
-            except OSError:
-                pass
-
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--start", dest="start", action="store_true", default=True, help="Start hircd (default)")
-    parser.add_argument("--stop", dest="stop", action="store_true", default=False, help="Stop hircd")
-    parser.add_argument("--restart", dest="restart", action="store_true", default=False, help="Restart hircd")
     parser.add_argument("-a", "--address", dest="listen_address", action="store", default='127.0.0.1', help="IP to listen on")
     parser.add_argument("-p", "--port", dest="listen_port", action="store", default='6667', help="Port to listen on")
     parser.add_argument("-e", "--errors", dest="errors", action="store_true", default=False, help="Do not intercept errors.")
-    parser.add_argument("-f", "--foreground", dest="foreground", action="store_true", default=False, help="Do not go into daemon mode.")
     log_util.add_arguments(parser)
 
     return parser.parse_args()
@@ -522,37 +475,7 @@ if __name__ == "__main__":
     options = get_args()
     log_util.setup(options)
 
-    #
-    # Handle start/stop/restart commands.
-    #
-    if options.stop or options.restart:
-        pid = None
-        try:
-            f = file('hircd.pid', 'r')
-            pid = int(f.readline())
-            f.close()
-            os.unlink('hircd.pid')
-        except ValueError as e:
-            sys.stderr.write('Error in pid file `hircd.pid`. Aborting\n')
-            sys.exit(-1)
-        except IOError as e:
-            pass
-
-        if pid:
-            os.kill(pid, 15)
-        else:
-            sys.stderr.write('hircd not running or no PID file found\n')
-
-        if not options.restart:
-            sys.exit(0)
-
     log.info("Starting hircd")
-
-    #
-    # Go into daemon mode
-    #
-    if not options.foreground:
-        Daemon()
 
     #
     # Start server
