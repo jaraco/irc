@@ -134,14 +134,16 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         self.send_queue = []        # Messages to send to client (strings)
         self.channels = {}          # Channels the client is in
 
-        _py2_compat.socketserver.BaseRequestHandler.__init__(self, request, client_address, server)
+        _py2_compat.socketserver.BaseRequestHandler.__init__(self, request,
+            client_address, server)
 
     def handle(self):
-        log.info('Client connected: %s' % (self.client_ident(), ))
+        log.info('Client connected: %s', self.client_ident())
 
         while True:
             buf = ''
-            ready_to_read, ready_to_write, in_error = select.select([self.request], [], [], 0.1)
+            ready_to_read, ready_to_write, in_error = select.select(
+                [self.request], [], [], 0.1)
 
             # Write any commands to the client
             while self.send_queue:
@@ -156,7 +158,8 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                 if not data:
                     break
                 elif len(data) > 0:
-                    # There is data. Process it and turn it into line-oriented input.
+                    # There is data. Process it and turn it into line-oriented
+                    #  input.
                     buf += str(data)
 
                     while buf.find("\n") != -1:
@@ -165,30 +168,37 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
 
                         response = ''
                         try:
-                            log.debug('from %s: %s' % (self.client_ident(), line))
+                            log.debug('from %s: %s' % (self.client_ident(),
+                                line))
                             if ' ' in line:
                                 command, params = line.split(' ', 1)
                             else:
                                 command = line
                                 params = ''
-                            handler = getattr(self, 'handle_%s' % (command.lower()), None)
+                            handler = getattr(self,
+                                'handle_%s' % (command.lower()), None)
                             if not handler:
-                                log.info('No handler for command: %s. Full line: %s' % (command, line))
-                                raise IRCError(events.codes['unknowncommand'], '%s :Unknown command' % (command))
+                                log.info('No handler for command: %s. '
+                                    'Full line: %s' % (command, line))
+                                raise IRCError(events.codes['unknowncommand'],
+                                    '%s :Unknown command' % (command))
                             response = handler(params)
                         except AttributeError as e:
                             raise e
                             log.error('%s' % (e))
                         except IRCError as e:
-                            response = ':%s %s %s' % (self.server.servername, e.code, e.value)
+                            response = ':%s %s %s' % (self.server.servername,
+                                e.code, e.value)
                             log.error('%s' % (response))
                         except Exception as e:
-                            response = ':%s ERROR %s' % (self.server.servername, repr(e))
+                            response = ':%s ERROR %s' % (self.server.servername,
+                                repr(e))
                             log.error('%s' % (response))
                             raise
 
                         if response:
-                            log.debug('to %s: %s' % (self.client_ident(), response))
+                            log.debug('to %s: %s' % (self.client_ident(),
+                                response))
                             self.request.send(response + '\r\n')
 
         self.request.close()
