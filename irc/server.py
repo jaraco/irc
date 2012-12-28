@@ -223,40 +223,38 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             if nick in self.server.clients:
                 # Someone else is using the nick
                 raise IRCError(events.codes['nicknameinuse'], 'NICK :%s' % (nick))
-            else:
-                # Nick is available, register, send welcome and MOTD.
-                self.nick = nick
-                self.server.clients[nick] = self
-                response = ':%s %s %s :%s' % (self.server.servername,
-                    events.codes['welcome'], self.nick, SRV_WELCOME)
-                self.send_queue.append(response)
-                response = ':%s 376 %s :End of MOTD command.' % (self.server.servername, self.nick)
-                self.send_queue.append(response)
-                return
-        else:
-            if self.server.clients.get(nick, None) == self:
-                # Already registered to user
-                return
-            elif nick in self.server.clients:
-                # Someone else is using the nick
-                raise IRCError(events.codes['nicknameinuse'], 'NICK :%s' % (nick))
-            else:
-                # Nick is available. Change the nick.
-                message = ':%s NICK :%s' % (self.client_ident(), nick)
+            # Nick is available, register, send welcome and MOTD.
+            self.nick = nick
+            self.server.clients[nick] = self
+            response = ':%s %s %s :%s' % (self.server.servername,
+                events.codes['welcome'], self.nick, SRV_WELCOME)
+            self.send_queue.append(response)
+            response = ':%s 376 %s :End of MOTD command.' % (self.server.servername, self.nick)
+            self.send_queue.append(response)
+            return
 
-                self.server.clients.pop(self.nick)
-                self.nick = nick
-                self.server.clients[self.nick] = self
+        if self.server.clients.get(nick, None) == self:
+            # Already registered to user
+            return
+        elif nick in self.server.clients:
+            # Someone else is using the nick
+            raise IRCError(events.codes['nicknameinuse'], 'NICK :%s' % (nick))
+        # Nick is available. Change the nick.
+        message = ':%s NICK :%s' % (self.client_ident(), nick)
 
-                # Send a notification of the nick change to all the clients in
-                # the channels the client is in.
-                for channel in self.channels.values():
-                    for client in channel.clients:
-                        if client != self: # do not send to client itself.
-                            client.send_queue.append(message)
+        self.server.clients.pop(self.nick)
+        self.nick = nick
+        self.server.clients[self.nick] = self
 
-                # Send a notification of the nick change to the client itself
-                return message
+        # Send a notification of the nick change to all the clients in
+        # the channels the client is in.
+        for channel in self.channels.values():
+            for client in channel.clients:
+                if client != self: # do not send to client itself.
+                    client.send_queue.append(message)
+
+        # Send a notification of the nick change to the client itself
+        return message
 
     def handle_user(self, params):
         """
