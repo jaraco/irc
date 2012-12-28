@@ -470,8 +470,7 @@ def get_args():
 
     return parser.parse_args()
 
-if __name__ == "__main__":
-
+def main():
     options = get_args()
     log_util.setup(options)
 
@@ -486,4 +485,7 @@ if __name__ == "__main__":
         ircserver.serve_forever()
     except socket.error as e:
         log.error(repr(e))
-        sys.exit(-2)
+        raise SystemExit(-2)
+
+if __name__ == "__main__":
+    main()
