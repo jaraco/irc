@@ -522,9 +522,6 @@ if __name__ == "__main__":
     options = get_args()
     log_util.setup(options)
 
-    # Paths
-    configfile = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'hircd.ini')
-
     #
     # Handle start/stop/restart commands.
     #
@@ -550,7 +547,6 @@ if __name__ == "__main__":
             sys.exit(0)
 
     log.info("Starting hircd")
-    log.debug("configfile = %s" % (configfile))
 
     #
     # Go into daemon mode
