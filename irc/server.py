@@ -500,10 +500,7 @@ class Daemon:
             except OSError:
                 pass
 
-if __name__ == "__main__":
-    #
-    # Parameter parsing
-    #
+def get_args():
     parser = optparse.OptionParser()
     parser.set_usage(sys.argv[0] + " [option]")
 
@@ -517,7 +514,12 @@ if __name__ == "__main__":
     parser.add_option("-e", "--errors", dest="errors", action="store_true", default=False, help="Do not intercept errors.")
     parser.add_option("-f", "--foreground", dest="foreground", action="store_true", default=False, help="Do not go into daemon mode.")
 
-    (options, args) = parser.parse_args()
+    options, args = parser.parse_args()
+    return options
+
+if __name__ == "__main__":
+
+    options = get_args()
 
     # Paths
     configfile = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'hircd.ini')
