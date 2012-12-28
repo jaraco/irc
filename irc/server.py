@@ -147,7 +147,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         _py2_compat.socketserver.BaseRequestHandler.__init__(self, request, client_address, server)
 
     def handle(self):
-        logging.info('Client connected: %s' % (self.client_ident(), ))
+        log.info('Client connected: %s' % (self.client_ident(), ))
 
         while True:
             buf = ''
@@ -156,7 +156,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             # Write any commands to the client
             while self.send_queue:
                 msg = self.send_queue.pop(0)
-                logging.debug('to %s: %s' % (self.client_ident(), msg))
+                log.debug('to %s: %s' % (self.client_ident(), msg))
                 self.request.send(msg + '\n')
 
             # See if the client has any commands for us.
@@ -175,7 +175,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
 
                         response = ''
                         try:
-                            logging.debug('from %s: %s' % (self.client_ident(), line))
+                            log.debug('from %s: %s' % (self.client_ident(), line))
                             if ' ' in line:
                                 command, params = line.split(' ', 1)
                             else:
@@ -183,22 +183,22 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                                 params = ''
                             handler = getattr(self, 'handle_%s' % (command.lower()), None)
                             if not handler:
-                                logging.info('No handler for command: %s. Full line: %s' % (command, line))
+                                log.info('No handler for command: %s. Full line: %s' % (command, line))
                                 raise IRCError(ERR_UNKNOWNCOMMAND, '%s :Unknown command' % (command))
                             response = handler(params)
                         except AttributeError as e:
                             raise e
-                            logging.error('%s' % (e))
+                            log.error('%s' % (e))
                         except IRCError as e:
                             response = ':%s %s %s' % (self.server.servername, e.code, e.value)
-                            logging.error('%s' % (response))
+                            log.error('%s' % (response))
                         except Exception as e:
                             response = ':%s ERROR %s' % (self.server.servername, repr(e))
-                            logging.error('%s' % (response))
+                            log.error('%s' % (response))
                             raise
 
                         if response:
-                            logging.debug('to %s: %s' % (self.client_ident(), response))
+                            log.debug('to %s: %s' % (self.client_ident(), response))
                             self.request.send(response + '\r\n')
 
         self.request.close()
@@ -423,7 +423,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         client doesn't linger around in any channel or the client list, in case
         the client didn't properly close the connection with PART and QUIT.
         """
-        logging.info('Client disconnected: %s' % (self.client_ident()))
+        log.info('Client disconnected: %s' % (self.client_ident()))
         response = ':%s QUIT :EOF from client' % (self.client_ident())
         for channel in self.channels.values():
             if self in channel.clients:
@@ -433,7 +433,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                     client.send_queue.append(response)
                 channel.clients.remove(self)
         self.server.clients.pop(self.nick)
-        logging.info('Connection finished: %s' % (self.client_ident()))
+        log.info('Connection finished: %s' % (self.client_ident()))
 
     def __repr__(self):
         """
@@ -488,7 +488,7 @@ class Daemon:
                     f.write(str(pid))
                     f.close()
                 except IOError as e:
-                    logging.error(e)
+                    log.error(e)
                     sys.stderr.write(repr(e))
                 sys.exit(0) # End parent
         except OSError as e:
@@ -549,8 +549,8 @@ if __name__ == "__main__":
         if not options.restart:
             sys.exit(0)
 
-    logging.info("Starting hircd")
-    logging.debug("configfile = %s" % (configfile))
+    log.info("Starting hircd")
+    log.debug("configfile = %s" % (configfile))
 
     #
     # Go into daemon mode
@@ -563,8 +563,8 @@ if __name__ == "__main__":
     #
     try:
         ircserver = IRCServer((options.listen_address, int(options.listen_port)), IRCClient)
-        logging.info('Starting hircd on %s:%s' % (options.listen_address, options.listen_port))
+        log.info('Starting hircd on %s:%s' % (options.listen_address, options.listen_port))
         ircserver.serve_forever()
     except socket.error as e:
-        logging.error(repr(e))
+        log.error(repr(e))
         sys.exit(-2)
