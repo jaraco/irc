@@ -144,8 +144,8 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         log.info('Client connected: %s', self.client_ident())
 
         try:
-            while self._handle_one():
-                pass
+            while True:
+                self._handle_one()
         except self.Disconnect:
             self.request.close()
 
