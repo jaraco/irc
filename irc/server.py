@@ -453,12 +453,17 @@ class IRCServer(_py2_compat.socketserver.ThreadingMixIn,
     daemon_threads = True
     allow_reuse_address = True
 
-    def __init__(self, server_address, RequestHandlerClass):
+    channels = {}
+    "Existing channels (IRCChannel instances) by channel name"
+
+    clients = {}
+    "Connected clients (IRCClient instances) by nick name"
+
+    def __init__(self, *args, **kwargs):
         self.servername = 'localhost'
-        self.channels = {} # Existing channels (IRCChannel instances) by channelname
-        self.clients = {}  # Connected clients (IRCClient instances) by nickname
-        _py2_compat.socketserver.TCPServer.__init__(self, server_address,
-            RequestHandlerClass)
+        self.channels = {}
+        self.clients = {}
+        _py2_compat.socketserver.TCPServer.__init__(self, *args, **kwargs)
 
 def get_args():
     parser = argparse.ArgumentParser()
