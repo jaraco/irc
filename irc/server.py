@@ -80,7 +80,7 @@ will ever be connected to by the public.
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 
 import sys
 import argparse
@@ -91,6 +91,7 @@ import select
 import re
 
 from . import _py2_compat
+from . import logging as log_util
 
 SRV_NAME = "Hircd"
 SRV_VERSION = "0.1"
@@ -508,31 +509,24 @@ def get_args():
     parser.add_argument("--restart", dest="restart", action="store_true", default=False, help="Restart hircd")
     parser.add_argument("-a", "--address", dest="listen_address", action="store", default='127.0.0.1', help="IP to listen on")
     parser.add_argument("-p", "--port", dest="listen_port", action="store", default='6667', help="Port to listen on")
-    parser.add_argument("-V", "--verbose", dest="verbose", action="store_true", default=False, help="Be verbose (show lots of output)")
     parser.add_argument("-l", "--log-stdout", dest="log_stdout", action="store_true", default=False, help="Also log to stdout")
     parser.add_argument("-e", "--errors", dest="errors", action="store_true", default=False, help="Do not intercept errors.")
     parser.add_argument("-f", "--foreground", dest="foreground", action="store_true", default=False, help="Do not go into daemon mode.")
+    log_util.add_arguments(parser)
 
     return parser.parse_args()
 
 if __name__ == "__main__":
 
     options = get_args()
+    log_util.setup()
 
     # Paths
     configfile = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'hircd.ini')
     logfile = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'hircd.log')
 
-    #
-    # Logging
-    #
-    if options.verbose:
-        loglevel = logging.DEBUG
-    else:
-        loglevel = logging.WARNING
-
-    log = logging.basicConfig(
-        level=loglevel,
+    log_util.setup(
+        options,
         format='%(asctime)s:%(levelname)s:%(message)s',
         filename=logfile,
         filemode='a')
