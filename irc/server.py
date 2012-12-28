@@ -181,11 +181,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         try:
             log.debug('from %s: %s' % (self.client_ident(),
                 line))
-            if ' ' in line:
-                command, params = line.split(' ', 1)
-            else:
-                command = line
-                params = ''
+            command, sep, params = line.partition(' ')
             handler = getattr(self,
                 'handle_%s' % (command.lower()), None)
             if not handler:
@@ -493,7 +489,7 @@ def main():
     options = get_args()
     log_util.setup(options)
 
-    log.info("Starting hircd")
+    log.info("Starting irc.server")
 
     #
     # Start server
@@ -501,7 +497,7 @@ def main():
     try:
         bind_address = options.listen_address, options.listen_port
         ircserver = IRCServer(bind_address, IRCClient)
-        log.info('Starting hircd on {listen_address}:{listen_port}'.format(
+        log.info('Listening on {listen_address}:{listen_port}'.format(
             **vars(options)))
         ircserver.serve_forever()
     except socket.error as e:
