@@ -120,9 +120,6 @@ class IRCChannel(object):
         self.topic = topic
         self.clients = set()
 
-class ClientDisconnect(BaseException):
-    pass
-
 class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
     """
     IRC client connect and command handling. Client connection is handled by
@@ -130,6 +127,8 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
     It then handles commands sent by the client by dispatching them to the
     handle_ methods.
     """
+    class Disconnect(BaseException): pass
+
     def __init__(self, request, client_address, server):
         self.user = None
         self.host = client_address  # Client's hostname / ip.
@@ -147,7 +146,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         try:
             while self._handle_one():
                 pass
-        except ClientDisconnect:
+        except self.Disconnect:
             self.request.close()
 
     def _handle_one(self):
@@ -172,7 +171,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         data = self.request.recv(1024)
 
         if not data:
-            raise ClientDisconnect()
+            raise self.Disconnect()
         buf.feed(data)
         for line in buf:
             self._handle_line(line)
