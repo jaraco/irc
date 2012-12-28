@@ -161,7 +161,7 @@ numeric = {
     "502": "usersdontmatch",
 }
 
-codes = dict((v, k) for v, k in numeric.items())
+codes = dict((v, k) for k, v in numeric.items())
 
 generated = [
     "dcc_connect",
