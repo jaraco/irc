@@ -27,7 +27,7 @@ will ever be connected to by the public.
 # Very simple hacky ugly IRC server.
 #
 # Todo:
-#   - Encode format for each message and reply with ERR_NEEDMOREPARAMS
+#   - Encode format for each message and reply with events.codes['needmoreparams']
 #   - starting server when already started doesn't work properly. PID file is not changed, no error messsage is displayed.
 #   - Delete channel if last user leaves.
 #   - [ERROR] <socket.error instance at 0x7f9f203dfb90> (better error msg required)
@@ -88,21 +88,13 @@ import socket
 import select
 import re
 
+from . import client
 from . import _py2_compat
 from . import logging as log_util
+from . import events
 
-SRV_NAME = "Hircd"
-SRV_VERSION = "0.1"
-SRV_WELCOME = "Welcome to %s v%s, the ugliest IRC server in the world." % (SRV_NAME, SRV_VERSION)
-
-RPL_WELCOME = '001'
-ERR_NOSUCHNICK = '401'
-ERR_NOSUCHCHANNEL = '403'
-ERR_CANNOTSENDTOCHAN = '404'
-ERR_UNKNOWNCOMMAND = '421'
-ERR_ERRONEUSNICKNAME = '432'
-ERR_NICKNAMEINUSE = '433'
-ERR_NEEDMOREPARAMS = '461'
+SRV_WELCOME = "Welcome to %s v%s, the ugliest IRC server in the world." % (
+    __name__, client.VERSION)
 
 log = logging.getLogger(__name__)
 
@@ -182,7 +174,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                             handler = getattr(self, 'handle_%s' % (command.lower()), None)
                             if not handler:
                                 log.info('No handler for command: %s. Full line: %s' % (command, line))
-                                raise IRCError(ERR_UNKNOWNCOMMAND, '%s :Unknown command' % (command))
+                                raise IRCError(events.codes['unknowncommand'], '%s :Unknown command' % (command))
                             response = handler(params)
                         except AttributeError as e:
                             raise e
@@ -209,19 +201,19 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
 
         # Valid nickname?
         if re.search('[^a-zA-Z0-9\-\[\]\'`^{}_]', nick):
-            raise IRCError(ERR_ERRONEUSNICKNAME, ':%s' % (nick))
+            raise IRCError(events.codes['erroneusnickname'], ':%s' % (nick))
 
         if not self.nick:
             # New connection
             if nick in self.server.clients:
                 # Someone else is using the nick
-                raise IRCError(ERR_NICKNAMEINUSE, 'NICK :%s' % (nick))
+                raise IRCError(events.codes['nicknameinuse'], 'NICK :%s' % (nick))
             else:
                 # Nick is available, register, send welcome and MOTD.
                 self.nick = nick
                 self.server.clients[nick] = self
                 response = ':%s %s %s :%s' % (self.server.servername,
-                    RPL_WELCOME, self.nick, SRV_WELCOME)
+                    events.codes['welcome'], self.nick, SRV_WELCOME)
                 self.send_queue.append(response)
                 response = ':%s 376 %s :End of MOTD command.' % (self.server.servername, self.nick)
                 self.send_queue.append(response)
@@ -232,7 +224,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                 return
             elif nick in self.server.clients:
                 # Someone else is using the nick
-                raise IRCError(ERR_NICKNAMEINUSE, 'NICK :%s' % (nick))
+                raise IRCError(events.codes['nicknameinuse'], 'NICK :%s' % (nick))
             else:
                 # Nick is available. Change the nick.
                 message = ':%s NICK :%s' % (self.client_ident(), nick)
@@ -256,7 +248,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         Handle the USER command which identifies the user to the server.
         """
         if params.count(' ') < 3:
-            raise IRCError(ERR_NEEDMOREPARAMS, 'USER :Not enough parameters')
+            raise IRCError(events.codes['needmoreparams'], 'USER :Not enough parameters')
 
         user, mode, unused, realname = params.split(' ', 3)
         self.user = user
@@ -282,7 +274,8 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
 
             # Valid channel name?
             if not re.match('^#([a-zA-Z0-9_])+$', r_channel_name):
-                raise IRCError(ERR_NOSUCHCHANNEL, '%s :No such channel' % (r_channel_name))
+                raise IRCError(events.codes['nosuchchannel'],
+                    '%s :No such channel' % (r_channel_name))
 
             # Add user to the channel (create new channel if not exists)
             channel = self.server.channels.setdefault(r_channel_name, IRCChannel(r_channel_name))
@@ -313,7 +306,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         """
         Handle sending a private message to a user or channel.
         """
-        # FIXME: ERR_NEEDMOREPARAMS
+        # FIXME: events.codes['needmoreparams']
         target, msg = params.split(' ', 1)
 
         message = ':%s PRIVMSG %s %s' % (self.client_ident(), target, msg)
@@ -323,7 +316,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             if channel:
                 if not channel.name in self.channels:
                     # The user isn't in the channel.
-                    raise IRCError(ERR_CANNOTSENDTOCHAN,
+                    raise IRCError(events.codes['cannotsendtochan'],
                         '%s :Cannot send to channel' % (channel.name))
                 for client in channel.clients:
                     # Send message to all client in the channel, except the user himself.
@@ -332,14 +325,14 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                     if client != self:
                         client.send_queue.append(message)
             else:
-                raise IRCError(ERR_NOSUCHNICK, 'PRIVMSG :%s' % (target))
+                raise IRCError(events.codes['nosuchnick'], 'PRIVMSG :%s' % (target))
         else:
             # Message to user
             client = self.server.clients.get(target, None)
             if client:
                 client.send_queue.append(message)
             else:
-                raise IRCError(ERR_NOSUCHNICK, 'PRIVMSG :%s' % (target))
+                raise IRCError(events.codes['nosuchnick'], 'PRIVMSG :%s' % (target))
 
     def handle_topic(self, params):
         """
@@ -354,10 +347,10 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
 
         channel = self.server.channels.get(channel_name)
         if not channel:
-            raise IRCError(ERR_NOSUCHNICK, 'PRIVMSG :%s' % channel_name)
+            raise IRCError(events.codes['nosuchnick'], 'PRIVMSG :%s' % channel_name)
         if not channel.name in self.channels:
             # The user isn't in the channel.
-            raise IRCError(ERR_CANNOTSENDTOCHAN,
+            raise IRCError(events.codes['cannotsendtochan'],
                 '%s :Cannot send to channel' % (channel.name))
 
         if topic:
