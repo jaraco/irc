@@ -261,10 +261,13 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         """
         Handle the USER command which identifies the user to the server.
         """
-        if params.count(' ') < 3:
-            raise IRCError(events.codes['needmoreparams'], 'USER :Not enough parameters')
+        params = params.split(' ', 3)
 
-        user, mode, unused, realname = params.split(' ', 3)
+        if len(params) != 4:
+            raise IRCError(events.codes['needmoreparams'],
+                'USER :Not enough parameters')
+
+        user, mode, unused, realname = params
         self.user = user
         self.mode = mode
         self.realname = realname
