@@ -106,6 +106,8 @@ ERR_ERRONEUSNICKNAME = '432'
 ERR_NICKNAMEINUSE = '433'
 ERR_NEEDMOREPARAMS = '461'
 
+log = logging.getLogger(__name__)
+
 class IRCError(Exception):
     """
     Exception thrown by IRC command handlers to notify client of a server/client error.
@@ -509,7 +511,6 @@ def get_args():
     parser.add_argument("--restart", dest="restart", action="store_true", default=False, help="Restart hircd")
     parser.add_argument("-a", "--address", dest="listen_address", action="store", default='127.0.0.1', help="IP to listen on")
     parser.add_argument("-p", "--port", dest="listen_port", action="store", default='6667', help="Port to listen on")
-    parser.add_argument("-l", "--log-stdout", dest="log_stdout", action="store_true", default=False, help="Also log to stdout")
     parser.add_argument("-e", "--errors", dest="errors", action="store_true", default=False, help="Do not intercept errors.")
     parser.add_argument("-f", "--foreground", dest="foreground", action="store_true", default=False, help="Do not go into daemon mode.")
     log_util.add_arguments(parser)
@@ -523,13 +524,6 @@ if __name__ == "__main__":
 
     # Paths
     configfile = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'hircd.ini')
-    logfile = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'hircd.log')
-
-    log_util.setup(
-        options,
-        format='%(asctime)s:%(levelname)s:%(message)s',
-        filename=logfile,
-        filemode='a')
 
     #
     # Handle start/stop/restart commands.
@@ -557,17 +551,6 @@ if __name__ == "__main__":
 
     logging.info("Starting hircd")
     logging.debug("configfile = %s" % (configfile))
-    logging.debug("logfile = %s" % (logfile))
-
-    if options.log_stdout:
-        console = logging.StreamHandler()
-        formatter = logging.Formatter('[%(levelname)s] %(message)s')
-        console.setFormatter(formatter)
-        console.setLevel(logging.DEBUG)
-        logging.getLogger('').addHandler(console)
-
-    if options.verbose:
-        logging.info("We're being verbose")
 
     #
     # Go into daemon mode
