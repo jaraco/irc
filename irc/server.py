@@ -92,18 +92,18 @@ import re
 
 from . import _py2_compat
 
-SRV_NAME    = "Hircd"
+SRV_NAME = "Hircd"
 SRV_VERSION = "0.1"
 SRV_WELCOME = "Welcome to %s v%s, the ugliest IRC server in the world." % (SRV_NAME, SRV_VERSION)
 
-RPL_WELCOME          = '001'
-ERR_NOSUCHNICK       = '401'
-ERR_NOSUCHCHANNEL    = '403'
+RPL_WELCOME = '001'
+ERR_NOSUCHNICK = '401'
+ERR_NOSUCHCHANNEL = '403'
 ERR_CANNOTSENDTOCHAN = '404'
-ERR_UNKNOWNCOMMAND   = '421'
+ERR_UNKNOWNCOMMAND = '421'
 ERR_ERRONEUSNICKNAME = '432'
-ERR_NICKNAMEINUSE    = '433'
-ERR_NEEDMOREPARAMS   = '461'
+ERR_NICKNAMEINUSE = '433'
+ERR_NEEDMOREPARAMS = '461'
 
 class IRCError(Exception):
     """
@@ -236,7 +236,6 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                 message = ':%s NICK :%s' % (self.client_ident(), nick)
 
                 self.server.clients.pop(self.nick)
-                prev_nick = self.nick
                 self.nick = nick
                 self.server.clients[self.nick] = self
 
@@ -255,7 +254,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         Handle the USER command which identifies the user to the server.
         """
         if params.count(' ') < 3:
-            raise IRCError(ERR_NEEDMOREPARAMS, '%s :Not enough parameters' % (USER))
+            raise IRCError(ERR_NEEDMOREPARAMS, 'USER :Not enough parameters')
 
         user, mode, unused, realname = params.split(' ', 3)
         self.user = user
@@ -352,7 +351,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
 
         channel = self.server.channels.get(channel_name)
         if not channel:
-            raise IRCError(ERR_NOSUCHNICK, 'PRIVMSG :%s' % (target))
+            raise IRCError(ERR_NOSUCHNICK, 'PRIVMSG :%s' % channel_name)
         if not channel.name in self.channels:
             # The user isn't in the channel.
             raise IRCError(ERR_CANNOTSENDTOCHAN, '%s :Cannot send to channel' % (channel.name))
