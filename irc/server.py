@@ -82,10 +82,8 @@ will ever be connected to by the public.
 
 from __future__ import print_function, absolute_import
 
-import sys
 import argparse
 import logging
-import os
 import socket
 import select
 import re
