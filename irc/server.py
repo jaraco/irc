@@ -465,7 +465,6 @@ def get_args():
 
     parser.add_argument("-a", "--address", dest="listen_address", action="store", default='127.0.0.1', help="IP to listen on")
     parser.add_argument("-p", "--port", dest="listen_port", action="store", default='6667', help="Port to listen on")
-    parser.add_argument("-e", "--errors", dest="errors", action="store_true", default=False, help="Do not intercept errors.")
     log_util.add_arguments(parser)
 
     return parser.parse_args()
