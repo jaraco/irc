@@ -8,6 +8,7 @@ def read_long_description():
     return data
 
 importlib_req = ['importlib'] if sys.version_info < (2,7) else []
+argparse_req = ['argparse'] if sys.version_info < (2,7) else []
 
 setup_params = dict(
     name="irc",
@@ -29,7 +30,7 @@ setup_params = dict(
         "Programming Language :: Python :: 3",
     ],
     install_requires=[
-    ] + importlib_req,
+    ] + importlib_req + argparse_req,
     setup_requires=[
         'hgtools',
         'pytest-runner',
