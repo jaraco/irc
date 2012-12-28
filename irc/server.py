@@ -222,11 +222,12 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                 # Nick is available, register, send welcome and MOTD.
                 self.nick = nick
                 self.server.clients[nick] = self
-                response = ':%s %s %s :%s' % (self.server.servername, RPL_WELCOME, self.nick, SRV_WELCOME)
+                response = ':%s %s %s :%s' % (self.server.servername,
+                    RPL_WELCOME, self.nick, SRV_WELCOME)
                 self.send_queue.append(response)
                 response = ':%s 376 %s :End of MOTD command.' % (self.server.servername, self.nick)
                 self.send_queue.append(response)
-                return()
+                return
         else:
             if self.server.clients.get(nick, None) == self:
                 # Already registered to user
@@ -250,7 +251,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                             client.send_queue.append(message)
 
                 # Send a notification of the nick change to the client itself
-                return(message)
+                return message
 
     def handle_user(self, params):
         """
@@ -263,7 +264,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         self.user = user
         self.mode = mode
         self.realname = realname
-        return('')
+        return ''
 
     def handle_ping(self, params):
         """
@@ -324,7 +325,8 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             if channel:
                 if not channel.name in self.channels:
                     # The user isn't in the channel.
-                    raise IRCError(ERR_CANNOTSENDTOCHAN, '%s :Cannot send to channel' % (channel.name))
+                    raise IRCError(ERR_CANNOTSENDTOCHAN,
+                        '%s :Cannot send to channel' % (channel.name))
                 for client in channel.clients:
                     # Send message to all client in the channel, except the user himself.
                     # TODO: Abstract this into a seperate method so that not every function has
@@ -357,13 +359,15 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             raise IRCError(ERR_NOSUCHNICK, 'PRIVMSG :%s' % channel_name)
         if not channel.name in self.channels:
             # The user isn't in the channel.
-            raise IRCError(ERR_CANNOTSENDTOCHAN, '%s :Cannot send to channel' % (channel.name))
+            raise IRCError(ERR_CANNOTSENDTOCHAN,
+                '%s :Cannot send to channel' % (channel.name))
 
         if topic:
             channel.topic = topic
             channel.topic_by = self.nick
-        message = ':%s TOPIC %s :%s' % (self.client_ident(), channel_name, channel.topic)
-        return(message)
+        message = ':%s TOPIC %s :%s' % (self.client_ident(), channel_name,
+            channel.topic)
+        return message
 
     def handle_part(self, params):
         """
@@ -415,7 +419,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         """
         Return the client identifier as included in many command replies.
         """
-        return('%s!%s@%s' % (self.nick, self.user, self.server.servername))
+        return '%s!%s@%s' % (self.nick, self.user, self.server.servername)
 
     def finish(self):
         """
@@ -439,14 +443,13 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         """
         Return a user-readable description of the client
         """
-        return('<%s %s!%s@%s (%s)>' % (
+        return '<%s %s!%s@%s (%s)>' % (
             self.__class__.__name__,
             self.nick,
             self.user,
             self.host[0],
             self.realname,
             )
-        )
 
 class IRCServer(_py2_compat.socketserver.ThreadingMixIn,
         _py2_compat.socketserver.TCPServer):
