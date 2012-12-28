@@ -218,12 +218,17 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         if re.search('[^a-zA-Z0-9\-\[\]\'`^{}_]', nick):
             raise IRCError(events.codes['erroneusnickname'], ':%s' % (nick))
 
+        if self.server.clients.get(nick, None) == self:
+            # Already registered to user
+            return
+
+        if nick in self.server.clients:
+            # Someone else is using the nick
+            raise IRCError(events.codes['nicknameinuse'], 'NICK :%s' % (nick))
+
         if not self.nick:
-            # New connection
-            if nick in self.server.clients:
-                # Someone else is using the nick
-                raise IRCError(events.codes['nicknameinuse'], 'NICK :%s' % (nick))
-            # Nick is available, register, send welcome and MOTD.
+            # New connection and nick is available; register and send welcome
+            # and MOTD.
             self.nick = nick
             self.server.clients[nick] = self
             response = ':%s %s %s :%s' % (self.server.servername,
@@ -233,12 +238,6 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             self.send_queue.append(response)
             return
 
-        if self.server.clients.get(nick, None) == self:
-            # Already registered to user
-            return
-        elif nick in self.server.clients:
-            # Someone else is using the nick
-            raise IRCError(events.codes['nicknameinuse'], 'NICK :%s' % (nick))
         # Nick is available. Change the nick.
         message = ':%s NICK :%s' % (self.client_ident(), nick)
 
