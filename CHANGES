@@ -1,8 +1,10 @@
-5.2
+6.0
 ===
 
 * Moved `LineBuffer` and `DecodingLineBuffer` from client to buffer module.
   Backward-compatible references have been kept for now.
+* Removed daemon mode and log-to-file options for server.
+* Miscellaneous bugfixes in server.
 
 5.1.1
 =====
