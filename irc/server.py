@@ -281,7 +281,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         Handle client PING requests to keep the connection alive.
         """
         response = ':%s PONG :%s' % (self.server.servername, self.server.servername)
-        return (response)
+        return response
 
     def handle_join(self, params):
         """
@@ -337,7 +337,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                 if not channel.name in self.channels:
                     # The user isn't in the channel.
                     raise IRCError.from_name('cannotsendtochan',
-                        '%s :Cannot send to channel' % (channel.name))
+                        '%s :Cannot send to channel' % channel.name)
                 for client in channel.clients:
                     # Send message to all client in the channel, except the user himself.
                     # TODO: Abstract this into a seperate method so that not every function has
@@ -438,8 +438,8 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         client doesn't linger around in any channel or the client list, in case
         the client didn't properly close the connection with PART and QUIT.
         """
-        log.info('Client disconnected: %s' % (self.client_ident()))
-        response = ':%s QUIT :EOF from client' % (self.client_ident())
+        log.info('Client disconnected: %s', self.client_ident())
+        response = ':%s QUIT :EOF from client' % self.client_ident()
         for channel in self.channels.values():
             if self in channel.clients:
                 # Client is gone without properly QUITing or PARTing this
@@ -448,7 +448,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                     client.send_queue.append(response)
                 channel.clients.remove(self)
         self.server.clients.pop(self.nick)
-        log.info('Connection finished: %s' % (self.client_ident()))
+        log.info('Connection finished: %s', self.client_ident())
 
     def __repr__(self):
         """
