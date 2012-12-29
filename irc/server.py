@@ -312,7 +312,6 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             # send user list of the channel back to the user.
             response_join = ':%s JOIN :%s' % (self.client_ident(), r_channel_name)
             for client in channel.clients:
-                #if client != self: # FIXME: According to specs, this should be done because the user is included in the channel listing sent later.
                 client.send_queue.append(response_join)
 
             nicks = [client.nick for client in channel.clients]
