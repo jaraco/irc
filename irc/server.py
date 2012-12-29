@@ -247,15 +247,10 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         self.nick = nick
         self.server.clients[self.nick] = self
 
-        # Send a notification of the nick change to all the clients in
-        # the channels the client is in.
-        other_clients = [client
-            for channel in self.channels.values()
-            for client in channel.clients
-            if client != self
-        ]
-        for client in other_clients:
-            client.send_queue.append(message)
+        # Send a notification of the nick change to all the clients in the
+        # channels the client is in.
+        for channel in self.channels.values():
+            self._send_to_others(message, channel)
 
         # Send a notification of the nick change to the client itself
         return message
