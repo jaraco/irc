@@ -1378,6 +1378,10 @@ class NickMask(str):
     """
     A nickmask (the source of an Event)
     """
+    @classmethod
+    def from_params(cls, nick, user, host):
+        return cls('{nick}!{user}@{host}'.format(**vars()))
+
     @property
     def nick(self):
         return self.split("!")[0]

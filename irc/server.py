@@ -430,7 +430,8 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         """
         Return the client identifier as included in many command replies.
         """
-        return '%s!%s@%s' % (self.nick, self.user, self.server.servername)
+        return client.NickMask.from_params(self.nick, self.user,
+            self.server.servername)
 
     def finish(self):
         """
