@@ -343,18 +343,23 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                 raise IRCError.from_name('cannotsendtochan',
                     '%s :Cannot send to channel' % channel.name)
 
-            for client in channel.clients:
-                # Send message to all client in the channel, except the user himself.
-                # TODO: Abstract this into a seperate method so that not every function has
-                # to check if the user is in the channel.
-                if client != self:
-                    client.send_queue.append(message)
+            self._send_to_others(message, channel)
         else:
             # Message to user
             client = self.server.clients.get(target, None)
             if not client:
                 raise IRCError.from_name('nosuchnick', 'PRIVMSG :%s' % target)
 
+            client.send_queue.append(message)
+
+    def _send_to_others(self, message, channel):
+        """
+        Send the message to all clients in the specified channel except for
+        self.
+        """
+        other_clients = [client for client in channel.clients
+            if not client == self]
+        for client in other_clients:
             client.send_queue.append(message)
 
     def handle_topic(self, params):
