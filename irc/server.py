@@ -181,7 +181,6 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             self._handle_line(line)
 
     def _handle_line(self, line):
-        response = ''
         try:
             log.debug('from %s: %s' % (self.client_ident(), line))
             command, sep, params = line.partition(' ')
