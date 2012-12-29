@@ -1,3 +1,9 @@
+6.0.1
+=====
+
+* Fixed some unhandled exceptions in server client connections when the client
+  would disconnect in response to messages sent after select was called.
+
 6.0
 ===
 
