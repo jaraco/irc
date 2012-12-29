@@ -358,12 +358,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         """
         Handle a topic command.
         """
-        if ' ' in params:
-            channel_name = params.split(' ', 1)[0]
-            topic = params.split(' ', 1)[1].lstrip(':')
-        else:
-            channel_name = params
-            topic = None
+        channel_name, sep, topic = params.partition(' ')
 
         channel = self.server.channels.get(channel_name)
         if not channel:
@@ -374,7 +369,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
                 '%s :Cannot send to channel' % channel.name)
 
         if topic:
-            channel.topic = topic
+            channel.topic = topic.lstrip(':')
             channel.topic_by = self.nick
         message = ':%s TOPIC %s :%s' % (self.client_ident(), channel_name,
             channel.topic)
