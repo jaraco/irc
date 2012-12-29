@@ -162,10 +162,13 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         Handle one read/write cycle.
         """
         ready_to_read, ready_to_write, in_error = select.select(
-            [self.request], [], [], 0.1)
+            [self.request], [self.request], [self.request], 0.1)
+
+        if in_error:
+            raise self.Disconnect()
 
         # Write any commands to the client
-        while self.send_queue:
+        while self.send_queue and ready_to_write:
             msg = self.send_queue.pop(0)
             self._send(msg)
 
