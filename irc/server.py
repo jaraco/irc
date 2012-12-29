@@ -335,26 +335,27 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         if target.startswith('#') or target.startswith('$'):
             # Message to channel. Check if the channel exists.
             channel = self.server.channels.get(target)
-            if channel:
-                if not channel.name in self.channels:
-                    # The user isn't in the channel.
-                    raise IRCError.from_name('cannotsendtochan',
-                        '%s :Cannot send to channel' % channel.name)
-                for client in channel.clients:
-                    # Send message to all client in the channel, except the user himself.
-                    # TODO: Abstract this into a seperate method so that not every function has
-                    # to check if the user is in the channel.
-                    if client != self:
-                        client.send_queue.append(message)
-            else:
+            if not channel:
                 raise IRCError.from_name('nosuchnick', 'PRIVMSG :%s' % target)
+
+            if not channel.name in self.channels:
+                # The user isn't in the channel.
+                raise IRCError.from_name('cannotsendtochan',
+                    '%s :Cannot send to channel' % channel.name)
+
+            for client in channel.clients:
+                # Send message to all client in the channel, except the user himself.
+                # TODO: Abstract this into a seperate method so that not every function has
+                # to check if the user is in the channel.
+                if client != self:
+                    client.send_queue.append(message)
         else:
             # Message to user
             client = self.server.clients.get(target, None)
-            if client:
-                client.send_queue.append(message)
-            else:
+            if not client:
                 raise IRCError.from_name('nosuchnick', 'PRIVMSG :%s' % target)
+
+            client.send_queue.append(message)
 
     def handle_topic(self, params):
         """
