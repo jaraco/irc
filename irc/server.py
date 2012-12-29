@@ -170,11 +170,14 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
             self._send(msg)
 
         # See if the client has any commands for us.
-        if len(ready_to_read) == 1 and ready_to_read[0] == self.request:
+        if ready_to_read:
             self._handle_incoming()
 
     def _handle_incoming(self):
-        data = self.request.recv(1024)
+        try:
+            data = self.request.recv(1024)
+        except Exception:
+            raise self.Disconnect()
 
         if not data:
             raise self.Disconnect()
