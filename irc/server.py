@@ -326,8 +326,10 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
         """
         Handle sending a private message to a user or channel.
         """
-        # FIXME: events.codes['needmoreparams']
-        target, msg = params.split(' ', 1)
+        target, sep, msg = params.partition(' ')
+        if not msg:
+            raise IRCError.from_name('needmoreparams',
+                'PRIVMSG :Not enough parameters')
 
         message = ':%s PRIVMSG %s %s' % (self.client_ident(), target, msg)
         if target.startswith('#') or target.startswith('$'):
