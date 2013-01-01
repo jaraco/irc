@@ -23,6 +23,12 @@ def test_delayed_command_order():
 	])
 	assert [c.delay.seconds for c in cmds] == sorted(delays)
 
+def test_periodic_command_delay():
+	"A PeriodicCommand must have a positive, non-zero delay."
+	with pytest.raises(ValueError) as exc_info:
+		irc.client.PeriodicCommand(0, None, None)
+	assert str(exc_info.value) == test_periodic_command_delay.__doc__
+
 def test_periodic_command_fixed_delay():
 	"""
 	Test that we can construct a periodic command with a fixed initial

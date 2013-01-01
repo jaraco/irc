@@ -421,21 +421,32 @@ class DelayedCommand(datetime.datetime):
     def due(self):
         return self.now() >= self
 
-class PeriodicCommand(DelayedCommand):
-    """
-    Like a deferred command, but expect this command to run every delay
-    seconds.
-    """
+class PeriodicCommandBase(DelayedCommand):
     def next(self):
         return PeriodicCommand(self.delay, self.function,
             self.arguments)
 
-class PeriodicCommandFixedDelay(PeriodicCommand):
+    def _check_delay(self):
+        if not self.delay > datetime.timedelta():
+            raise ValueError("A PeriodicCommand must have a positive, "
+                "non-zero delay.")
+
+class PeriodicCommand(PeriodicCommandBase):
+    """
+    Like a delayed command, but expect this command to run every delay
+    seconds.
+    """
+    def __init__(self, *args, **kwargs):
+        super(PeriodicCommand, self).__init__(*args, **kwargs)
+        self._check_delay()
+
+class PeriodicCommandFixedDelay(PeriodicCommandBase):
     """
     Like a periodic command, but don't calculate the delay based on
     the current time. Instead use a fixed delay following the initial
     run.
     """
+
     @classmethod
     def at_time(cls, at, delay, function, arguments):
         cmd = super(PeriodicCommandFixedDelay, cls).at_time(
@@ -443,6 +454,7 @@ class PeriodicCommandFixedDelay(PeriodicCommand):
         if not isinstance(delay, datetime.timedelta):
             delay = datetime.timedelta(seconds=delay)
         cmd.delay = delay
+        cmd._check_delay()
         return cmd
 
 _rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")

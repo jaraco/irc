@@ -1,6 +1,9 @@
 7.0
 ===
 
+* PeriodicCommand now raises a ValueError if it's created with a negative or
+  zero delay (meaning all subsequent commands are immediately due). This fixes
+  #12.
 * Renamed the parameters to the IRC object. If you use a custom event loop
   and your code constructs the IRC object with keyword parameters, you will
   need to update your code to use the new names, so::
