@@ -1,3 +1,19 @@
+7.0
+===
+
+* Renamed the parameters to the IRC object. If you use a custom event loop
+  and your code constructs the IRC object with keyword parameters, you will
+  need to update your code to use the new names, so::
+
+    IRC(fn_to_add_socket=adder, fn_to_remove_socket=remover, fn_to_add_timeout=timeout)
+
+  becomes::
+
+    IRC(on_connect=adder, on_disconnect=remover, on_schedule=timeout)
+
+  If you don't use a custom event loop or you pass the parameters
+  positionally, no change is necessary.
+
 6.0.1
 =====
 

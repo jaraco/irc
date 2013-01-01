@@ -142,23 +142,24 @@ class IRC(object):
     are guarded by a mutex.
     """
 
-    def __init__(self, fn_to_add_socket=None,
-                 fn_to_remove_socket=None,
-                 fn_to_add_timeout=None):
+    def __do_nothing(*args, **kwargs):
+        pass
+
+    def __init__(self, on_connect=__do_nothing, on_disconnect=__do_nothing,
+            on_schedule=__do_nothing):
         """Constructor for IRC objects.
 
-        Optional arguments are fn_to_add_socket, fn_to_remove_socket
-        and fn_to_add_timeout.  The first two specify functions that
-        will be called with a socket object as argument when the IRC
-        object wants to be notified (or stop being notified) of data
-        coming on a new socket.  When new data arrives, the method
-        process_data should be called.  Similarly, fn_to_add_timeout
-        is called with a number of seconds (a floating point number)
-        as first argument when the IRC object wants to receive a
-        notification (by calling the process_timeout method).  So, if
-        e.g. the argument is 42.17, the object wants the
-        process_timeout method to be called after 42 seconds and 170
-        milliseconds.
+        on_connect: optional callback invoked when a new connection
+        is made.
+
+        on_disconnect: optional callback invoked when a socket is
+        disconnected.
+
+        on_schedule: optional callback, usually supplied by an external
+        event loop, to indicate in float seconds that the client needs to
+        process events that many seconds in the future. An external event
+        loop will implement this callback to schedule a call to
+        process_timeout.
 
         The three arguments mainly exist to be able to use an external
         main loop (for example Tkinter's or PyGTK's main app loop)
@@ -168,14 +169,10 @@ class IRC(object):
         once in a while.
         """
 
-        if fn_to_add_socket and fn_to_remove_socket:
-            self.fn_to_add_socket = fn_to_add_socket
-            self.fn_to_remove_socket = fn_to_remove_socket
-        else:
-            self.fn_to_add_socket = None
-            self.fn_to_remove_socket = None
+        self._on_connect = on_connect
+        self._on_disconnect = on_disconnect
+        self._on_schedule = on_schedule
 
-        self.fn_to_add_timeout = fn_to_add_timeout
         self.connections = []
         self.handlers = {}
         self.delayed_commands = []  # list of DelayedCommands
@@ -348,8 +345,7 @@ class IRC(object):
     def _schedule_command(self, command):
         with self.mutex:
             bisect.insort(self.delayed_commands, command)
-            if self.fn_to_add_timeout:
-                self.fn_to_add_timeout(util.total_seconds(command.delay))
+            self._on_schedule(util.total_seconds(command.delay))
 
     def dcc(self, dcctype="chat"):
         """Creates and returns a DCCConnection object.
@@ -385,8 +381,7 @@ class IRC(object):
         """[Internal]"""
         with self.mutex:
             self.connections.remove(connection)
-            if self.fn_to_remove_socket:
-                self.fn_to_remove_socket(connection.socket)
+            self._on_disconnect(connection.socket)
 
 class DelayedCommand(datetime.datetime):
     """
@@ -544,8 +539,7 @@ class ServerConnection(Connection):
         except socket.error as err:
             raise ServerConnectionError("Couldn't connect to socket: %s" % err)
         self.connected = True
-        if self.irclibobj.fn_to_add_socket:
-            self.irclibobj.fn_to_add_socket(self.socket)
+        self.irclibobj._on_connect(self.socket)
 
         # Log on...
         if self.password:
@@ -1042,8 +1036,7 @@ class DCCConnection(Connection):
         except socket.error as x:
             raise DCCConnectionError("Couldn't connect to socket: %s" % x)
         self.connected = 1
-        if self.irclibobj.fn_to_add_socket:
-            self.irclibobj.fn_to_add_socket(self.socket)
+        self.irclibobj._on_connect(self.socket)
         return self
 
     def listen(self):
