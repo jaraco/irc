@@ -55,7 +55,6 @@ import select
 import socket
 import string
 import time
-import datetime
 import struct
 import logging
 import itertools
@@ -74,6 +73,7 @@ from . import functools as irc_functools
 from . import strings
 from . import util
 from . import buffer
+from . import schedule
 
 log = logging.getLogger(__name__)
 
@@ -97,6 +97,10 @@ except Exception:
 # connection.quit() only sends QUIT to the server.
 # ERROR from the server triggers the error event and the disconnect event.
 # dropping of the connection triggers the disconnect event.
+
+# for backward-compatibility
+from .schedule import (PeriodicCommand, DelayedCommand,
+    PeriodicCommandFixedDelay)
 
 class IRCError(Exception):
     "An IRC exception"
@@ -215,7 +219,7 @@ class IRC(object):
                 if not command.due():
                     break
                 command.function(*command.arguments)
-                if isinstance(command, PeriodicCommand):
+                if isinstance(command, schedule.PeriodicCommand):
                     self._schedule_command(command.next())
                 del self.delayed_commands[0]
 
@@ -317,7 +321,7 @@ class IRC(object):
             function -- Function to call.
             arguments -- Arguments to give the function.
         """
-        command = DelayedCommand.at_time(at, function, arguments)
+        command = schedule.DelayedCommand.at_time(at, function, arguments)
         self._schedule_command(command)
 
     def execute_delayed(self, delay, function, arguments=()):
@@ -328,7 +332,7 @@ class IRC(object):
         function -- Function to call.
         arguments -- Arguments to give the function.
         """
-        command = DelayedCommand(delay, function, arguments)
+        command = schedule.DelayedCommand(delay, function, arguments)
         self._schedule_command(command)
 
     def execute_every(self, period, function, arguments=()):
@@ -339,7 +343,7 @@ class IRC(object):
         function -- Function to call.
         arguments -- Arguments to give the function.
         """
-        command = PeriodicCommand(period, function, arguments)
+        command = schedule.PeriodicCommand(period, function, arguments)
         self._schedule_command(command)
 
     def _schedule_command(self, command):
@@ -382,80 +386,6 @@ class IRC(object):
         with self.mutex:
             self.connections.remove(connection)
             self._on_disconnect(connection.socket)
-
-class DelayedCommand(datetime.datetime):
-    """
-    A command to be executed after some delay (seconds or timedelta).
-
-    Clients may override .now() to have dates interpreted in a different
-    manner, such as to use UTC or to have timezone-aware times.
-    """
-    def __new__(cls, delay, function, arguments):
-        if not isinstance(delay, datetime.timedelta):
-            delay = datetime.timedelta(seconds=delay)
-        at = cls.now() + delay
-        cmd = datetime.datetime.__new__(cls, at.year,
-            at.month, at.day, at.hour, at.minute, at.second,
-            at.microsecond, at.tzinfo)
-        cmd.delay = delay
-        cmd.function = function
-        cmd.arguments = arguments
-        return cmd
-
-    @classmethod
-    def now(self, tzinfo=None):
-        return datetime.datetime.now(tzinfo)
-
-    @classmethod
-    def at_time(cls, at, function, arguments):
-        """
-        Construct a DelayedCommand to come due at `at`, where `at` may be
-        a datetime or timestamp. If `at` is a timestamp, it will be
-        interpreted as a naive local timestamp.
-        """
-        if isinstance(at, int):
-            at = datetime.datetime.fromtimestamp(at)
-        delay = at - cls.now()
-        return cls(delay, function, arguments)
-
-    def due(self):
-        return self.now() >= self
-
-class PeriodicCommandBase(DelayedCommand):
-    def next(self):
-        return PeriodicCommand(self.delay, self.function,
-            self.arguments)
-
-    def _check_delay(self):
-        if not self.delay > datetime.timedelta():
-            raise ValueError("A PeriodicCommand must have a positive, "
-                "non-zero delay.")
-
-class PeriodicCommand(PeriodicCommandBase):
-    """
-    Like a delayed command, but expect this command to run every delay
-    seconds.
-    """
-    def __init__(self, *args, **kwargs):
-        super(PeriodicCommand, self).__init__(*args, **kwargs)
-        self._check_delay()
-
-class PeriodicCommandFixedDelay(PeriodicCommandBase):
-    """
-    Like a periodic command, but don't calculate the delay based on
-    the current time. Instead use a fixed delay following the initial
-    run.
-    """
-
-    @classmethod
-    def at_time(cls, at, delay, function, arguments):
-        cmd = super(PeriodicCommandFixedDelay, cls).at_time(
-            at, function, arguments)
-        if not isinstance(delay, datetime.timedelta):
-            delay = datetime.timedelta(seconds=delay)
-        cmd.delay = delay
-        cmd._check_delay()
-        return cmd
 
 _rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
 

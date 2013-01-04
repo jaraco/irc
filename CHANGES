@@ -1,3 +1,9 @@
+7.1
+===
+
+* Moved scheduled command classes to irc.schedule module. Kept references for
+  backwards-compatibility.
+
 7.0
 ===
 
