@@ -1,10 +1,14 @@
 8.0
 ===
 
+This release brings several backward-incompatible changes to the scheduled
+commands.
+
 * Refactored implementation of schedule classes. No longer do they override
   the datetime constructor, but now only provide suitable classmethods for
   construction in various forms.
 * Removed backward-compatible references from irc.client.
+* Remove 'arguments' parameter from scheduled commands.
 
 Clients that reference the schedule classes from irc.client or that construct
 them from the basic constructor will need to update to use the new class
@@ -12,6 +16,25 @@ methods::
 
   - DelayedCommand -> DelayedCommand.after
   - PeriodicCommand -> PeriodicCommand.after
+
+Arguments may no longer be passed to the 'function' callback, but one is
+encouraged instead to use functools.partial to attach parameters to the
+callback. For example::
+
+    DelayedCommand.after(3, func, ('a', 10))
+
+becomes::
+
+    func = functools.partial(func, 'a', 10)
+    DelayedCommand.after(3, func)
+
+This mode puts less constraints on the both the handler and the caller. For
+example, a caller can now pass keyword arguments instead::
+
+    func = functools.partial(func, name='a', quantity=10)
+    DelayedCommand.after(3, func)
+
+Readability, maintainability, and usability go up.
 
 7.1
 ===

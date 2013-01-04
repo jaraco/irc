@@ -22,18 +22,17 @@ class DelayedCommand(datetime.datetime):
             other.tzinfo)
 
     @classmethod
-    def after(cls, delay, function, arguments):
+    def after(cls, delay, function):
         if not isinstance(delay, datetime.timedelta):
             delay = datetime.timedelta(seconds=delay)
         due_time = cls.now() + delay
         cmd = cls.from_datetime(due_time)
         cmd.delay = delay
         cmd.function = function
-        cmd.arguments = arguments
         return cmd
 
     @classmethod
-    def at_time(cls, at, function, arguments):
+    def at_time(cls, at, function):
         """
         Construct a DelayedCommand to come due at `at`, where `at` may be
         a datetime or timestamp. If `at` is a timestamp, it will be
@@ -44,7 +43,6 @@ class DelayedCommand(datetime.datetime):
         cmd = cls.from_datetime(at)
         cmd.delay = at - cmd.now()
         cmd.function = function
-        cmd.arguments = arguments
         return cmd
 
     def due(self):
@@ -59,7 +57,6 @@ class PeriodicCommand(DelayedCommand):
         cmd = self.__class__.from_datetime(self + self.delay)
         cmd.delay = self.delay
         cmd.function = self.function
-        cmd.arguments = self.arguments
         return cmd
 
     def __setattr__(self, key, value):
@@ -76,7 +73,7 @@ class PeriodicCommandFixedDelay(PeriodicCommand):
     """
 
     @classmethod
-    def at_time(cls, at, delay, function, arguments):
+    def at_time(cls, at, delay, function):
         if isinstance(at, int):
             at = datetime.datetime.fromtimestamp(at)
         cmd = cls.from_datetime(at)
@@ -84,5 +81,4 @@ class PeriodicCommandFixedDelay(PeriodicCommand):
             delay = datetime.timedelta(seconds=delay)
         cmd.delay = delay
         cmd.function = function
-        cmd.arguments = arguments
         return cmd
