@@ -1,3 +1,18 @@
+8.0
+===
+
+* Refactored implementation of schedule classes. No longer do they override
+  the datetime constructor, but now only provide suitable classmethods for
+  construction in various forms.
+* Removed backward-compatible references from irc.client.
+
+Clients that reference the schedule classes from irc.client or that construct
+them from the basic constructor will need to update to use the new class
+methods::
+
+  - DelayedCommand -> DelayedCommand.after
+  - PeriodicCommand -> PeriodicCommand.after
+
 7.1
 ===
 

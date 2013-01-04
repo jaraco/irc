@@ -98,10 +98,6 @@ except Exception:
 # ERROR from the server triggers the error event and the disconnect event.
 # dropping of the connection triggers the disconnect event.
 
-# for backward-compatibility
-from .schedule import (PeriodicCommand, DelayedCommand,
-    PeriodicCommandFixedDelay)
-
 class IRCError(Exception):
     "An IRC exception"
 
@@ -332,7 +328,7 @@ class IRC(object):
         function -- Function to call.
         arguments -- Arguments to give the function.
         """
-        command = schedule.DelayedCommand(delay, function, arguments)
+        command = schedule.DelayedCommand.after(delay, function, arguments)
         self._schedule_command(command)
 
     def execute_every(self, period, function, arguments=()):
@@ -343,7 +339,7 @@ class IRC(object):
         function -- Function to call.
         arguments -- Arguments to give the function.
         """
-        command = schedule.PeriodicCommand(period, function, arguments)
+        command = schedule.PeriodicCommand.after(period, function, arguments)
         self._schedule_command(command)
 
     def _schedule_command(self, command):
