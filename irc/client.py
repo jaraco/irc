@@ -219,7 +219,7 @@ class IRC(object):
                 if not command.due():
                     break
                 command.function(*command.arguments)
-                if isinstance(command, schedule.PeriodicCommand):
+                if isinstance(command, schedule.PeriodicCommandBase):
                     self._schedule_command(command.next())
                 del self.delayed_commands[0]
 
@@ -1121,13 +1121,13 @@ class SimpleIRCClient(object):
 
     def _dispatcher(self, connection, event):
         """
-        Dispatch event from connection.
+        Dispatch events to on_<event.type> method, if present.
         """
         log.debug("_dispatcher: %s", event.type)
 
-        m = "on_" + event.type
-        if hasattr(self, m):
-            getattr(self, m)(connection, event)
+        do_nothing = lambda c, e: None
+        method = getattr(self, "on_" + event.type, do_nothing)
+        method(connection, event)
 
     def _dcc_disconnect(self, c, e):
         self.dcc_connections.remove(c)
