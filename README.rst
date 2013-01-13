@@ -14,6 +14,11 @@ Some legacy content is still available at the `foundational SourceForge site
 Tests are `continuously run <https://travis-ci.org/#!/jaraco/irc>`_ using
 Travis-CI.
 
+|BuildStatus|_
+
+.. |BuildStatus| image:: https://secure.travis-ci.org/jaraco/irc.png
+.. _BuildStatus: http://travis-ci.org/jaraco/irc
+
 This library is intended to encapsulate the IRC protocol at a quite
 low level.  It provides an event-driven IRC client framework.  It has
 a fairly thorough support for the basic IRC protocol, CTCP and DCC
