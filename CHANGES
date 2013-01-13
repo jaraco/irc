@@ -36,6 +36,12 @@ example, a caller can now pass keyword arguments instead::
 
 Readability, maintainability, and usability go up.
 
+7.1.1
+=====
+
+* Fixed regression created in 7.0 where PeriodicCommandFixedDelay would only
+  cause the first command to be scheduled, but not subsequent ones.
+
 7.1
 ===
 
