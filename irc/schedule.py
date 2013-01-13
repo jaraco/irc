@@ -11,6 +11,9 @@ class DelayedCommand(datetime.datetime):
     Clients may override .now() to have dates interpreted in a different
     manner, such as to use UTC or to have timezone-aware times.
     """
+    def __init__(self, delay, function, arguments):
+        pass
+
     def __new__(cls, delay, function, arguments):
         if not isinstance(delay, datetime.timedelta):
             delay = datetime.timedelta(seconds=delay)
