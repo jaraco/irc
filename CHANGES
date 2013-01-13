@@ -36,6 +36,12 @@ example, a caller can now pass keyword arguments instead::
 
 Readability, maintainability, and usability go up.
 
+7.1.2
+=====
+
+* Issue #13: TypeError on Python 3 when constructing PeriodicCommand (and thus
+  execute_every).
+
 7.1.1
 =====
 
