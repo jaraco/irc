@@ -3,8 +3,10 @@ import sys
 import setuptools
 
 def read_long_description():
-    with open('README') as f:
+    with open('README.rst') as f:
         data = f.read()
+    with open('CHANGES.rst') as f:
+        data += '\n\n' + f.read()
     return data
 
 importlib_req = ['importlib'] if sys.version_info < (2,7) else []
