@@ -1,6 +1,13 @@
 Changes
 -------
 
+8.0.1
+=====
+
+* Issue #14: Fix errors when handlers of the same priority are added under
+  Python 3. This also fixes the unintended behavior of allowing handlers of
+  the same priority to compare as unequal.
+
 8.0
 ===
 

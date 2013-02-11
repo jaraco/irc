@@ -108,8 +108,11 @@ class InvalidCharacters(ValueError):
 class MessageTooLong(ValueError):
     "Message is too long"
 
-PrioritizedHandler = collections.namedtuple('PrioritizedHandler',
-    ('priority', 'callback'))
+class PrioritizedHandler(
+        collections.namedtuple('Base', ('priority', 'callback'))):
+    def __lt__(self, other):
+        "when sorting prioritized handlers, only use the priority"
+        return self.priority < other.priority
 
 class IRC(object):
     """Class that handles one or several IRC server connections.
