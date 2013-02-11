@@ -28,3 +28,13 @@ def test_privmsg_fails_on_embedded_carriage_returns(socket_mod):
 	server.connect('foo', 6667, 'bestnick')
 	with pytest.raises(ValueError):
 		server.privmsg('#best-channel', 'You are great\nSo are you')
+
+class TestHandlers(object):
+	def test_handlers_same_priority(self):
+		"""
+		Two handlers of the same priority should still compare.
+		"""
+		handler1 = irc.client.PrioritizedHandler(1, lambda: None)
+		handler2 = irc.client.PrioritizedHandler(1, lambda: 'other')
+		assert not handler1 < handler2
+		assert not handler2 < handler1
