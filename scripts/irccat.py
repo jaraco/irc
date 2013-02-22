@@ -17,16 +17,14 @@ target = None
 def on_connect(connection, event):
     if irc.client.is_channel(target):
         connection.join(target)
-    else:
-        while 1:
-            line = sys.stdin.readline().strip()
-            if not line:
-                break
-            connection.privmsg(target, line)
-        connection.quit("Using irc.client.py")
+        return
+    main_loop(connection)
 
 def on_join(connection, event):
-    while 1:
+    main_loop(connection)
+
+def main_loop(connection):
+    while True:
         line = sys.stdin.readline().strip()
         if not line:
             break
