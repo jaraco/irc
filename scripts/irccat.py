@@ -7,9 +7,11 @@
 #
 # Joel Rosdahl <joel@rosdahl.net>
 
-import argparse
-import irc.client
 import sys
+import argparse
+import itertools
+
+import irc.client
 
 target = None
 "The nick or channel to which to send messages"
@@ -23,11 +25,13 @@ def on_connect(connection, event):
 def on_join(connection, event):
     main_loop(connection)
 
-def main_loop(connection):
+def get_lines():
     while True:
-        line = sys.stdin.readline().strip()
-        if not line:
-            break
+        yield sys.stdin.readline().strip()
+
+def main_loop(connection):
+    for line in itertools.takewhile(bool, get_lines()):
+        print(line)
         connection.privmsg(target, line)
     connection.quit("Using irc.client.py")
 
