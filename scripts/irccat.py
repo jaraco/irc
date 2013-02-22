@@ -10,6 +10,9 @@
 import irc.client
 import sys
 
+target = None
+"The nick or channel to which to send messages"
+
 def on_connect(connection, event):
     if irc.client.is_channel(target):
         connection.join(target)
