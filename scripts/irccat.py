@@ -38,9 +38,10 @@ def on_disconnect(connection, event):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('server_spec')
+    parser.add_argument('server')
     parser.add_argument('nickname')
     parser.add_argument('target', help="a nickname or channel")
+    parser.add_argument('-p', '--port', default=6667, type=int)
     return parser.parse_args()
 
 def main():
@@ -49,20 +50,9 @@ def main():
     args = get_args()
     target = args.target
 
-    s = args.server_spec.split(":", 1)
-    server = s[0]
-    if len(s) == 2:
-        try:
-            port = int(s[1])
-        except ValueError:
-            print "Error: Erroneous port."
-            raise SystemExit(1)
-    else:
-        port = 6667
-
     client = irc.client.IRC()
     try:
-        c = client.server().connect(server, port, args.nickname)
+        c = client.server().connect(args.server, args.port, args.nickname)
     except irc.client.ServerConnectionError, x:
         print x
         raise SystemExit(1)
