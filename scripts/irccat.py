@@ -7,6 +7,7 @@
 #
 # Joel Rosdahl <joel@rosdahl.net>
 
+import argparse
 import irc.client
 import sys
 
@@ -35,16 +36,20 @@ def on_join(connection, event):
 def on_disconnect(connection, event):
     raise SystemExit()
 
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('server_spec')
+    parser.add_argument('nickname')
+    parser.add_argument('target', help="a nickname or channel")
+    return parser.parse_args()
+
 def main():
     global target
-    if len(sys.argv) != 4:
-        print "Usage: irccat <server[:port]> <nickname> <target>"
-        print "\ntarget is a nickname or a channel."
-        raise SystemExit(1)
 
-    cmd, host_port, nickname, target = sys.argv
+    args = get_args()
+    target = args.target
 
-    s = host_port.split(":", 1)
+    s = args.server_spec.split(":", 1)
     server = s[0]
     if len(s) == 2:
         try:
@@ -57,7 +62,7 @@ def main():
 
     client = irc.client.IRC()
     try:
-        c = client.server().connect(server, port, nickname)
+        c = client.server().connect(server, port, args.nickname)
     except irc.client.ServerConnectionError, x:
         print x
         raise SystemExit(1)
