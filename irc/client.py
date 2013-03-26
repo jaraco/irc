@@ -603,6 +603,7 @@ class ServerConnection(Connection):
                         if feature_name == 'PREFIX':  # channel user prefixes
                             channel_modes, channel_chars = feature_value.split(')')
                             channel_modes = channel_modes[1:]
+                            self.isupport[feature_name] = {}
                             for i in range(len(channel_modes)):
                                 self.isupport[feature_name][channel_modes[i]] = channel_chars[i]
 
