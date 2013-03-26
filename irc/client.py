@@ -438,6 +438,7 @@ class ServerConnection(Connection):
     def __init__(self, irclibobj):
         super(ServerConnection, self).__init__(irclibobj)
         self.connected = False
+        self.isupport = {}
 
     # save the method args to allow for easier reconnection.
     @irc_functools.save_method_args
@@ -588,6 +589,33 @@ class ServerConnection(Connection):
                 # Record the nickname in case the client changed nick
                 # in a nicknameinuse callback.
                 self.real_nickname = arguments[0]
+            elif command == "featurelist":
+                for feature in arguments[:-1]:  # last is "are supported on this server" or similar
+                    # negating
+                    if feature[0] == '-':
+                        feature = feature[1:]
+                        if feature in self.isupport:
+                            del self.isupport[feature]
+                    # special setting
+                    elif ('=' in feature) and (len(feature.split('=')) > 1):
+                        feature_name, feature_value = feature.split('=')
+
+                        if feature_name == 'PREFIX':  # channel user prefixes
+                            channel_modes, channel_chars = feature_value.split(')')
+                            channel_modes = channel_modes[1:]
+                            for i in range(len(channel_modes)):
+                                self.isupport[feature_name][channel_modes[i]] = channel_chars[i]
+
+                        elif feature_name == 'CHANMODES':  # channel mode letters
+                            self.isupport[feature_name] = feature_value.split(',')
+
+                        else:
+                            self.isupport[feature_name] = feature_value
+                    # standard on/off setting
+                    else:
+                        if feature[-1] == '=':
+                            feature = feature[:-1]
+                        self.isupport[feature] = True
 
             if command in ["privmsg", "notice"]:
                 target, message = arguments[0], arguments[1]
