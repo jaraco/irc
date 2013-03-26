@@ -621,6 +621,20 @@ class ServerConnection(Connection):
                                     target_value = int(target_value)
                                 self.isupport[feature_name][target_name] = target_value
 
+                        elif feature_name in ['CHANLIMIT', 'MAXLIST']:
+                            self.isupport[feature_name] = {}
+
+                            for target_split in feature_value.split(','):
+                                targets, number = target_split.split(':')
+
+                                if number == '':
+                                    number = None
+                                else:
+                                    number = int(number)
+
+                                for target in targets:
+                                    self.isupport[feature_name][target] = number
+
                         else:
                             self.isupport[feature_name] = feature_value
                     # standard on/off setting
