@@ -590,7 +590,7 @@ class ServerConnection(Connection):
                 # in a nicknameinuse callback.
                 self.real_nickname = arguments[0]
             elif command == "featurelist":
-                for feature in arguments[:-1]:  # last is "are supported on this server" or similar
+                for feature in arguments[1:-1]:  # first is target, last is "are supported on this server" or similar
                     # negating
                     if feature[0] == '-':
                         feature = feature[1:]
