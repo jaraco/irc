@@ -161,18 +161,15 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
 
         ch = e.arguments[1]
         for nick in e.arguments[2].split():
-            if nick[0] == "@":
-                nick = nick[1:]
-                self.channels[ch].set_mode("o", nick)
-            elif nick[0] == "+":
-                nick = nick[1:]
-                self.channels[ch].set_mode("v", nick)
-            elif nick[0] == "~":
-                nick = nick[1:]
-                self.channels[ch].set_mode("q", nick)
-            elif nick[0] == "%":
-                nick = nick[1:]
-                self.channels[ch].set_mode("h", nick)
+            nick_modes = []
+
+            for mode in self.connection.isupport['PREFIX']:
+                if nick[0] == self.connection.isupport['PREFIX'][mode]:
+                    nick = nick[1:]
+
+            for mode in nick_modes:
+                self.channels[ch].set_mode(mode, nick)
+
             self.channels[ch].add_user(nick)
 
     def _on_nick(self, c, e):
@@ -368,11 +365,20 @@ class Channel(object):
         """
         try:
             if mode == "o":
-                del self.operdict[value]
+                if value in self.operdict:
+                    del self.operdict[value]
             elif mode == "v":
-                del self.voiceddict[value]
+                if value in self.voiceddict:
+                    del self.voiceddict[value]
+            elif mode == "q":
+                if value in self.ownerdict:
+                    del self.ownerdict[value]
+            elif mode == "h":
+                if value in self.halfopdict:
+                    del self.halfopdict[value]
             else:
-                del self.modes[mode]
+                if mode in self.modes:
+                    del self.modes[mode]
         except KeyError:
             pass
 
