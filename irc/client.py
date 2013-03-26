@@ -610,6 +610,17 @@ class ServerConnection(Connection):
                         elif feature_name == 'CHANMODES':  # channel mode letters
                             self.isupport[feature_name] = feature_value.split(',')
 
+                        elif feature_name == 'TARGMAX':
+                            self.isupport[feature_name] = {}
+
+                            for target in feature_value.split(','):
+                                target_name, target_value = target.split(':')
+                                if target_value == '':
+                                    target_value = None
+                                else:
+                                    target_value = int(target_value)
+                                self.isupport[feature_name][target_name] = target_value
+
                         else:
                             self.isupport[feature_name] = feature_value
                     # standard on/off setting
