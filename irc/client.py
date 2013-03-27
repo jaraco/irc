@@ -635,6 +635,10 @@ class ServerConnection(Connection):
                                 for target in targets:
                                     self.isupport[feature_name][target] = number
 
+                        elif feature_name in ['AWAYLEN', 'CHANNELLEN', 'KICKLEN', 'NICKLEN',
+                                              'TOPICLEN', 'SILENCE', 'WATCH']:  # numbers
+                            self.isupport[feature_name] = int(feature_value)
+
                         else:
                             self.isupport[feature_name] = feature_value
                     # standard on/off setting
