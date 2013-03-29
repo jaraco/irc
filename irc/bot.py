@@ -166,6 +166,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             for mode in self.connection.isupport['PREFIX']:
                 if nick[0] == self.connection.isupport['PREFIX'][mode]:
                     nick = nick[1:]
+                    nick_modes.append(mode)
 
             for mode in nick_modes:
                 self.channels[ch].set_mode(mode, nick)
@@ -365,20 +366,15 @@ class Channel(object):
         """
         try:
             if mode == "o":
-                if value in self.operdict:
-                    del self.operdict[value]
+                del self.operdict[value]
             elif mode == "v":
-                if value in self.voiceddict:
-                    del self.voiceddict[value]
+                del self.voiceddict[value]
             elif mode == "q":
-                if value in self.ownerdict:
-                    del self.ownerdict[value]
+                del self.ownerdict[value]
             elif mode == "h":
-                if value in self.halfopdict:
-                    del self.halfopdict[value]
+                del self.halfopdict[value]
             else:
-                if mode in self.modes:
-                    del self.modes[mode]
+                del self.modes[mode]
         except KeyError:
             pass
 
