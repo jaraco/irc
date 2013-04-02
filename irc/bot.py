@@ -97,6 +97,11 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.connection.add_global_handler(i, getattr(self, "_on_" + i),
                 -20)
 
+        self.connection.features['PREFIX'].update({
+            'h': '%',
+            'q': '~',
+        })
+
     def _connected_checker(self):
         """[Internal]"""
         if not self.connection.is_connected():
