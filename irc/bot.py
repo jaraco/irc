@@ -163,8 +163,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         for nick in e.arguments[2].split():
             nick_modes = []
 
-            for mode in self.connection.isupport['PREFIX']:
-                if nick[0] == self.connection.isupport['PREFIX'][mode]:
+            for mode in self.connection.features['PREFIX']:
+                if nick[0] == self.connection.features['PREFIX'][mode]:
                     nick = nick[1:]
                     nick_modes.append(mode)
 

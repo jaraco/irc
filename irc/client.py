@@ -438,7 +438,7 @@ class ServerConnection(Connection):
     def __init__(self, irclibobj):
         super(ServerConnection, self).__init__(irclibobj)
         self.connected = False
-        self.isupport = {
+        self.features = {
             'PREFIX': {
                 # standard (RFC1459) prefixes
                 'o': '@',
@@ -596,61 +596,7 @@ class ServerConnection(Connection):
                 # in a nicknameinuse callback.
                 self.real_nickname = arguments[0]
             elif command == "featurelist":
-                for feature in arguments[1:-1]:  # first is target, last is "are supported on this server" or similar
-                    # negating
-                    if feature[0] == '-':
-                        feature = feature[1:]
-                        if feature in self.isupport:
-                            del self.isupport[feature]
-                    # special setting
-                    elif ('=' in feature) and (len(feature.split('=')) > 1):
-                        feature_name, feature_value = feature.split('=')
-
-                        if feature_name == 'PREFIX':  # channel user prefixes
-                            channel_modes, channel_chars = feature_value.split(')')
-                            channel_modes = channel_modes[1:]
-                            self.isupport[feature_name] = {}
-                            for i in range(len(channel_modes)):
-                                self.isupport[feature_name][channel_modes[i]] = channel_chars[i]
-
-                        elif feature_name == 'CHANMODES':  # channel mode letters
-                            self.isupport[feature_name] = feature_value.split(',')
-
-                        elif feature_name == 'TARGMAX':
-                            self.isupport[feature_name] = {}
-
-                            for target in feature_value.split(','):
-                                target_name, target_value = target.split(':')
-                                if target_value == '':
-                                    target_value = None
-                                else:
-                                    target_value = int(target_value)
-                                self.isupport[feature_name][target_name] = target_value
-
-                        elif feature_name in ['CHANLIMIT', 'MAXLIST']:
-                            self.isupport[feature_name] = {}
-
-                            for target_split in feature_value.split(','):
-                                targets, number = target_split.split(':')
-
-                                if number == '':
-                                    number = None
-                                else:
-                                    number = int(number)
-
-                                for target in targets:
-                                    self.isupport[feature_name][target] = number
-
-                        elif feature_value.isdigit():
-                            self.isupport[feature_name] = int(feature_value)
-
-                        else:
-                            self.isupport[feature_name] = feature_value
-                    # standard on/off setting
-                    else:
-                        if feature[-1] == '=':
-                            feature = feature[:-1]
-                        self.isupport[feature] = True
+                self.load_features(arguments)
 
             if command in ["privmsg", "notice"]:
                 target, message = arguments[0], arguments[1]
@@ -700,6 +646,64 @@ class ServerConnection(Connection):
                 log.debug("command: %s, source: %s, target: %s, "
                     "arguments: %s", command, prefix, target, arguments)
                 self._handle_event(Event(command, NickMask(prefix), target, arguments))
+
+    def load_features(self, arguments):
+        for feature in arguments[1:-1]:  # first is target, last is "are supported on this server" or similar
+            # negating
+            if feature[0] == '-':
+                feature = feature[1:]
+                if feature in self.features:
+                    del self.features[feature]
+            # special setting
+            elif ('=' in feature) and (len(feature.split('=')) > 1):
+                feature_name, feature_value = feature.split('=')
+
+                if feature_name == 'PREFIX':  # channel user prefixes
+                    channel_modes, channel_chars = feature_value.split(')')
+                    channel_modes = channel_modes[1:]
+                    self.features[feature_name] = {}
+                    for i in range(len(channel_modes)):
+                        self.features[feature_name][channel_modes[i]] = channel_chars[i]
+
+                elif feature_name == 'CHANMODES':  # channel mode letters
+                    self.features[feature_name] = feature_value.split(',')
+
+                elif feature_name == 'TARGMAX':
+                    self.features[feature_name] = {}
+
+                    for target in feature_value.split(','):
+                        target_name, target_value = target.split(':')
+                        if target_value == '':
+                            target_value = None
+                        else:
+                            target_value = int(target_value)
+                        self.features[feature_name][target_name] = target_value
+
+                elif feature_name in ['CHANLIMIT', 'MAXLIST']:
+                    self.features[feature_name] = {}
+
+                    for target_split in feature_value.split(','):
+                        targets, number = target_split.split(':')
+
+                        if number == '':
+                            number = None
+                        else:
+                            number = int(number)
+
+                        for target in targets:
+                            self.features[feature_name][target] = number
+
+                elif feature_value.isdigit():
+                    self.features[feature_name] = int(feature_value)
+
+                else:
+                    self.features[feature_name] = feature_value
+            # standard on/off setting
+            else:
+                if feature[-1] == '=':
+                    feature = feature[:-1]
+                self.features[feature] = True
+
 
     def _handle_event(self, event):
         """[Internal]"""
