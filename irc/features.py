@@ -9,6 +9,10 @@ class FeatureSet(object):
     >>> f.load(['target', 'PREFIX=(abc)+-/', 'your message sir'])
     >>> f.prefix == {'+': 'a', '-': 'b', '/': 'c'}
     True
+
+    >>> f.load_feature('CHANMODES=foo,bar,baz')
+    >>> f.chanmodes
+    ['foo', 'bar', 'baz']
     """
 
     def __init__(self):
@@ -62,19 +66,30 @@ class FeatureSet(object):
 
     @staticmethod
     def _parse_TARGMAX(value):
-        return dict(
-            (name, int(value) if value else None)
-            for target in value.split(',')
-            for name, value in target.split(':')
-        )
+        """
+        >>> res = FeatureSet._parse_TARGMAX('a:3,c:,b:2')
+        >>> res['a']
+        3
+        """
+        return dict(string_int_pair(target, ':')
+            for target in value.split(','))
 
     @staticmethod
     def _parse_CHANLIMIT(value):
+        """
+        >>> res = FeatureSet._parse_CHANLIMIT('ibe:250,xyz:100')
+        >>> len(res)
+        6
+        >>> res['x']
+        100
+        >>> res['i'] == res['b'] == res['e'] == 250
+        True
+        """
+        pairs = map(string_int_pair, value.split(','))
         return dict(
-            (target, int(number) if number else None)
-            for target_split in value.split(',')
-            for targets, number in target_split.split(':')
-            for target in targets
+            (target, number)
+            for target_keys, number in pairs
+            for target in target_keys
         )
     _parse_MAXLIST = _parse_CHANLIMIT
 
@@ -87,3 +102,8 @@ class FeatureSet(object):
     def set(self, name, value=True):
         "set a feature value"
         setattr(self, name.lower(), value)
+
+def string_int_pair(target, sep=':'):
+    name, value = target.split(sep)
+    value = int(value) if value else None
+    return name, value
