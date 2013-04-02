@@ -1,11 +1,11 @@
-class Features(object):
+class FeatureSet(object):
     """
     An implementation of features as loaded from an ISUPPORT server directive.
 
     Each feature is loaded into an attribute of the same name (but lowercased
     to match Python sensibilities).
 
-    >>> f = Features()
+    >>> f = FeatureSet()
     >>> f.load(['target', 'PREFIX=(abc)+-/', 'your message sir'])
     >>> f.prefix == {'+': 'a', '-': 'b', '/': 'c'}
     True
