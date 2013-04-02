@@ -25,14 +25,18 @@ class FeatureSet(object):
             '+': 'v',
         })
 
-    def load(self, arguments):
-        "Load the values from the a ServerConnection arguments"
-        target, features, msg = arguments[:1], arguments[1:-1], arguments[-1:]
-        map(self.load_feature, features)
+    def set(self, name, value=True):
+        "set a feature value"
+        setattr(self, name.lower(), value)
 
     def remove(self, feature_name):
         if feature_name in vars(self):
             delattr(self, feature_name)
+
+    def load(self, arguments):
+        "Load the values from the a ServerConnection arguments"
+        target, features, msg = arguments[:1], arguments[1:-1], arguments[-1:]
+        map(self.load_feature, features)
 
     def load_feature(self, feature):
         # negating
@@ -98,10 +102,6 @@ class FeatureSet(object):
         if value.isdigit():
             return int(value)
         return value
-
-    def set(self, name, value=True):
-        "set a feature value"
-        setattr(self, name.lower(), value)
 
 def string_int_pair(target, sep=':'):
     name, value = target.split(sep)
