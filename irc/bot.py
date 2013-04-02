@@ -97,9 +97,9 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.connection.add_global_handler(i, getattr(self, "_on_" + i),
                 -20)
 
-        self.connection.features['PREFIX'].update({
-            'h': '%',
-            'q': '~',
+        self.connection.features.prefix.update({
+            '%': 'h',
+            '~': 'q',
         })
 
     def _connected_checker(self):
@@ -168,10 +168,9 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         for nick in e.arguments[2].split():
             nick_modes = []
 
-            for mode in self.connection.features['PREFIX']:
-                if nick[0] == self.connection.features['PREFIX'][mode]:
-                    nick = nick[1:]
-                    nick_modes.append(mode)
+            if nick[0] in self.connection.features.prefix:
+                nick_modes.append(self.connections.features.prefix[nick[0]])
+                nick = nick[1:]
 
             for mode in nick_modes:
                 self.channels[ch].set_mode(mode, nick)
