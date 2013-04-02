@@ -1,6 +1,14 @@
 class Features(object):
     """
     An implementation of features as loaded from an ISUPPORT server directive.
+
+    Each feature is loaded into an attribute of the same name (but lowercased
+    to match Python sensibilities).
+
+    >>> f = Features()
+    >>> f.load(['target', 'PREFIX=(abc)+-/', 'your message sir'])
+    >>> f.prefix == {'+': 'a', '-': 'b', '/': 'c'}
+    True
     """
 
     def __init__(self):
@@ -32,54 +40,49 @@ class Features(object):
         if not sep:
             return
 
-        if value:
-            self._set_special(name, value)
-        else:
+        if not value:
             self.set(name)
+            return
 
-    def _set_special(self, name, value):
-        if name == 'PREFIX':  # channel user prefixes
-            channel_modes, channel_chars = value.split(')')
-            channel_modes = channel_modes[1:]
-            self.set(name, {})
-            for i in range(len(channel_modes)):
-                self.prefix[channel_modes[i]] = channel_chars[i]
+        parser = getattr(self, '_parse_' + name, self._parse_other)
+        value = parser(value)
+        self.set(name, value)
 
-        elif name == 'CHANMODES':
-            # channel mode letters
-            self.set(name, value.split(','))
+    @staticmethod
+    def _parse_PREFIX(value):
+        "channel user prefixes"
+        channel_modes, channel_chars = value.split(')')
+        channel_modes = channel_modes[1:]
+        return dict(zip(channel_chars, channel_modes))
 
-        elif name == 'TARGMAX':
-            self.set(name, {})
+    @staticmethod
+    def _parse_CHANMODES(value):
+        "channel mode letters"
+        return value.split(',')
 
-            for target in value.split(','):
-                target_name, target_value = target.split(':')
-                if target_value == '':
-                    target_value = None
-                else:
-                    target_value = int(target_value)
-                self.targmax[target_name] = target_value
+    @staticmethod
+    def _parse_TARGMAX(value):
+        return dict(
+            (name, int(value) if value else None)
+            for target in value.split(',')
+            for name, value in target.split(':')
+        )
 
-        elif name in ['CHANLIMIT', 'MAXLIST']:
-            res = {}
-            self.set(name, res)
+    @staticmethod
+    def _parse_CHANLIMIT(value):
+        return dict(
+            (target, int(number) if number else None)
+            for target_split in value.split(',')
+            for targets, number in target_split.split(':')
+            for target in targets
+        )
+    _parse_MAXLIST = _parse_CHANLIMIT
 
-            for target_split in value.split(','):
-                targets, number = target_split.split(':')
-
-                if number == '':
-                    number = None
-                else:
-                    number = int(number)
-
-                for target in targets:
-                    res[target] = number
-
-        elif value.isdigit():
-            self.set(name, int(value))
-
-        else:
-            self.set(name, value)
+    @staticmethod
+    def _parse_other(value):
+        if value.isdigit():
+            return int(value)
+        return value
 
     def set(self, name, value=True):
         "set a feature value"
