@@ -1,6 +1,14 @@
 Changes
 -------
 
+8.1
+===
+
+* Issue #15: Added client support for ISUPPORT directives on server
+  connections. Now, each ServerConnection has a `features` attribute which
+  reflects the features supported by the server. See the docs for
+  `irc.features` for details about the implementation.
+
 8.0.1
 =====
 
