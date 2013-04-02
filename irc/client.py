@@ -438,7 +438,13 @@ class ServerConnection(Connection):
     def __init__(self, irclibobj):
         super(ServerConnection, self).__init__(irclibobj)
         self.connected = False
-        self.isupport = {}
+        self.isupport = {
+            'PREFIX': {
+                # standard (RFC1459) prefixes
+                'o': '@',
+                'v': '+',
+            },
+        }
 
     # save the method args to allow for easier reconnection.
     @irc_functools.save_method_args
