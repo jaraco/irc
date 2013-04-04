@@ -1,6 +1,11 @@
 Changes
 -------
 
+8.1.1
+=====
+
+* Fix typo in bot.py.
+
 8.1
 ===
 
