@@ -1,6 +1,11 @@
 Changes
 -------
 
+8.1.2
+=====
+
+* Fix typo in `client.NickMask`.
+
 8.1.1
 =====
 
