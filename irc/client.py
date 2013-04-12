@@ -1319,6 +1319,19 @@ def ip_quad_to_numstr(quad):
 class NickMask(str):
     """
     A nickmask (the source of an Event)
+
+    >>> nm = NickMask('pinky!username@example.com')
+    >>> nm.nick
+    'pinky'
+
+    >>> nm.host
+    'example.com'
+
+    >>> nm.user
+    'username'
+
+    >>> isinstance(nm, basestring)
+    True
     """
     @classmethod
     def from_params(cls, nick, user, host):
