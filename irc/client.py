@@ -1338,7 +1338,7 @@ class NickMask(str):
 
     @property
     def user(self):
-        return self.userhost.split("@"[0])
+        return self.userhost.split("@")[0]
 
 def _ping_ponger(connection, event):
     "A global handler for the 'ping' event"
