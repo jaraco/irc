@@ -964,11 +964,11 @@ class Throttler(object):
 
     def reset(self):
         self.start = time.time()
-        self.calls = itertools.Count()
+        self.calls = itertools.count()
 
     def __call__(self, *args, **kwargs):
         # ensure max_rate >= next(self.calls) / (elapsed + must_wait)
-        elapsed = time.time() - self.start()
+        elapsed = time.time() - self.start
         must_wait = next(self.calls) / self.max_rate - elapsed
         time.sleep(max(0, must_wait))
         return self.func()
