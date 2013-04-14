@@ -944,6 +944,35 @@ class ServerConnection(Connection):
                                          max and (" " + max),
                                          server and (" " + server)))
 
+    def set_rate_limit(self, frequency):
+        """
+        Set a `frequency` limit (messages per second) for this connection.
+        Any attempts to send faster than this rate will block.
+        """
+        self.send_raw = Throttler(self.send_raw, frequency)
+
+class Throttler(object):
+    """
+    Rate-limit a function (or other callable)
+    """
+    def __init__(self, func, max_rate=float('Inf')):
+        if isinstance(func, Throttler):
+            func = func.func
+        self.func = func
+        self.max_rate = max_rate
+        self.reset()
+
+    def reset(self):
+        self.start = time.time()
+        self.calls = itertools.Count()
+
+    def __call__(self, *args, **kwargs):
+        # ensure max_rate >= next(self.calls) / (elapsed + must_wait)
+        elapsed = time.time() - self.start()
+        must_wait = next(self.calls) / self.max_rate - elapsed
+        time.sleep(max(0, must_wait))
+        return self.func()
+
 class DCCConnectionError(IRCError):
     pass
 
