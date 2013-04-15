@@ -971,7 +971,7 @@ class Throttler(object):
         elapsed = time.time() - self.start
         must_wait = next(self.calls) / self.max_rate - elapsed
         time.sleep(max(0, must_wait))
-        return self.func(args[0])
+        return self.func(*args, **kwargs)
 
 class DCCConnectionError(IRCError):
     pass
