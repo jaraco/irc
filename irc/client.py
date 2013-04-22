@@ -944,9 +944,13 @@ class ServerConnection(Connection):
                                          max and (" " + max),
                                          server and (" " + server)))
 
-    def set_keepalive(self, seconds):
+    def set_keepalive(self, period):
+        """
+        Set a keepalive to occur every ``period`` on this connection.
+        """
         pinger = functools.partial(self.ping, 'keep-alive')
-        self.irclibobj.execute_every(period=seconds, function=pinger)
+        self.irclibobj.execute_every(period=period, function=pinger)
+
 
 class DCCConnectionError(IRCError):
     pass
