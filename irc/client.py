@@ -951,6 +951,14 @@ class ServerConnection(Connection):
         """
         self.send_raw = Throttler(self.send_raw, frequency)
 
+    def set_keepalive(self, interval):
+        """
+        Set a keepalive to occur every ``interval`` on this connection.
+        """
+        pinger = functools.partial(self.ping, 'keep-alive')
+        self.irclibobj.execute_every(period=interval, function=pinger)
+
+
 class Throttler(object):
     """
     Rate-limit a function (or other callable)
@@ -972,6 +980,7 @@ class Throttler(object):
         must_wait = next(self.calls) / self.max_rate - elapsed
         time.sleep(max(0, must_wait))
         return self.func(*args, **kwargs)
+
 
 class DCCConnectionError(IRCError):
     pass
