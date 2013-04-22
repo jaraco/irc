@@ -1,6 +1,12 @@
 Changes
 -------
 
+8.3
+===
+
+* Added a ``set_keepalive`` method to the ServerConnection. Sends a periodic
+  PING message every indicated interval.
+
 8.1.2
 =====
 
