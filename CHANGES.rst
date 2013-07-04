@@ -1,6 +1,11 @@
 Changes
 -------
 
+8.3.1
+=====
+
+* Fixed encoding errors in server on Python 3.
+
 8.3
 ===
 
