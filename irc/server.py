@@ -170,6 +170,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
 
         self.buffer.feed(data)
         for line in self.buffer:
+            line = line.decode('utf-8')
             self._handle_line(line)
 
     def _handle_line(self, line):
@@ -199,7 +200,7 @@ class IRCClient(_py2_compat.socketserver.BaseRequestHandler):
 
     def _send(self, msg):
         log.debug('to %s: %s', self.client_ident(), msg)
-        self.request.send(msg + '\r\n')
+        self.request.send(msg.encode('utf-8') + b'\r\n')
 
     def handle_nick(self, params):
         """
