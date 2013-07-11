@@ -12,13 +12,15 @@ write simpler bots.
 
 from __future__ import absolute_import
 
+from collections import namedtuple
 import sys
 
 import irc.client
 import irc.modes
 from .dict import IRCDict
 
-class ServerSpec(object):
+_ServerSpec = namedtuple('ServerSpec', 'host port password')
+def ServerSpec(host, port=6667, password=None):
     """
     An IRC server specification.
 
@@ -33,10 +35,7 @@ class ServerSpec(object):
     >>> spec.password
     'fooP455'
     """
-    def __init__(self, host, port=6667, password=None):
-        self.host = host
-        self.port = port
-        self.password = password
+    return _ServerSpec(host, port, password)
 
 class SingleServerIRCBot(irc.client.SimpleIRCClient):
     """A single-server IRC bot class.
@@ -83,7 +82,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             for server in server_list
         ]
         assert all(
-            isinstance(server, ServerSpec)
+            isinstance(server, _ServerSpec)
             for server in self.server_list
         )
         if not reconnection_interval or reconnection_interval < 0:

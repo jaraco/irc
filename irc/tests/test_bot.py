@@ -1,4 +1,31 @@
 import irc.bot
+from irc.bot import ServerSpec
+
+class TestServerSpec(object):
+
+    def test_with_host(self):
+        server_spec = ServerSpec('irc.example.com')
+        assert server_spec.host == 'irc.example.com'
+        assert server_spec.port == 6667
+        assert server_spec.password == None
+
+    def test_with_host_and_port(self):
+        server_spec = ServerSpec('irc.example.org', port=6669)
+        assert server_spec.host == 'irc.example.org'
+        assert server_spec.port == 6669
+        assert server_spec.password == None
+
+    def test_with_host_and_password(self):
+        server_spec = ServerSpec('irc.example.net', password='heres johnny!')
+        assert server_spec.host == 'irc.example.net'
+        assert server_spec.port == 6667
+        assert server_spec.password == 'heres johnny!'
+
+    def test_with_host_and_port_and_password(self):
+        server_spec = ServerSpec('irc.example.gov', port=6668, password='there-is-only-zuul')
+        assert server_spec.host == 'irc.example.gov'
+        assert server_spec.port == 6668
+        assert server_spec.password == 'there-is-only-zuul'
 
 class TestChannel(object):
 
