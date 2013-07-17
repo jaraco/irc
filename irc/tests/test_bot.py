@@ -1,3 +1,6 @@
+
+import six
+
 import irc.client
 import irc.bot
 from irc.bot import ServerSpec
@@ -68,4 +71,6 @@ class TestBot(object):
         """
         event = irc.client.Event(type=None, source=None, target=None,
             arguments=['*', '*', 'nick'])
-        irc.bot.SingleServerIRCBot._on_namreply.im_func(None, None, event)
+        _on_namreply = six.get_unbound_function(
+            irc.bot.SingleServerIRCBot._on_namreply)
+        _on_namreply(None, None, event)

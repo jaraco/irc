@@ -32,6 +32,7 @@ setup_params = dict(
         "Programming Language :: Python :: 3",
     ],
     install_requires=[
+        'six',
     ] + importlib_req + argparse_req,
     setup_requires=[
         'hgtools',
