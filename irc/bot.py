@@ -159,8 +159,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         # e.arguments[1] == channel
         # e.arguments[2] == nick list
 
-        ch = e.arguments[1]
-        for nick in e.arguments[2].split():
+        ch_type, channel, nick_list = e.arguments
+        for nick in nick_list.split():
             nick_modes = []
 
             if nick[0] in self.connection.features.prefix:
@@ -168,9 +168,9 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
                 nick = nick[1:]
 
             for mode in nick_modes:
-                self.channels[ch].set_mode(mode, nick)
+                self.channels[channel].set_mode(mode, nick)
 
-            self.channels[ch].add_user(nick)
+            self.channels[channel].add_user(nick)
 
     def _on_nick(self, c, e):
         before = e.source.nick
