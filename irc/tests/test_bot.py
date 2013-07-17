@@ -1,3 +1,4 @@
+import irc.client
 import irc.bot
 from irc.bot import ServerSpec
 
@@ -58,3 +59,13 @@ class TestBot(object):
         assert svr.host == 'localhost'
         assert svr.port == '9999'
         assert svr.password is None
+
+    def test_namreply_no_channel(self):
+        """
+        If channel is '*', _on_namreply should not crash.
+
+        Regression test for #22
+        """
+        event = irc.client.Event(type=None, source=None, target=None,
+            arguments=['*', '*', 'nick'])
+        irc.bot.SingleServerIRCBot._on_namreply.im_func(None, None, event)
