@@ -3,7 +3,9 @@ python:
   - 2.6
   - 2.7
   - 3.2
+  - 3.3
 # command to run tests
 script:
  - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then OPTS="build/lib"; fi
+ - if [[ $TRAVIS_PYTHON_VERSION == '3.3' ]]; then OPTS="build/lib"; fi
  - python setup.py ptr --addopts="$OPTS"
