@@ -7,13 +7,13 @@ class TestServerSpec(object):
         server_spec = ServerSpec('irc.example.com')
         assert server_spec.host == 'irc.example.com'
         assert server_spec.port == 6667
-        assert server_spec.password == None
+        assert server_spec.password is None
 
     def test_with_host_and_port(self):
         server_spec = ServerSpec('irc.example.org', port=6669)
         assert server_spec.host == 'irc.example.org'
         assert server_spec.port == 6669
-        assert server_spec.password == None
+        assert server_spec.password is None
 
     def test_with_host_and_password(self):
         server_spec = ServerSpec('irc.example.net', password='heres johnny!')
