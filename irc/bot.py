@@ -160,6 +160,12 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         # e.arguments[2] == nick list
 
         ch_type, channel, nick_list = e.arguments
+
+        if channel == '*':
+            # User is not in any visible channel
+            # http://tools.ietf.org/html/rfc2812#section-3.2.5
+            return
+
         for nick in nick_list.split():
             nick_modes = []
 

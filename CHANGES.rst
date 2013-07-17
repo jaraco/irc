@@ -1,6 +1,12 @@
 Changes
 -------
 
+8.3.2
+=====
+
+* Issue #22: Catch error in bot.py on NAMREPLY when nick is not in any visible
+  channel.
+
 8.3.1
 =====
 
