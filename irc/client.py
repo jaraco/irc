@@ -57,7 +57,6 @@ import string
 import time
 import struct
 import logging
-import itertools
 import threading
 import abc
 import collections
@@ -971,14 +970,14 @@ class Throttler(object):
         self.reset()
 
     def reset(self):
-        self.start = time.time()
-        self.calls = itertools.count()
+        self.last_called = 0
 
     def __call__(self, *args, **kwargs):
-        # ensure max_rate >= next(self.calls) / (elapsed + must_wait)
-        elapsed = time.time() - self.start
-        must_wait = next(self.calls) / self.max_rate - elapsed
+        # ensure at least 1/max_rate seconds from last call
+        elapsed = time.time() - self.last_called
+        must_wait = 1.0 / self.max_rate - elapsed
         time.sleep(max(0, must_wait))
+        self.last_called = time.time()
         return self.func(*args, **kwargs)
 
 

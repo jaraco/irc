@@ -55,7 +55,15 @@ class TestThrottler(object):
 		while time.time() < deadline:
 			limited_next(counter)
 		# ensure the counter was advanced about 30 times
-		assert 29 <= next(counter) <= 31
+		last_count = next(counter)
+		assert 29 <= last_count <= 31
+		# ensure that another burst of calls will also get throttled
+		last_count += 1
+		time.sleep(1)
+		deadline = time.time() + 1
+		while time.time() < deadline:
+			limited_next(counter)
+		assert 29 <= next(counter) - last_count <= 31
 
 	def test_reconstruct_unwraps(self):
 		"""
