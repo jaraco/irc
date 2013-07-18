@@ -31,8 +31,11 @@ setup_params = dict(
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
     ],
+    dependency_links=[
+        'https://bitbucket.org/jaraco/six/downloads',
+    ],
     install_requires=[
-        'six',
+        'six>=1.4dev',
     ] + importlib_req + argparse_req,
     setup_requires=[
         'hgtools',
