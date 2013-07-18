@@ -54,7 +54,7 @@ def _parse_modes(mode_string, unary_modes=""):
     ...     len = random.randint(min_len, max_len)
     ...     chars_to_choose = [_py2_compat.chr(x) for x in range(0,1024)]
     ...     chars = (random.choice(chars_to_choose) for x in range(len))
-    ...     return u''.join(chars)
+    ...     return ''.join(chars)
     >>> def random_texts(min_len = 3, max_len = 80):
     ...     while True:
     ...         yield random_text(min_len, max_len)
