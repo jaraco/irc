@@ -32,21 +32,15 @@ setup_params = dict(
         "Programming Language :: Python :: 3",
     ],
     install_requires=[
-        'six',
     ] + importlib_req + argparse_req,
     setup_requires=[
         'hgtools',
         'pytest-runner',
     ],
     tests_require=[
+        'six',
         'pytest',
         'mock',
-    ],
-    use_2to3=True,
-    use_2to3_exclude_fixers=[
-        'lib2to3.fixes.fix_import',
-        'lib2to3.fixes.fix_next',
-        'lib2to3.fixes.fix_print',
     ],
 )
 

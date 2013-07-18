@@ -36,7 +36,7 @@ class DCCSend(irc.client.SimpleIRCClient):
         self.send_chunk()
 
     def on_dcc_disconnect(self, connection, event):
-        print "Sent file %s (%d bytes)." % (self.filename, self.filesize)
+        print("Sent file %s (%d bytes)." % (self.filename, self.filesize))
         self.connection.quit()
 
     def on_dccmsg(self, connection, event):
@@ -51,7 +51,7 @@ class DCCSend(irc.client.SimpleIRCClient):
         sys.exit(0)
 
     def on_nosuchnick(self, connection, event):
-        print "No such nickname:", event.arguments[0]
+        print("No such nickname:", event.arguments[0])
         self.connection.quit()
 
     def send_chunk(self):
@@ -61,8 +61,8 @@ class DCCSend(irc.client.SimpleIRCClient):
 
 def main():
     if len(sys.argv) != 5:
-        print "Usage: dccsend <server[:port]> <nickname> <receiver nickname> <filename>"
-        print "\nSends <filename> to <receiver nickname> via DCC and then exits."
+        print("Usage: dccsend <server[:port]> <nickname> <receiver nickname> <filename>")
+        print("\nSends <filename> to <receiver nickname> via DCC and then exits.")
         sys.exit(1)
 
     s = sys.argv[1].split(":", 1)
@@ -71,7 +71,7 @@ def main():
         try:
             port = int(s[1])
         except ValueError:
-            print "Error: Erroneous port."
+            print("Error: Erroneous port.")
             sys.exit(1)
     else:
         port = 6667
@@ -82,8 +82,8 @@ def main():
     c = DCCSend(receiver, filename)
     try:
         c.connect(server, port, nickname)
-    except irc.client.ServerConnectionError, x:
-        print x
+    except irc.client.ServerConnectionError as x:
+        print(x)
         sys.exit(1)
     c.start()
 

@@ -37,8 +37,8 @@ class IRCCat(irc.client.SimpleIRCClient):
 
 def main():
     if len(sys.argv) != 4:
-        print "Usage: irccat2 <server[:port]> <nickname> <target>"
-        print "\ntarget is a nickname or a channel."
+        print("Usage: irccat2 <server[:port]> <nickname> <target>")
+        print("\ntarget is a nickname or a channel.")
         sys.exit(1)
 
     s = sys.argv[1].split(":", 1)
@@ -47,7 +47,7 @@ def main():
         try:
             port = int(s[1])
         except ValueError:
-            print "Error: Erroneous port."
+            print("Error: Erroneous port.")
             sys.exit(1)
     else:
         port = 6667
@@ -57,8 +57,8 @@ def main():
     c = IRCCat(target)
     try:
         c.connect(server, port, nickname)
-    except irc.client.ServerConnectionError, x:
-        print x
+    except irc.client.ServerConnectionError as x:
+        print(x)
         sys.exit(1)
     c.start()
 

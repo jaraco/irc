@@ -36,7 +36,7 @@ class FeatureSet(object):
     def load(self, arguments):
         "Load the values from the a ServerConnection arguments"
         target, features, msg = arguments[:1], arguments[1:-1], arguments[-1:]
-        map(self.load_feature, features)
+        list(map(self.load_feature, features))
 
     def load_feature(self, feature):
         # negating

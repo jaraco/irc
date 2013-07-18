@@ -96,7 +96,7 @@ class TestBot(irc.bot.SingleServerIRCBot):
 def main():
     import sys
     if len(sys.argv) != 4:
-        print "Usage: testbot <server[:port]> <channel> <nickname>"
+        print("Usage: testbot <server[:port]> <channel> <nickname>")
         sys.exit(1)
 
     s = sys.argv[1].split(":", 1)
@@ -105,7 +105,7 @@ def main():
         try:
             port = int(s[1])
         except ValueError:
-            print "Error: Erroneous port."
+            print("Error: Erroneous port.")
             sys.exit(1)
     else:
         port = 6667

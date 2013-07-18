@@ -1368,7 +1368,8 @@ class NickMask(str):
     >>> nm.user
     'username'
 
-    >>> isinstance(nm, basestring)
+    >>> import six
+    >>> isinstance(nm, six.string_types)
     True
     """
     @classmethod

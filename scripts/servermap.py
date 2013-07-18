@@ -68,7 +68,7 @@ def on_connect(connection, event):
     connection.links()
 
 def on_passwdmismatch(connection, event):
-    print "Password required."
+    print("Password required.")
     sys.exit(1)
 
 def on_links(connection, event):
@@ -81,7 +81,7 @@ def on_links(connection, event):
 def on_endoflinks(connection, event):
     global links
 
-    print "\n"
+    print("\n")
 
     m = {}
     for (to_node, from_node, desc) in links:
@@ -96,7 +96,7 @@ def on_endoflinks(connection, event):
     else:
         hubs = 0
 
-    print "%d servers (%d leaves and %d hubs)\n" % (len(links), len(links)-hubs, hubs)
+    print("%d servers (%d leaves and %d hubs)\n" % (len(links), len(links)-hubs, hubs))
 
     print_tree(0, [], connection.get_server_name(), m)
     connection.quit("Using irc.client.py")
@@ -132,7 +132,7 @@ def main():
     global links
 
     if len(sys.argv) != 3:
-        print "Usage: servermap <server[:port]> <nickname>"
+        print("Usage: servermap <server[:port]> <nickname>")
         sys.exit(1)
 
     links = []
@@ -143,7 +143,7 @@ def main():
         try:
             port = int(s[1])
         except ValueError:
-            print "Error: Erroneous port."
+            print("Error: Erroneous port.")
             sys.exit(1)
     else:
         port = 6667
@@ -154,8 +154,8 @@ def main():
     sys.stdout.flush()
     try:
         c = client.server().connect(server, port, nickname)
-    except irc.client.ServerConnectionError, x:
-        print x
+    except irc.client.ServerConnectionError as x:
+        print(x)
         sys.exit(1)
 
     c.add_global_handler("welcome", on_connect)
