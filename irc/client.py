@@ -47,7 +47,7 @@ Current limitations:
 .. [IRC specifications] http://www.irchelp.org/irchelp/rfc/
 """
 
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import bisect
 import re
@@ -976,7 +976,7 @@ class Throttler(object):
     def __call__(self, *args, **kwargs):
         # ensure at least 1/max_rate seconds from last call
         elapsed = time.time() - self.last_called
-        must_wait = 1.0 / self.max_rate - elapsed
+        must_wait = 1 / self.max_rate - elapsed
         time.sleep(max(0, must_wait))
         self.last_called = time.time()
         return self.func(*args, **kwargs)
