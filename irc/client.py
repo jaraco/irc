@@ -61,6 +61,7 @@ import threading
 import abc
 import collections
 import functools
+import itertools
 
 try:
     import pkg_resources
