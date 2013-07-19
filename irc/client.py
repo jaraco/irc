@@ -1120,21 +1120,27 @@ class DCCConnection(Connection):
                 self,
                 Event(command, prefix, target, arguments))
 
-    def privmsg(self, string):
-        """Send data to DCC peer.
-
-        The string will be padded with appropriate LF if it's a DCC
-        CHAT session.
+    def privmsg(self, text):
         """
-        bytes = string.encode('utf-8')
+        Send text to DCC peer.
+
+        The text will be padded with a newline if it's a DCC CHAT session.
+        """
+        if self.dcctype == 'chat':
+            text += '\n'
+        bytes = text.encode('utf-8')
+        return self.send_bytes(bytes)
+
+    def send_bytes(self, bytes):
+        """
+        Send data to DCC peer.
+        """
         try:
             self.socket.send(bytes)
-            if self.dcctype == "chat":
-                self.socket.send("\n")
-            log.debug("TO PEER: %s\n", string)
+            log.debug("TO PEER: %r\n", bytes)
         except socket.error:
-            # Ouch!
             self.disconnect("Connection reset by peer.")
+
 
 class SimpleIRCClient(object):
     """A simple single-server IRC client class.

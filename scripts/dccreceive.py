@@ -37,7 +37,7 @@ class DCCReceive(irc.client.SimpleIRCClient):
         data = event.arguments[0]
         self.file.write(data)
         self.received_bytes = self.received_bytes + len(data)
-        self.dcc.privmsg(struct.pack("!I", self.received_bytes))
+        self.dcc.send_bytes(struct.pack("!I", self.received_bytes))
 
     def on_dcc_disconnect(self, connection, event):
         self.file.close()

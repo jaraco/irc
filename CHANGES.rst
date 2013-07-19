@@ -1,6 +1,12 @@
 Changes
 -------
 
+8.5
+===
+
+* Issue #24: Added `DCCConnection.send_bytes` for transmitting binary data.
+  `privmsg` remains to support transmitting text.
+
 8.4
 ===
 
