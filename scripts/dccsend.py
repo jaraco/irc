@@ -56,7 +56,7 @@ class DCCSend(irc.client.SimpleIRCClient):
 
     def send_chunk(self):
         data = self.file.read(1024)
-        self.dcc.send_data(data)
+        self.dcc.send_bytes(data)
         self.sent_bytes = self.sent_bytes + len(data)
 
 def main():
