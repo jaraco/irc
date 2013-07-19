@@ -1,6 +1,14 @@
 Changes
 -------
 
+8.4
+===
+
+* Code base now runs natively on Python 2 and Python 3, but requires `six
+  <https://pypi.python.org/pypi/six>`_ to be installed.
+* Issue #25: Rate-limiting has been updated to be finer grained (preventing
+  bursts exceeding the limit following idle periods).
+
 8.3.2
 =====
 
