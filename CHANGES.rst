@@ -4,6 +4,8 @@ Changes
 8.5
 ===
 
+* ``irc.client.NickMask`` is now a Unicode object on Python 2. Fixes issue
+  reported in pull request #19.
 * Issue #24: Added `DCCConnection.send_bytes` for transmitting binary data.
   `privmsg` remains to support transmitting text.
 

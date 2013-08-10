@@ -63,6 +63,8 @@ import collections
 import functools
 import itertools
 
+import six
+
 try:
     import pkg_resources
 except ImportError:
@@ -1360,22 +1362,28 @@ def ip_quad_to_numstr(quad):
     packed = struct.pack('BBBB', *bytes)
     return str(struct.unpack('>L', packed)[0])
 
-class NickMask(str):
+class NickMask(six.text_type):
     """
     A nickmask (the source of an Event)
 
     >>> nm = NickMask('pinky!username@example.com')
-    >>> nm.nick
-    'pinky'
+    >>> print(nm.nick)
+    pinky
 
-    >>> nm.host
-    'example.com'
+    >>> print(nm.host)
+    example.com
 
-    >>> nm.user
-    'username'
+    >>> print(nm.user)
+    username
 
-    >>> import six
-    >>> isinstance(nm, six.string_types)
+    >>> isinstance(nm, six.text_type)
+    True
+
+    >>> nm = 'красный!red@yahoo.ru'
+    >>> if six.PY2: nm = nm.decode('utf-8')
+    >>> nm = NickMask(nm)
+
+    >>> isinstance(nm.nick, six.text_type)
     True
     """
     @classmethod
