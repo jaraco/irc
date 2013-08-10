@@ -1380,7 +1380,7 @@ class NickMask(six.text_type):
     True
 
     >>> nm = 'красный!red@yahoo.ru'
-    >>> if six.PY2: nm = nm.decode('utf-8')
+    >>> if not six.PY3: nm = nm.decode('utf-8')
     >>> nm = NickMask(nm)
 
     >>> isinstance(nm.nick, six.text_type)
