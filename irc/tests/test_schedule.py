@@ -1,3 +1,4 @@
+import time
 import random
 import datetime
 
@@ -38,6 +39,14 @@ def test_periodic_command_fixed_delay():
 	assert fd.next().due() == False
 
 class TestCommands(object):
+	def test_delayed_command_from_timestamp(self):
+		"""
+		Ensure a delayed command can be constructed from a timestamp.
+		"""
+		t = time.time()
+		do_nothing = lambda: None
+		schedule.DelayedCommand.at_time(t, do_nothing)
+
 	def test_command_at_noon(self):
 		"""
 		Create a periodic command that's run at noon every day.
