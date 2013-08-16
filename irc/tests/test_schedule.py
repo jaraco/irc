@@ -35,8 +35,8 @@ def test_periodic_command_fixed_delay():
 		delay = datetime.timedelta(seconds=2),
 		function = lambda: None,
 		)
-	assert fd.due() == True
-	assert fd.next().due() == False
+	assert fd.due() is True
+	assert fd.next().due() is False
 
 class TestCommands(object):
 	def test_delayed_command_from_timestamp(self):
