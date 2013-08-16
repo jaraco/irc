@@ -1,6 +1,11 @@
 Changes
 -------
 
+8.5.1
+=====
+
+* Fix timestamp support in ``schedule.DelayedCommand`` construction.
+
 8.5
 ===
 
