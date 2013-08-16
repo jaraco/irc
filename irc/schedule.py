@@ -38,7 +38,7 @@ class DelayedCommand(datetime.datetime):
         a datetime or timestamp. If `at` is a timestamp, it will be
         interpreted as a naive local timestamp.
         """
-        if isinstance(at, int):
+        if isinstance(at, int) or isinstance(at, float):
             at = datetime.datetime.fromtimestamp(at)
         cmd = cls.from_datetime(at)
         cmd.delay = at - cmd.now()
