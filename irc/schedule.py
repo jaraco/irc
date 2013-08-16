@@ -3,6 +3,7 @@ Classes for calling functions a schedule.
 """
 
 import datetime
+import numbers
 
 class DelayedCommand(datetime.datetime):
     """
@@ -35,10 +36,10 @@ class DelayedCommand(datetime.datetime):
     def at_time(cls, at, function):
         """
         Construct a DelayedCommand to come due at `at`, where `at` may be
-        a datetime or timestamp. If `at` is a timestamp, it will be
+        a datetime or timestamp. If `at` is a real number, it will be
         interpreted as a naive local timestamp.
         """
-        if isinstance(at, int) or isinstance(at, float):
+        if isinstance(at, numbers.Real):
             at = datetime.datetime.fromtimestamp(at)
         cmd = cls.from_datetime(at)
         cmd.delay = at - cmd.now()
