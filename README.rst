@@ -147,17 +147,26 @@ since irc 3.4.2, the ServerConnection class may be customized. The
 'buffer_class' attribute on the ServerConnection determines what class is used
 for buffering lines from the input stream. By default it is
 DecodingLineBuffer, but may be re-assigned with another class, such as irc
-client.LineBuffer, which does not decode the lines and passes them through as
+buffer.LineBuffer, which does not decode the lines and passes them through as
 byte strings. The 'buffer_class' attribute may be assigned for all instances
 of ServerConnection by overriding the class attribute::
 
-    irc.client.ServerConnection.buffer_class = irc.client.LineBuffer
+    irc.client.ServerConnection.buffer_class = irc.buffer.LineBuffer
 
 or it may be overridden on a per-instance basis (as long as it's overridden before the connection is established)::
 
     server = irc.client.IRC().server()
-    server.buffer_class = irc.client.LineBuffer
+    server.buffer_class = irc.buffer.LineBuffer
     server.connect()
+
+Alternatively, some clients may still want to decode the input using a
+different encoding::
+
+    irc.client.ServerConnection.buffer_class.encoding = 'latin-1'
+
+or using a less strict decoder::
+
+    irc.client.ServerConnection.buffer_class.errors = 'replace'
 
 
 Notes and Contact Info
