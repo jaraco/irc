@@ -3,10 +3,10 @@ Internet Relay Chat (IRC) protocol client library
 
 The home of irclib is:
 
-    http://bitbucket.org/jaraco/irc
+    https://bitbucket.org/jaraco/irc
 
 You can `download project releases from PyPI
-<http://pypi.python.org/pypi/irc>`_.
+<https://pypi.python.org/pypi/irc>`_.
 
 Some legacy content is still available at the `foundational SourceForge site
 <http://sourceforge.net/projects/python-irclib/>`_.
@@ -17,7 +17,7 @@ Travis-CI.
 |BuildStatus|_
 
 .. |BuildStatus| image:: https://secure.travis-ci.org/jaraco/irc.png
-.. _BuildStatus: http://travis-ci.org/jaraco/irc
+.. _BuildStatus: https://travis-ci.org/jaraco/irc
 
 This library is intended to encapsulate the IRC protocol at a quite
 low level.  It provides an event-driven IRC client framework.  It has
