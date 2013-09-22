@@ -1,6 +1,11 @@
 Changes
 -------
 
+8.5.2
+=====
+
+* Updated DCC send and receive scripts (Issue #27).
+
 8.5.1
 =====
 
