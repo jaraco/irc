@@ -83,9 +83,10 @@ log = logging.getLogger(__name__)
 
 # set the version tuple
 try:
-    VERSION = tuple(int(res) for res in re.findall('\d+',
-        pkg_resources.require('irc')[0].version))
+    VERSION_STRING = pkg_resources.require('irc')[0].version
+    VERSION = tuple(int(res) for res in re.findall('\d+', VERSION_STRING))
 except Exception:
+    VERSION_STRING = 'unknown'
     VERSION = ()
 
 # TODO

@@ -1,6 +1,11 @@
 Changes
 -------
 
+8.5.3
+=====
+
+* Issue #28: Fix TypeError in version calculation in irc.bot CTCP version.
+
 8.5.2
 =====
 

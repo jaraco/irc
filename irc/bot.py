@@ -227,8 +227,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
 
         Used when answering a CTCP VERSION request.
         """
-        version='.'.join(irc.client.VERSION) or 'unknown'
-        return "Python irc.bot ({version})".format(version=version)
+        return "Python irc.bot ({version})".format(
+            version=irc.client.VERSION_STRING)
 
     def jump_server(self, msg="Changing servers"):
         """Connect to a new server, possibly disconnecting from the current.
