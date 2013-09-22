@@ -7,10 +7,13 @@
 #
 # Joel Rosdahl <joel@rosdahl.net>
 
-import irc.client
 import os
 import struct
 import sys
+import argparse
+
+import irc.client
+import irc.logging
 
 class DCCSend(irc.client.SimpleIRCClient):
     def __init__(self, receiver, filename):
@@ -59,29 +62,25 @@ class DCCSend(irc.client.SimpleIRCClient):
         self.dcc.send_bytes(data)
         self.sent_bytes = self.sent_bytes + len(data)
 
+def get_args():
+    parser = argparse.ArgumentParser(
+        description="Send <filename> to <receiver> via DCC and then exit.",
+    )
+    parser.add_argument('server')
+    parser.add_argument('nickname')
+    parser.add_argument('receiver', help="the nickname to receive the file")
+    parser.add_argument('filename')
+    parser.add_argument('-p', '--port', default=6667, type=int)
+    irc.logging.add_arguments(parser)
+    return parser.parse_args()
+
 def main():
-    if len(sys.argv) != 5:
-        print("Usage: dccsend <server[:port]> <nickname> <receiver nickname> <filename>")
-        print("\nSends <filename> to <receiver nickname> via DCC and then exits.")
-        sys.exit(1)
+    args = get_args()
+    irc.logging.setup(args)
 
-    s = sys.argv[1].split(":", 1)
-    server = s[0]
-    if len(s) == 2:
-        try:
-            port = int(s[1])
-        except ValueError:
-            print("Error: Erroneous port.")
-            sys.exit(1)
-    else:
-        port = 6667
-    nickname = sys.argv[2]
-    receiver = sys.argv[3]
-    filename = sys.argv[4]
-
-    c = DCCSend(receiver, filename)
+    c = DCCSend(args.receiver, args.filename)
     try:
-        c.connect(server, port, nickname)
+        c.connect(args.server, args.port, args.nickname)
     except irc.client.ServerConnectionError as x:
         print(x)
         sys.exit(1)

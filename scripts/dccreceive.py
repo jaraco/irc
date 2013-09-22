@@ -9,10 +9,13 @@
 
 from __future__ import print_function
 
-import irc.client
 import os
 import struct
 import sys
+import argparse
+
+import irc.client
+import irc.logging
 
 class DCCReceive(irc.client.SimpleIRCClient):
     def __init__(self):
@@ -48,28 +51,24 @@ class DCCReceive(irc.client.SimpleIRCClient):
     def on_disconnect(self, connection, event):
         sys.exit(0)
 
-def main():
-    if len(sys.argv) != 3:
-        print("Usage: dccreceive <server[:port]> <nickname>")
-        print("\nReceives one file via DCC and then exits.  The file is stored in the")
-        print("current directory.")
-        sys.exit(1)
+def get_args():
+    parser = argparse.ArgumentParser(
+        description="Receive a single file to the current directory via DCC "
+            "and then exit.",
+    )
+    parser.add_argument('server')
+    parser.add_argument('nickname')
+    parser.add_argument('-p', '--port', default=6667, type=int)
+    irc.logging.add_arguments(parser)
+    return parser.parse_args()
 
-    s = sys.argv[1].split(":", 1)
-    server = s[0]
-    if len(s) == 2:
-        try:
-            port = int(s[1])
-        except ValueError:
-            print("Error: Erroneous port.")
-            sys.exit(1)
-    else:
-        port = 6667
-    nickname = sys.argv[2]
+def main():
+    args = get_args()
+    irc.logging.setup(args)
 
     c = DCCReceive()
     try:
-        c.connect(server, port, nickname)
+        c.connect(args.server, args.port, args.nickname)
     except irc.client.ServerConnectionError as x:
         print(x)
         sys.exit(1)
