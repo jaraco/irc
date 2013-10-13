@@ -53,7 +53,7 @@ def main():
     args = get_args()
     target = args.target
 
-    ssl_factory = irc.connection.Factory(ssl.wrap_socket)
+    ssl_factory = irc.connection.Factory(wrapper=ssl.wrap_socket)
     client = irc.client.IRC()
     try:
         c = client.server().connect(
