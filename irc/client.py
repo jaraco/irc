@@ -554,96 +554,97 @@ class ServerConnection(Connection):
 
         self.buffer.feed(new_data)
 
+        # process each non-empty line after logging all lines
         for line in self.buffer:
             log.debug("FROM SERVER: %s", line)
+            if not line: continue
+            self._process_line(line)
 
-            if not line:
-                continue
+    def _process_line(self, line):
+        prefix = None
+        command = None
+        arguments = None
+        self._handle_event(Event("all_raw_messages",
+                                 self.get_server_name(),
+                                 None,
+                                 [line]))
 
-            prefix = None
-            command = None
-            arguments = None
-            self._handle_event(Event("all_raw_messages",
-                                     self.get_server_name(),
-                                     None,
-                                     [line]))
+        m = _rfc_1459_command_regexp.match(line)
+        if m.group("prefix"):
+            prefix = m.group("prefix")
+            if not self.real_server_name:
+                self.real_server_name = prefix
 
-            m = _rfc_1459_command_regexp.match(line)
-            if m.group("prefix"):
-                prefix = m.group("prefix")
-                if not self.real_server_name:
-                    self.real_server_name = prefix
+        if m.group("command"):
+            command = m.group("command").lower()
 
-            if m.group("command"):
-                command = m.group("command").lower()
+        if m.group("argument"):
+            a = m.group("argument").split(" :", 1)
+            arguments = a[0].split()
+            if len(a) == 2:
+                arguments.append(a[1])
 
-            if m.group("argument"):
-                a = m.group("argument").split(" :", 1)
-                arguments = a[0].split()
-                if len(a) == 2:
-                    arguments.append(a[1])
+        # Translate numerics into more readable strings.
+        command = events.numeric.get(command, command)
 
-            # Translate numerics into more readable strings.
-            command = events.numeric.get(command, command)
-
-            if command == "nick":
-                if NickMask(prefix).nick == self.real_nickname:
-                    self.real_nickname = arguments[0]
-            elif command == "welcome":
-                # Record the nickname in case the client changed nick
-                # in a nicknameinuse callback.
+        if command == "nick":
+            if NickMask(prefix).nick == self.real_nickname:
                 self.real_nickname = arguments[0]
-            elif command == "featurelist":
-                self.features.load(arguments)
+        elif command == "welcome":
+            # Record the nickname in case the client changed nick
+            # in a nicknameinuse callback.
+            self.real_nickname = arguments[0]
+        elif command == "featurelist":
+            self.features.load(arguments)
 
-            if command in ["privmsg", "notice"]:
-                target, message = arguments[0], arguments[1]
-                messages = _ctcp_dequote(message)
+        if command in ["privmsg", "notice"]:
+            target, message = arguments[0], arguments[1]
+            messages = _ctcp_dequote(message)
 
-                if command == "privmsg":
-                    if is_channel(target):
-                        command = "pubmsg"
-                else:
-                    if is_channel(target):
-                        command = "pubnotice"
-                    else:
-                        command = "privnotice"
-
-                for m in messages:
-                    if isinstance(m, tuple):
-                        if command in ["privmsg", "pubmsg"]:
-                            command = "ctcp"
-                        else:
-                            command = "ctcpreply"
-
-                        m = list(m)
-                        log.debug("command: %s, source: %s, target: %s, "
-                            "arguments: %s", command, prefix, target, m)
-                        self._handle_event(Event(command, NickMask(prefix), target, m))
-                        if command == "ctcp" and m[0] == "ACTION":
-                            self._handle_event(Event("action", prefix, target, m[1:]))
-                    else:
-                        log.debug("command: %s, source: %s, target: %s, "
-                            "arguments: %s", command, prefix, target, [m])
-                        self._handle_event(Event(command, NickMask(prefix), target, [m]))
+            if command == "privmsg":
+                if is_channel(target):
+                    command = "pubmsg"
             else:
-                target = None
-
-                if command == "quit":
-                    arguments = [arguments[0]]
-                elif command == "ping":
-                    target = arguments[0]
+                if is_channel(target):
+                    command = "pubnotice"
                 else:
-                    target = arguments[0]
-                    arguments = arguments[1:]
+                    command = "privnotice"
 
-                if command == "mode":
-                    if not is_channel(target):
-                        command = "umode"
+            for m in messages:
+                if isinstance(m, tuple):
+                    if command in ["privmsg", "pubmsg"]:
+                        command = "ctcp"
+                    else:
+                        command = "ctcpreply"
 
-                log.debug("command: %s, source: %s, target: %s, "
-                    "arguments: %s", command, prefix, target, arguments)
-                self._handle_event(Event(command, NickMask(prefix), target, arguments))
+                    m = list(m)
+                    log.debug("command: %s, source: %s, target: %s, "
+                        "arguments: %s", command, prefix, target, m)
+                    self._handle_event(Event(command, NickMask(prefix), target, m))
+                    if command == "ctcp" and m[0] == "ACTION":
+                        self._handle_event(Event("action", prefix, target, m[1:]))
+                else:
+                    log.debug("command: %s, source: %s, target: %s, "
+                        "arguments: %s", command, prefix, target, [m])
+                    self._handle_event(Event(command, NickMask(prefix), target, [m]))
+        else:
+            target = None
+
+            if command == "quit":
+                arguments = [arguments[0]]
+            elif command == "ping":
+                target = arguments[0]
+            else:
+                target = arguments[0]
+                arguments = arguments[1:]
+
+            if command == "mode":
+                if not is_channel(target):
+                    command = "umode"
+
+            log.debug("command: %s, source: %s, target: %s, "
+                "arguments: %s", command, prefix, target, arguments)
+            self._handle_event(Event(command, NickMask(prefix), target, arguments))
 
     def _handle_event(self, event):
         """[Internal]"""
