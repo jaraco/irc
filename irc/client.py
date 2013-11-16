@@ -991,7 +991,8 @@ class DCCConnectionError(IRCError):
 
 
 class DCCConnection(Connection):
-    """This class represents a DCC connection.
+    """
+    A DCC (Direct Client Connection).
 
     DCCConnection objects are instantiated by calling the dcc
     method on an IRC object.
@@ -1107,6 +1108,8 @@ class DCCConnection(Connection):
 
             if len(self.buffer) > 2 ** 14:
                 # Bad peer! Naughty peer!
+                log.info("Received >16k from a peer without a newline; "
+                    "disconnecting.")
                 self.disconnect()
                 return
         else:
