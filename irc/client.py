@@ -1225,7 +1225,7 @@ class Event(object):
     "An IRC event."
     def __init__(self, type, source, target, arguments=None):
         """
-        Constructor of Event objects.
+        Initialize an Event.
 
         Arguments:
 
