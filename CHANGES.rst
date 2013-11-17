@@ -1,6 +1,13 @@
 Changes
 -------
 
+8.5.4
+=====
+
+* Issue #32: Add logging around large DCC messages to facilitate
+  troubleshooting.
+* Issue #31: Fix error in connection wrapper for SSL example.
+
 8.5.3
 =====
 
