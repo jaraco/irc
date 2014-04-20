@@ -622,7 +622,7 @@ class ServerConnection(Connection):
                         "arguments: %s", command, prefix, target, m)
                     self._handle_event(Event(command, NickMask(prefix), target, m))
                     if command == "ctcp" and m[0] == "ACTION":
-                        self._handle_event(Event("action", prefix, target, m[1:]))
+                        self._handle_event(Event("action", NickMask(prefix), target, m[1:]))
                 else:
                     log.debug("command: %s, source: %s, target: %s, "
                         "arguments: %s", command, prefix, target, [m])
