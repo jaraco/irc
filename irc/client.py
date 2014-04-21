@@ -571,10 +571,8 @@ class ServerConnection(Connection):
         prefix = None
         command = None
         arguments = None
-        self._handle_event(Event("all_raw_messages",
-                                 self.get_server_name(),
-                                 None,
-                                 [line]))
+        event = Event("all_raw_messages", self.get_server_name(), None, [line])
+        self._handle_event(event)
 
         m = _rfc_1459_command_regexp.match(line)
         if m.group("prefix"):
