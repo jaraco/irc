@@ -33,6 +33,7 @@ setup_params = dict(
     ],
     install_requires=[
         'six',
+        'jaraco.util<10dev',
     ] + importlib_req + argparse_req,
     setup_requires=[
         'hgtools',

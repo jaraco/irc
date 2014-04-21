@@ -64,6 +64,7 @@ import functools
 import itertools
 
 import six
+from jaraco.util.itertools import always_iterable
 
 try:
     import pkg_resources
@@ -850,7 +851,7 @@ class ServerConnection(Connection):
 
     def part(self, channels, message=""):
         """Send a PART command."""
-        channels = util.always_iterable(channels)
+        channels = always_iterable(channels)
         cmd_parts = [
             'PART',
             ','.join(channels),
