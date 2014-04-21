@@ -1,6 +1,12 @@
 Changes
 -------
 
+8.6
+===
+
+* Introduced 'Manifold' as an alias for irc.client.IRC. This better name will
+  replace the IRC name in a future version.
+
 8.5.4
 =====
 

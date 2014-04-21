@@ -119,7 +119,11 @@ class PrioritizedHandler(
         return self.priority < other.priority
 
 class IRC(object):
-    """Class that handles one or several IRC server connections.
+    """
+    Processes events from one or more IRC server connections.
+
+    Note: This class is poorly named. In the future, it will be renamed to
+    Manifold to better reflect its purpose.
 
     When an IRC object has been instantiated, it can be used to create
     Connection objects that represent the IRC connections.  The
@@ -393,6 +397,9 @@ class IRC(object):
         with self.mutex:
             self.connections.remove(connection)
             self._on_disconnect(connection.socket)
+
+# for future compatibility
+Manifold = IRC
 
 _rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
 
