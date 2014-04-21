@@ -1171,7 +1171,7 @@ class SimpleIRCClient(object):
 
     Instance attributes that can be used by sub classes:
 
-        ircobj -- The IRC instance.
+        manifold -- The Manifold instance.
 
         connection -- The ServerConnection instance.
 
@@ -1181,10 +1181,14 @@ class SimpleIRCClient(object):
 
     def __init__(self):
         self.ircobj = self.manifold_class()
-        self.connection = self.ircobj.server()
+        self.connection = self.manifold.server()
         self.dcc_connections = []
-        self.ircobj.add_global_handler("all_events", self._dispatcher, -10)
-        self.ircobj.add_global_handler("dcc_disconnect", self._dcc_disconnect, -10)
+        self.manifold.add_global_handler("all_events", self._dispatcher, -10)
+        self.manifold.add_global_handler("dcc_disconnect", self._dcc_disconnect, -10)
+
+    @property
+    def manifold(self):
+        return self.ircobj
 
     def _dispatcher(self, connection, event):
         """
@@ -1214,7 +1218,7 @@ class SimpleIRCClient(object):
 
         Returns a DCCConnection instance.
         """
-        dcc = self.ircobj.dcc(dcctype)
+        dcc = self.manifold.dcc(dcctype)
         self.dcc_connections.append(dcc)
         dcc.connect(address, port)
         return dcc
@@ -1224,14 +1228,14 @@ class SimpleIRCClient(object):
 
         Returns a DCCConnection instance.
         """
-        dcc = self.ircobj.dcc(dcctype)
+        dcc = self.manifold.dcc(dcctype)
         self.dcc_connections.append(dcc)
         dcc.listen()
         return dcc
 
     def start(self):
         """Start the IRC client."""
-        self.ircobj.process_forever()
+        self.manifold.process_forever()
 
 
 class Event(object):
