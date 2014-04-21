@@ -812,8 +812,9 @@ class ServerConnection(Connection):
     def list(self, channels=None, server=""):
         """Send a LIST command."""
         command = "LIST"
+        channels = ",".join(always_iterable(channels))
         if channels:
-            command = command + " " + ",".join(channels)
+            command += ' ' + channels
         if server:
             command = command + " " + server
         self.send_raw(command)
@@ -833,8 +834,8 @@ class ServerConnection(Connection):
     def names(self, channels=None):
         """Send a NAMES command."""
         tmpl = "NAMES {channels}" if channels else "NAMES"
-        channels = channels or []
-        self.send_raw(tmpl.format(channels=','.join(channels)))
+        channels = ','.join(always_iterable(channels))
+        self.send_raw(tmpl.format(channels=channels))
 
     def nick(self, newnick):
         """Send a NICK command."""
