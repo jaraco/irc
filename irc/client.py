@@ -1177,8 +1177,10 @@ class SimpleIRCClient(object):
 
         dcc_connections -- A list of DCCConnection instances.
     """
+    manifold_class = Manifold
+
     def __init__(self):
-        self.ircobj = IRC()
+        self.ircobj = self.manifold_class()
         self.connection = self.ircobj.server()
         self.dcc_connections = []
         self.ircobj.add_global_handler("all_events", self._dispatcher, -10)

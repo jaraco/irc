@@ -6,6 +6,8 @@ Changes
 
 * Introduced 'Manifold' as an alias for irc.client.IRC. This better name will
   replace the IRC name in a future version.
+* Added 'manifold_class' property to the client.SimpleIRCClient to allow
+  consumers to provide a customized Manifold.
 
 8.5.4
 =====
