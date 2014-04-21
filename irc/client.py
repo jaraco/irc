@@ -149,8 +149,8 @@ class IRC(object):
     using the nickname my_nickname and send the message "Hi there!"
     to the nickname a_nickname.
 
-    The methods of this class are thread-safe; accesses to and modifications of
-    its internal lists of connections, handlers, and delayed commands
+    The methods of this class are thread-safe; accesses to and modifications
+    of its internal lists of connections, handlers, and delayed commands
     are guarded by a mutex.
     """
 
@@ -401,7 +401,8 @@ class IRC(object):
 # for future compatibility
 Manifold = IRC
 
-_rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
+_rfc_1459_command_regexp = re.compile(
+    "^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
 
 class Connection(object):
     """
@@ -493,8 +494,8 @@ class ServerConnection(Connection):
         self.connect_factory = connect_factory
         try:
             self.socket = self.connect_factory(self.server_address)
-        except socket.error as err:
-            raise ServerConnectionError("Couldn't connect to socket: %s" % err)
+        except socket.error as ex:
+            raise ServerConnectionError("Couldn't connect to socket: %s" % ex)
         self.connected = True
         self.irclibobj._on_connect(self.socket)
 
@@ -571,7 +572,8 @@ class ServerConnection(Connection):
         prefix = None
         command = None
         arguments = None
-        event = Event("all_raw_messages", self.get_server_name(), None, [line])
+        event = Event("all_raw_messages", self.get_server_name(), None,
+            [line])
         self._handle_event(event)
 
         m = _rfc_1459_command_regexp.match(line)
@@ -625,13 +627,16 @@ class ServerConnection(Connection):
                     m = list(m)
                     log.debug("command: %s, source: %s, target: %s, "
                         "arguments: %s", command, prefix, target, m)
-                    self._handle_event(Event(command, NickMask(prefix), target, m))
+                    event = Event(command, NickMask(prefix), target, m)
+                    self._handle_event(event)
                     if command == "ctcp" and m[0] == "ACTION":
-                        self._handle_event(Event("action", prefix, target, m[1:]))
+                        event = Event("action", prefix, target, m[1:])
+                        self._handle_event(event)
                 else:
                     log.debug("command: %s, source: %s, target: %s, "
                         "arguments: %s", command, prefix, target, [m])
-                    self._handle_event(Event(command, NickMask(prefix), target, [m]))
+                    event = Event(command, NickMask(prefix), target, [m])
+                    self._handle_event(event)
         else:
             target = None
 
@@ -649,7 +654,8 @@ class ServerConnection(Connection):
 
             log.debug("command: %s, source: %s, target: %s, "
                 "arguments: %s", command, prefix, target, arguments)
-            self._handle_event(Event(command, NickMask(prefix), target, arguments))
+            event = Event(command, NickMask(prefix), target, arguments)
+            self._handle_event(event)
 
     def _handle_event(self, event):
         """[Internal]"""
@@ -714,10 +720,10 @@ class ServerConnection(Connection):
                 If more than one capability is named, the RFC1459 designated
                 sentinel (:) for a multi-parameter argument must be present.
 
-            It's not obvious where the sentinel should be present or if it must
-            be omitted for a single parameter, so follow convention and only
-            include the sentinel prefixed to the first parameter if more than
-            one parameter is present.
+            It's not obvious where the sentinel should be present or if it
+            must be omitted for a single parameter, so follow convention and
+            only include the sentinel prefixed to the first parameter if more
+            than one parameter is present.
             """
             if len(args) > 1:
                 return (':' + args[0],) + args[1:]
@@ -729,7 +735,11 @@ class ServerConnection(Connection):
     def ctcp(self, ctcptype, target, parameter=""):
         """Send a CTCP command."""
         ctcptype = ctcptype.upper()
-        self.privmsg(target, "\001%s%s\001" % (ctcptype, parameter and (" " + parameter) or ""))
+        tmpl = (
+            "\001{ctcptype} {parameter}\001" if parameter else
+            "\001{ctcptype}\001"
+        )
+        self.privmsg(target, tmpl.format(**vars()))
 
     def ctcp_reply(self, target, parameter):
         """Send a CTCP REPLY command."""
@@ -784,7 +794,10 @@ class ServerConnection(Connection):
 
     def kick(self, channel, nick, comment=""):
         """Send a KICK command."""
-        self.send_raw("KICK %s %s%s" % (channel, nick, (comment and (" :" + comment))))
+        tmpl = "KICK {channel} {nick}"
+        if comment:
+            tmpl += " :{comment}"
+        self.send_raw(tmpl.format(**vars()))
 
     def links(self, remote_server="", server_mask=""):
         """Send a LINKS command."""
@@ -818,7 +831,9 @@ class ServerConnection(Connection):
 
     def names(self, channels=None):
         """Send a NAMES command."""
-        self.send_raw("NAMES" + (channels and (" " + ",".join(channels)) or ""))
+        tmpl = "NAMES {channels}" if channels else "NAMES"
+        channels = channels or []
+        self.send_raw(tmpl.format(channels=','.join(channels)))
 
     def nick(self, newnick):
         """Send a NICK command."""
@@ -1182,7 +1197,8 @@ class SimpleIRCClient(object):
         self.connection = self.manifold.server()
         self.dcc_connections = []
         self.manifold.add_global_handler("all_events", self._dispatcher, -10)
-        self.manifold.add_global_handler("dcc_disconnect", self._dcc_disconnect, -10)
+        self.manifold.add_global_handler("dcc_disconnect",
+            self._dcc_disconnect, -10)
 
     @property
     def manifold(self):
