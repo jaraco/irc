@@ -267,9 +267,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
 
 
 class Channel(object):
-    """A class for keeping information about an IRC channel.
-
-    This class can be improved a lot.
+    """
+    A class for keeping information about an IRC channel.
     """
 
     def __init__(self):
