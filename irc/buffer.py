@@ -82,3 +82,16 @@ class DecodingLineBuffer(LineBuffer):
     def lines(self):
         return (line.decode(self.encoding, self.errors)
             for line in super(DecodingLineBuffer, self).lines())
+
+class LenientDecodingLineBuffer(LineBuffer):
+    """
+    Like LineBuffer, but decode the output. First try UTF-8 and if that
+    fails, use latin-1, which decodes all byte strings.
+    """
+
+    def lines(self):
+        for line in super(LenientDecodingLineBuffer, self).lines():
+            try:
+                yield line.decode('utf-8', 'strict')
+            except UnicodeDecodeError:
+                yield line.decode('latin-1')
