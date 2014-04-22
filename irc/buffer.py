@@ -80,8 +80,14 @@ class DecodingLineBuffer(LineBuffer):
     errors = 'strict'
 
     def lines(self):
-        return (line.decode(self.encoding, self.errors)
-            for line in super(DecodingLineBuffer, self).lines())
+        for line in super(DecodingLineBuffer, self).lines():
+            try:
+                yield line.decode(self.encoding, self.errors)
+            except UnicodeDecodeError:
+                self.handle_exception()
+
+    def handle_exception(self):
+        raise
 
 class LenientDecodingLineBuffer(LineBuffer):
     """
