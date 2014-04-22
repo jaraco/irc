@@ -570,7 +570,7 @@ class ServerConnection(Connection):
             self._process_line(line)
 
     def _process_line(self, line):
-        prefix = None
+        source = None
         command = None
         arguments = None
         event = Event("all_raw_messages", self.get_server_name(), None,
@@ -582,6 +582,7 @@ class ServerConnection(Connection):
             prefix = m.group("prefix")
             if not self.real_server_name:
                 self.real_server_name = prefix
+            source = NickMask(prefix)
 
         if m.group("command"):
             command = m.group("command").lower()
@@ -596,7 +597,7 @@ class ServerConnection(Connection):
         command = events.numeric.get(command, command)
 
         if command == "nick":
-            if NickMask(prefix).nick == self.real_nickname:
+            if source.nick == self.real_nickname:
                 self.real_nickname = arguments[0]
         elif command == "welcome":
             # Record the nickname in case the client changed nick
@@ -627,16 +628,16 @@ class ServerConnection(Connection):
 
                     m = list(m)
                     log.debug("command: %s, source: %s, target: %s, "
-                        "arguments: %s", command, prefix, target, m)
-                    event = Event(command, NickMask(prefix), target, m)
+                        "arguments: %s", command, source, target, m)
+                    event = Event(command, source, target, m)
                     self._handle_event(event)
                     if command == "ctcp" and m[0] == "ACTION":
-                        event = Event("action", NickMask(prefix), target, m[1:])
+                        event = Event("action", source, target, m[1:])
                         self._handle_event(event)
                 else:
                     log.debug("command: %s, source: %s, target: %s, "
-                        "arguments: %s", command, prefix, target, [m])
-                    event = Event(command, NickMask(prefix), target, [m])
+                        "arguments: %s", command, source, target, [m])
+                    event = Event(command, source, target, [m])
                     self._handle_event(event)
         else:
             target = None
@@ -654,8 +655,8 @@ class ServerConnection(Connection):
                     command = "umode"
 
             log.debug("command: %s, source: %s, target: %s, "
-                "arguments: %s", command, prefix, target, arguments)
-            event = Event(command, NickMask(prefix), target, arguments)
+                "arguments: %s", command, source, target, arguments)
+            event = Event(command, source, target, arguments)
             self._handle_event(event)
 
     def _handle_event(self, event):
