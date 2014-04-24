@@ -97,9 +97,16 @@ class DecodingLineBuffer(LineBuffer):
         raise
 
 class LenientDecodingLineBuffer(LineBuffer):
-    """
+    r"""
     Like LineBuffer, but decode the output. First try UTF-8 and if that
     fails, use latin-1, which decodes all byte strings.
+
+    >>> b = LenientDecodingLineBuffer()
+    >>> utf8_word = b'Ol\xc3\xa9'
+    >>> b.feed(utf8_word + b'\n')
+    >>> b.feed(b'Ol\xe9\n')
+    >>> list(b.lines()) == [utf8_word.decode('utf-8')]*2
+    True
     """
 
     def lines(self):
