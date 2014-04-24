@@ -75,6 +75,13 @@ class DecodingLineBuffer(LineBuffer):
     >>> b.feed(b'Ol\xe9\n')
     >>> list(b.lines()) == ['Ol\ufffd']
     True
+
+    >>> b = DecodingLineBuffer()
+    >>> b.feed(b'Ol\xe9\n')
+    >>> list(b.lines())
+    Traceback (most recent call last):
+    ...
+    UnicodeDecodeError: ...
     """
     encoding = 'utf-8'
     errors = 'strict'
