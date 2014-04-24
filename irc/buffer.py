@@ -70,7 +70,7 @@ class DecodingLineBuffer(LineBuffer):
     support docoding from these clients (and not raise a UnicodeDecodeError),
     set errors='replace':
 
-    >>> rb = DecodingLineBuffer()
+    >>> b = DecodingLineBuffer()
     >>> b.errors = 'replace'
     >>> b.feed(b'Ol\xe9\n')
     >>> list(b.lines()) == ['Ol\ufffd']
