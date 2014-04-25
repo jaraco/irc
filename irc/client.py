@@ -232,6 +232,16 @@ class IRC(object):
                     self._schedule_command(command.next())
                 del self.delayed_commands[0]
 
+    @property
+    def sockets(self):
+        with self.mutex:
+            return [
+                conn.socket
+                for conn in self.connections
+                if conn is not None
+                and conn.socket is not None
+            ]
+
     def process_once(self, timeout=0):
         """Process data from connections once.
 
@@ -246,8 +256,7 @@ class IRC(object):
         """
         with self.mutex:
             log.log(logging.DEBUG-2, "process_once()")
-            sockets = [x.socket for x in self.connections if x is not None]
-            sockets = [x for x in sockets if x is not None]
+            sockets = self.sockets
             if sockets:
                 (i, o, e) = select.select(sockets, [], [], timeout)
                 self.process_data(i)
