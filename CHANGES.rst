@@ -1,6 +1,16 @@
 Changes
 -------
 
+8.7
+===
+
+* Issue #34: Introduced ``buffer.LenientDecodingLineBuffer`` for handling
+  input in a more lenient way, preferring UTF-8 but falling back to latin-1
+  if the content cannot be decoded as UTF-8. To enable it by default for
+  your application, set it as the default decoder::
+
+    irc.client.ServerConnection.buffer_class = irc.buffer.LenientDecodingLineBuffer
+
 8.6
 ===
 
