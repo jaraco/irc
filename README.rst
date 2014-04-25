@@ -168,6 +168,10 @@ or using a less strict decoder::
 
     irc.client.ServerConnection.buffer_class.errors = 'replace'
 
+The library also supplies a lenient decoder that attempts UTF-8 but falls
+back to latin-1::
+
+    irc.client.ServerConnection.buffer_class = irc.buffer.LenientDecodingLineBuffer
 
 Notes and Contact Info
 ======================
