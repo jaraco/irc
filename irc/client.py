@@ -254,15 +254,14 @@ class IRC(object):
         incoming data, if there are any.  If that seems boring, look
         at the process_forever method.
         """
-        with self.mutex:
-            log.log(logging.DEBUG-2, "process_once()")
-            sockets = self.sockets
-            if sockets:
-                (i, o, e) = select.select(sockets, [], [], timeout)
-                self.process_data(i)
-            else:
-                time.sleep(timeout)
-            self.process_timeout()
+        log.log(logging.DEBUG-2, "process_once()")
+        sockets = self.sockets
+        if sockets:
+            (i, o, e) = select.select(sockets, [], [], timeout)
+            self.process_data(i)
+        else:
+            time.sleep(timeout)
+        self.process_timeout()
 
     def process_forever(self, timeout=0.2):
         """Run an infinite loop, processing data from connections.

@@ -1,6 +1,12 @@
 Changes
 -------
 
+8.8
+===
+
+* Issue #35: Removed the mutex during process_once.
+* Issue #37: Deprecated buffer.LineBuffer for Python 3.
+
 8.7
 ===
 
