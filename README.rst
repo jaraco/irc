@@ -140,38 +140,46 @@ instead of #test.
 Decoding Input
 ==============
 
-By default, the IRC library does attempt to decode all incoming streams as
-UTF-8, but the author acknowledges that there are cases where decoding is
-undesirable or a custom decoding option is desirable. To support these cases,
-since irc 3.4.2, the ServerConnection class may be customized. The
-'buffer_class' attribute on the ServerConnection determines what class is used
-for buffering lines from the input stream. By default it is
-DecodingLineBuffer, but may be re-assigned with another class, such as irc
-buffer.LineBuffer, which does not decode the lines and passes them through as
-byte strings. The 'buffer_class' attribute may be assigned for all instances
-of ServerConnection by overriding the class attribute::
+By default, the IRC library attempts to decode all incoming streams as
+UTF-8, even though the IRC spec stipulates that no specific encoding can be
+expected. Since assuming UTF-8 is not reasonable in the general case, the IRC
+library provides options to customize decoding of input by customizing the
+ServerConnection class. The 'buffer_class' attribute on the ServerConnection
+determines which class is used for buffering lines from the input stream. By
+default it is buffer.DecodingLineBuffer, but may be re-assigned with another
+class, following the interface of buffer.LineBuffer. The 'buffer_class'
+attribute may be assigned for all instances of ServerConnection by overriding
+the class attribute. For example::
 
-    irc.client.ServerConnection.buffer_class = irc.buffer.LineBuffer
+    irc.client.ServerConnection.buffer_class = irc.buffer.LenientDecodingLineBuffer
 
-or it may be overridden on a per-instance basis (as long as it's overridden before the connection is established)::
+The LenientDecodingLineBuffer attempts UTF-8 but falls back to latin-1, which
+will avoid UnicodeDecodeErrors in all cases (but may produce unexpected
+behavior if an IRC user is using another encoding).
+
+The buffer may be overridden on a per-instance basis (as long as it's
+overridden before the connection is established)::
 
     server = irc.client.IRC().server()
-    server.buffer_class = irc.buffer.LineBuffer
+    server.buffer_class = irc.buffer.LenientDecodingLineBuffer
     server.connect()
 
 Alternatively, some clients may still want to decode the input using a
-different encoding::
+different encoding. To decode all input as latin-1 (which decodes any input),
+use the following::
 
     irc.client.ServerConnection.buffer_class.encoding = 'latin-1'
 
-or using a less strict decoder::
+Or decode to UTF-8, but use a replacement character for unrecognized byte
+sequences::
 
     irc.client.ServerConnection.buffer_class.errors = 'replace'
 
-The library also supplies a lenient decoder that attempts UTF-8 but falls
-back to latin-1::
-
-    irc.client.ServerConnection.buffer_class = irc.buffer.LenientDecodingLineBuffer
+On Python 2, it was possible to use the buffer.LineBuffer itself, which will
+pass the raw bytes. On Python 3, the library requires text for message
+processing, so a decoding buffer must be used. Therefore, use of the
+LineBuffer is considered deprecated and not supported on Python 3. Clients
+should use one of the above techniques for decoding input to text.
 
 Notes and Contact Info
 ======================
