@@ -5,6 +5,10 @@ The home of irclib is:
 
     https://bitbucket.org/jaraco/irc
 
+API Documentation is available at:
+
+    https://pythonhosted.org/irc
+
 You can `download project releases from PyPI
 <https://pypi.python.org/pypi/irc>`_.
 
