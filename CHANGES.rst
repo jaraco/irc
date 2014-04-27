@@ -1,6 +1,11 @@
 Changes
 -------
 
+8.9
+===
+
+Documentation is now published at https://pythonhosted.org/irc.
+
 8.8
 ===
 
