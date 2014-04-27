@@ -39,9 +39,7 @@ You have several options to install the IRC project.
 
   * Use "easy_install irc" or "pip install irc" to grab the latest
     version from the cheeseshop (recommended).
-  * Run "python setup.py install" (from the source distribution) or
-  * Run "paver install" (from repo checkout, requires paver) or
-  * Copy irc directory to appropriate site-packages directory.
+  * Run "python setup.py install" (from the source distribution).
 
 Client Features
 ===============
