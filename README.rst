@@ -12,9 +12,6 @@ API Documentation is available at:
 You can `download project releases from PyPI
 <https://pypi.python.org/pypi/irc>`_.
 
-Some legacy content is still available at the `foundational SourceForge site
-<http://sourceforge.net/projects/python-irclib/>`_.
-
 Tests are `continuously run <https://travis-ci.org/#!/jaraco/irc>`_ using
 Travis-CI.
 
@@ -23,14 +20,13 @@ Travis-CI.
 .. |BuildStatus| image:: https://secure.travis-ci.org/jaraco/irc.png
 .. _BuildStatus: https://travis-ci.org/jaraco/irc
 
-This library is intended to encapsulate the IRC protocol at a quite
-low level.  It provides an event-driven IRC client framework.  It has
-a fairly thorough support for the basic IRC protocol, CTCP and DCC
+This library provides a low-level impelmentation of the IRC protocol for
+Python.  It provides an event-driven IRC client framework.  It has
+a fairly thorough support for the basic IRC protocol, CTCP, and DCC
 connections.
 
-In order to understand how to make an IRC client, I'm afraid you more
-or less must understand the IRC specifications.  They are available
-here:
+In order to understand how to make an IRC client, it's best to read up first
+on the IRC specifications, available here:
 
     http://www.irchelp.org/irchelp/rfc/
 
