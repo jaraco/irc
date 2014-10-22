@@ -78,6 +78,7 @@ from . import strings
 from . import buffer
 from . import schedule
 from . import features
+from . import ctcp
 
 log = logging.getLogger(__name__)
 
@@ -596,7 +597,7 @@ class ServerConnection(Connection):
 
         if command in ["privmsg", "notice"]:
             target, message = arguments[0], arguments[1]
-            messages = _ctcp_dequote(message)
+            messages = ctcp.dequote(message)
 
             if command == "privmsg":
                 if is_channel(target):
@@ -1265,73 +1266,6 @@ class Event(object):
         if arguments is None:
             arguments = []
         self.arguments = arguments
-
-_LOW_LEVEL_QUOTE = '\x10'
-_CTCP_LEVEL_QUOTE = "\\"
-_CTCP_DELIMITER = '\x01'
-
-_low_level_mapping = {
-    "0": '\x00',
-    "n": "\n",
-    "r": "\r",
-    _LOW_LEVEL_QUOTE: _LOW_LEVEL_QUOTE
-}
-
-_low_level_regexp = re.compile(_LOW_LEVEL_QUOTE + "(.)")
-
-def _ctcp_dequote(message):
-    """[Internal] Dequote a message according to CTCP specifications.
-
-    The function returns a list where each element can be either a
-    string (normal message) or a tuple of one or two strings (tagged
-    messages).  If a tuple has only one element (ie is a singleton),
-    that element is the tag; otherwise the tuple has two elements: the
-    tag and the data.
-
-    Arguments:
-
-        message -- The message to be decoded.
-    """
-
-    def _low_level_replace(match_obj):
-        ch = match_obj.group(1)
-
-        # If low_level_mapping doesn't have the character as key, we
-        # should just return the character.
-        return _low_level_mapping.get(ch, ch)
-
-    if _LOW_LEVEL_QUOTE in message:
-        # Yup, there was a quote.  Release the dequoter, man!
-        message = _low_level_regexp.sub(_low_level_replace, message)
-
-    if _CTCP_DELIMITER not in message:
-        return [message]
-
-    # Split it into parts.  (Does any IRC client actually *use*
-    # CTCP stacking like this?)
-    chunks = message.split(_CTCP_DELIMITER)
-
-    messages = []
-    i = 0
-    while i < len(chunks) - 1:
-        # Add message if it's non-empty.
-        if len(chunks[i]) > 0:
-            messages.append(chunks[i])
-
-        if i < len(chunks) - 2:
-            # Aye!  CTCP tagged data ahead!
-            messages.append(tuple(chunks[i + 1].split(" ", 1)))
-
-        i = i + 2
-
-    if len(chunks) % 2 == 0:
-        # Hey, a lonely _CTCP_DELIMITER at the end!  This means
-        # that the last chunk, including the delimiter, is a
-        # normal message!  (This is according to the CTCP
-        # specification.)
-        messages.append(_CTCP_DELIMITER + chunks[-1])
-
-    return messages
 
 def is_channel(string):
     """Check if a string is a channel name.
