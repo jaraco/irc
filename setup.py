@@ -16,7 +16,7 @@ setup_params = dict(
     name="irc",
     description="IRC (Internet Relay Chat) protocol client library for Python",
     long_description=read_long_description(),
-    use_hg_version=True,
+    use_vcs_version=True,
     packages=setuptools.find_packages(),
     author="Joel Rosdahl",
     author_email="joel@rosdahl.net",
@@ -36,7 +36,7 @@ setup_params = dict(
         'jaraco.util',
     ] + importlib_req + argparse_req,
     setup_requires=[
-        'hgtools',
+        'hgtools>=5',
         'pytest-runner',
     ],
     tests_require=[
