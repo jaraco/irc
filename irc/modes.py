@@ -32,22 +32,27 @@ def _parse_modes(mode_string, unary_modes=""):
     Parse the mode_string and return a list of triples.
 
     If no string is supplied return an empty list.
+
     >>> _parse_modes('')
     []
 
     If no sign is supplied, return an empty list.
+
     >>> _parse_modes('ab')
     []
 
     Discard unused args.
+
     >>> _parse_modes('+a foo bar baz')
     [['+', 'a', None]]
 
     Return none for unary args when not provided
+
     >>> _parse_modes('+abc foo', unary_modes='abc')
     [['+', 'a', 'foo'], ['+', 'b', None], ['+', 'c', None]]
 
     This function never throws an error:
+
     >>> import random
     >>> import six
     >>> unichr = chr if six.PY3 else unichr

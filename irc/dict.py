@@ -54,10 +54,12 @@ class IRCDict(KeyTransformingDict):
     >>> d = IRCDict({'[This]': 'that'}, A='foo')
 
     The dict maintains the original case:
+
     >>> '[This]' in ''.join(d.keys())
     True
 
     But the keys can be referenced with a different case
+
     >>> d['a'] == 'foo'
     True
 
@@ -71,6 +73,7 @@ class IRCDict(KeyTransformingDict):
     True
 
     This should work for operations like delete and pop as well.
+
     >>> d.pop('A') == 'foo'
     True
     >>> del d['{This}']

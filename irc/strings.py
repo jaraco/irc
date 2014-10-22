@@ -10,6 +10,7 @@ class FoldedCase(six.text_type):
     """
     A case insensitive string class; behaves just like str
     except compares equal when the only variation is case.
+
     >>> s = FoldedCase('hello world')
 
     >>> s == 'Hello World'
@@ -29,6 +30,7 @@ class FoldedCase(six.text_type):
     True
 
     It's still possible to compare against non-FoldedCase dicts
+
     >>> s == None
     False
     >>> s == 1

@@ -25,11 +25,13 @@ class LineBuffer(object):
     0
 
     The buffer will not perform any decoding.
+
     >>> b.feed(b'Ol\xe9\n')
     >>> list(b.lines()) == [b'Ol\xe9']
     True
 
     The LineBuffer should also act as an iterable.
+
     >>> b.feed(b'iterate\nthis\n')
     >>> for line, expected in zip(b, [b'iterate', b'this']):
     ...    assert line == expected
