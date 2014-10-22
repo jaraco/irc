@@ -1,6 +1,12 @@
 Changes
 -------
 
+8.10
+====
+
+* Issue #46: The ``whois`` command now accepts a single string or iterable for
+  the target.
+
 8.9
 ===
 

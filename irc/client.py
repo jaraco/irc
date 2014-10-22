@@ -971,7 +971,7 @@ class ServerConnection(Connection):
 
     def whois(self, targets):
         """Send a WHOIS command."""
-        self.send_raw("WHOIS " + ",".join(targets))
+        self.send_raw("WHOIS " + ",".join(always_iterable(targets)))
 
     def whowas(self, nick, max="", server=""):
         """Send a WHOWAS command."""
