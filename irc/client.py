@@ -1460,7 +1460,3 @@ class NickMask(six.text_type):
 def _ping_ponger(connection, event):
     "A global handler for the 'ping' event"
     connection.pong(event.target)
-
-# for backward compatibility
-LineBuffer = buffer.LineBuffer
-DecodingLineBuffer = buffer.DecodingLineBuffer

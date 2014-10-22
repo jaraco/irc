@@ -4,7 +4,9 @@ Changes
 10.0
 ====
 
-Dropped support for Python 2.6.
+* Dropped support for Python 2.6.
+* Dropped ``irc.client.LineBuffer`` and ``irc.client.DecodingBuffer``
+  (available in ``irc.client.buffer``).
 
 9.0
 ===
