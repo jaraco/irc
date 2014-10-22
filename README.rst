@@ -33,7 +33,8 @@ on the IRC specifications, available here:
 Installation
 ============
 
-IRC requires Python 2.6 or newer (including Python 3).
+IRC requires Python versions specified in the `download pages
+<https://pypi.python.org/pypi/irc>`_ and definitely supports Python 3.
 
 You have several options to install the IRC project.
 
