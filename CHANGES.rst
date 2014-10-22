@@ -7,6 +7,9 @@ Changes
 * Dropped support for Python 2.6.
 * Dropped ``irc.client.LineBuffer`` and ``irc.client.DecodingBuffer``
   (available in ``irc.client.buffer``).
+* Renamed ``irc.client.IRC`` to ``irc.client.Manifold`` to provide a clearer
+  name for that object. Clients supporting 8.6 and later can use the
+  ``Manifold`` name. Latest clients must use the ``Manifold`` name.
 
 9.0
 ===

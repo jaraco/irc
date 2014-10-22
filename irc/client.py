@@ -112,14 +112,11 @@ class PrioritizedHandler(
         "when sorting prioritized handlers, only use the priority"
         return self.priority < other.priority
 
-class IRC(object):
+class Manifold(object):
     """
     Processes events from one or more IRC server connections.
 
-    Note: This class is poorly named. In the future, it will be renamed to
-    Manifold to better reflect its purpose.
-
-    When an IRC object has been instantiated, it can be used to create
+    When a Manifold object has been instantiated, it can be used to create
     Connection objects that represent the IRC connections.  The
     responsibility of the IRC object is to provide an event-driven
     framework for the connections and to keep the connections alive.
@@ -133,7 +130,7 @@ class IRC(object):
 
     Here is an example:
 
-        client = irc.client.IRC()
+        client = irc.client.Manifold()
         server = client.server()
         server.connect("irc.some.where", 6667, "my_nickname")
         server.privmsg("a_nickname", "Hi there!")
@@ -153,7 +150,7 @@ class IRC(object):
 
     def __init__(self, on_connect=__do_nothing, on_disconnect=__do_nothing,
             on_schedule=__do_nothing):
-        """Constructor for IRC objects.
+        """Constructor for Manifold objects.
 
         on_connect: optional callback invoked when a new connection
         is made.
@@ -202,7 +199,7 @@ class IRC(object):
 
             sockets -- A list of socket objects.
 
-        See documentation for IRC.__init__.
+        See documentation for Manifold.__init__.
         """
         with self.mutex:
             log.log(logging.DEBUG-2, "process_data()")
@@ -213,7 +210,7 @@ class IRC(object):
     def process_timeout(self):
         """Called when a timeout notification is due.
 
-        See documentation for IRC.__init__.
+        See documentation for Manifold.__init__.
         """
         with self.mutex:
             while self.delayed_commands:
@@ -267,7 +264,7 @@ class IRC(object):
         """
         # This loop should specifically *not* be mutex-locked.
         # Otherwise no other thread would ever be able to change
-        # the shared state of an IRC object running this function.
+        # the shared state of a Manifold object running this function.
         log.debug("process_forever(timeout=%s)", timeout)
         while 1:
             self.process_once(timeout)
@@ -400,9 +397,6 @@ class IRC(object):
             self.connections.remove(connection)
             self._on_disconnect(connection.socket)
 
-# for future compatibility
-Manifold = IRC
-
 _cmd_pat = "^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?"
 _rfc_1459_command_regexp = re.compile(_cmd_pat)
 
@@ -443,7 +437,7 @@ class ServerConnection(Connection):
     An IRC server connection.
 
     ServerConnection objects are instantiated by calling the server
-    method on an IRC object.
+    method on a Manifold object.
     """
 
     buffer_class = buffer.DecodingLineBuffer
@@ -1019,7 +1013,7 @@ class DCCConnection(Connection):
     A DCC (Direct Client Connection).
 
     DCCConnection objects are instantiated by calling the dcc
-    method on an IRC object.
+    method on a Manifold object.
     """
     socket = None
 

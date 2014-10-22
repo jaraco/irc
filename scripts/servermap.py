@@ -149,7 +149,7 @@ def main():
         port = 6667
     nickname = sys.argv[2]
 
-    client = irc.client.IRC()
+    client = irc.client.Manifold()
     sys.stdout.write("Connecting to server...")
     sys.stdout.flush()
     try:

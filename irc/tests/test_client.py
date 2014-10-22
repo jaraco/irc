@@ -18,7 +18,7 @@ def test_version():
 
 @mock.patch('irc.connection.socket')
 def test_privmsg_sends_msg(socket_mod):
-	server = irc.client.IRC().server()
+	server = irc.client.Manifold().server()
 	server.connect('foo', 6667, 'bestnick')
 	# make sure the mock object doesn't have a write method or it will treat
 	#  it as an SSL connection and never call .send.
@@ -29,7 +29,7 @@ def test_privmsg_sends_msg(socket_mod):
 
 @mock.patch('irc.connection.socket')
 def test_privmsg_fails_on_embedded_carriage_returns(socket_mod):
-	server = irc.client.IRC().server()
+	server = irc.client.Manifold().server()
 	server.connect('foo', 6667, 'bestnick')
 	with pytest.raises(ValueError):
 		server.privmsg('#best-channel', 'You are great\nSo are you')

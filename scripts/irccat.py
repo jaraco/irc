@@ -55,7 +55,7 @@ def main():
     irc.logging.setup(args)
     target = args.target
 
-    client = irc.client.IRC()
+    client = irc.client.Manifold()
     try:
         c = client.server().connect(args.server, args.port, args.nickname)
     except irc.client.ServerConnectionError:
