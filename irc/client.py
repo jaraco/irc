@@ -3,12 +3,11 @@
 """
 Internet Relay Chat (IRC) protocol client library.
 
-This library is intended to encapsulate the IRC protocol at a quite
-low level.  It provides an event-driven IRC client framework.  It has
-a fairly thorough support for the basic IRC protocol, CTCP, DCC chat,
-but DCC file transfers is not yet supported.
+This library is intended to encapsulate the IRC protocol in Python.
+It provides an event-driven IRC client framework.  It has
+a fairly thorough support for the basic IRC protocol, CTCP, and DCC chat.
 
-In order to understand how to make an IRC client, I'm afraid you more
+To best understand how to make an IRC client, the reader more
 or less must understand the IRC specifications.  They are available
 here: [IRC specifications].
 
@@ -34,13 +33,10 @@ The main features of the IRC client framework are:
 
 Current limitations:
 
-  * The IRC protocol shines through the abstraction a bit too much.
   * Data is not written asynchronously to the server, i.e. the write()
     may block if the TCP buffers are stuffed.
-  * There are no support for DCC file transfers.
-  * The author haven't even read RFC 2810, 2811, 2812 and 2813.
-  * Like most projects, documentation is lacking...
-
+  * DCC file transfers are not supported.
+  * RFCs 2810, 2811, 2812, and 2813 have not been considered.
 
 Notes:
   * connection.quit() only sends QUIT to the server.
