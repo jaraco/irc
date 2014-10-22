@@ -44,6 +44,13 @@ Current limitations:
   * The author haven't even read RFC 2810, 2811, 2812 and 2813.
   * Like most projects, documentation is lacking...
 
+
+Notes:
+  * connection.quit() only sends QUIT to the server.
+  * ERROR from the server triggers the error event and the disconnect event.
+  * dropping of the connection triggers the disconnect event.
+
+
 .. [IRC specifications] http://www.irchelp.org/irchelp/rfc/
 """
 
@@ -89,11 +96,6 @@ except Exception:
     VERSION_STRING = 'unknown'
     VERSION = ()
 
-# NOTES
-# -----
-# connection.quit() only sends QUIT to the server.
-# ERROR from the server triggers the error event and the disconnect event.
-# dropping of the connection triggers the disconnect event.
 
 class IRCError(Exception):
     "An IRC exception"
