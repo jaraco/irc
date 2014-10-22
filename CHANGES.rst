@@ -10,6 +10,9 @@ Changes
 * Renamed ``irc.client.IRC`` to ``irc.client.Manifold`` to provide a clearer
   name for that object. Clients supporting 8.6 and later can use the
   ``Manifold`` name. Latest clients must use the ``Manifold`` name.
+* Renamed ``irc.client.Connection.irclibobj`` property to ``manifold``. The
+  property is still exposed as ``irclibobj`` for compatibility but will be
+  removed in a future version.
 * Removed unused ``irc.client.mask_matches`` function.
 * Removed unused ``irc.client.nick_characters``.
 

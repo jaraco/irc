@@ -402,20 +402,25 @@ class Connection(object):
     def socket(self):
         "The socket for this connection"
 
-    def __init__(self, irclibobj):
-        self.irclibobj = irclibobj
+    def __init__(self, manifold):
+        self.manifold = manifold
+
+    @property
+    def irclibobj(self):
+        "For compatibility"
+        return self.manifold
 
     ##############################
     ### Convenience wrappers.
 
     def execute_at(self, at, function, arguments=()):
-        self.irclibobj.execute_at(at, function, arguments)
+        self.manifold.execute_at(at, function, arguments)
 
     def execute_delayed(self, delay, function, arguments=()):
-        self.irclibobj.execute_delayed(delay, function, arguments)
+        self.manifold.execute_delayed(delay, function, arguments)
 
     def execute_every(self, period, function, arguments=()):
-        self.irclibobj.execute_every(period, function, arguments)
+        self.manifold.execute_every(period, function, arguments)
 
 class ServerConnectionError(IRCError):
     pass
@@ -435,8 +440,8 @@ class ServerConnection(Connection):
     buffer_class = buffer.DecodingLineBuffer
     socket = None
 
-    def __init__(self, irclibobj):
-        super(ServerConnection, self).__init__(irclibobj)
+    def __init__(self, manifold):
+        super(ServerConnection, self).__init__(manifold)
         self.connected = False
         self.features = features.FeatureSet()
 
@@ -485,7 +490,7 @@ class ServerConnection(Connection):
         except socket.error as ex:
             raise ServerConnectionError("Couldn't connect to socket: %s" % ex)
         self.connected = True
-        self.irclibobj._on_connect(self.socket)
+        self.manifold._on_connect(self.socket)
 
         # Log on...
         if self.password:
@@ -508,9 +513,9 @@ class ServerConnection(Connection):
         """
         # Without this thread lock, there is a window during which
         # select() can find a closed socket, leading to an EBADF error.
-        with self.irclibobj.mutex:
+        with self.manifold.mutex:
             self.disconnect("Closing object")
-            self.irclibobj._remove_connection(self)
+            self.manifold._remove_connection(self)
 
     def get_server_name(self):
         """Get the (real) server name.
@@ -648,7 +653,7 @@ class ServerConnection(Connection):
 
     def _handle_event(self, event):
         """[Internal]"""
-        self.irclibobj._handle_event(self, event)
+        self.manifold._handle_event(self, event)
         if event.type in self.handlers:
             for fn in self.handlers[event.type]:
                 fn(self, event)
@@ -665,14 +670,14 @@ class ServerConnection(Connection):
 
         See documentation for IRC.add_global_handler.
         """
-        self.irclibobj.add_global_handler(*args)
+        self.manifold.add_global_handler(*args)
 
     def remove_global_handler(self, *args):
         """Remove global handler.
 
         See documentation for IRC.remove_global_handler.
         """
-        self.irclibobj.remove_global_handler(*args)
+        self.manifold.remove_global_handler(*args)
 
     def action(self, target, action):
         """Send a CTCP ACTION command."""
@@ -970,7 +975,7 @@ class ServerConnection(Connection):
         Set a keepalive to occur every ``interval`` on this connection.
         """
         pinger = functools.partial(self.ping, 'keep-alive')
-        self.irclibobj.execute_every(period=interval, function=pinger)
+        self.manifold.execute_every(period=interval, function=pinger)
 
 
 class Throttler(object):
@@ -1009,8 +1014,8 @@ class DCCConnection(Connection):
     """
     socket = None
 
-    def __init__(self, irclibobj, dcctype):
-        super(DCCConnection, self).__init__(irclibobj)
+    def __init__(self, manifold, dcctype):
+        super(DCCConnection, self).__init__(manifold)
         self.connected = 0
         self.passive = 0
         self.dcctype = dcctype
@@ -1038,7 +1043,7 @@ class DCCConnection(Connection):
         except socket.error as x:
             raise DCCConnectionError("Couldn't connect to socket: %s" % x)
         self.connected = 1
-        self.irclibobj._on_connect(self.socket)
+        self.manifold._on_connect(self.socket)
         return self
 
     def listen(self):
@@ -1080,10 +1085,10 @@ class DCCConnection(Connection):
         except socket.error:
             pass
         del self.socket
-        self.irclibobj._handle_event(
+        self.manifold._handle_event(
             self,
             Event("dcc_disconnect", self.peeraddress, "", [message]))
-        self.irclibobj._remove_connection(self)
+        self.manifold._remove_connection(self)
 
     def process_data(self):
         """[Internal]"""
@@ -1095,7 +1100,7 @@ class DCCConnection(Connection):
             self.connected = 1
             log.debug("DCC connection from %s:%d", self.peeraddress,
                 self.peerport)
-            self.irclibobj._handle_event(
+            self.manifold._handle_event(
                 self,
                 Event("dcc_connect", self.peeraddress, None, None))
             return
@@ -1133,7 +1138,7 @@ class DCCConnection(Connection):
             arguments = [chunk]
             log.debug("command: %s, source: %s, target: %s, arguments: %s",
                 command, prefix, target, arguments)
-            self.irclibobj._handle_event(
+            self.manifold._handle_event(
                 self,
                 Event(command, prefix, target, arguments))
 
