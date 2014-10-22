@@ -75,7 +75,6 @@ from . import connection
 from . import events
 from . import functools as irc_functools
 from . import strings
-from . import util
 from . import buffer
 from . import schedule
 from . import features
@@ -369,7 +368,7 @@ class IRC(object):
     def _schedule_command(self, command):
         with self.mutex:
             bisect.insort(self.delayed_commands, command)
-            self._on_schedule(util.total_seconds(command.delay))
+            self._on_schedule(command.delay.total_seconds())
 
     def dcc(self, dcctype="chat"):
         """Creates and returns a DCCConnection object.
