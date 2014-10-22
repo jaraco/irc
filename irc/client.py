@@ -1030,7 +1030,7 @@ class DCCConnection(Connection):
         """
         self.peeraddress = socket.gethostbyname(address)
         self.peerport = port
-        self.buffer = LineBuffer()
+        self.buffer = buffer.LineBuffer()
         self.handlers = {}
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.passive = 0
@@ -1052,7 +1052,7 @@ class DCCConnection(Connection):
         peer, the peer address and port are available as
         self.peeraddress and self.peerport.
         """
-        self.buffer = LineBuffer()
+        self.buffer = buffer.LineBuffer()
         self.handlers = {}
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.passive = 1
