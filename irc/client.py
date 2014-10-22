@@ -1279,21 +1279,6 @@ _low_level_mapping = {
 
 _low_level_regexp = re.compile(_LOW_LEVEL_QUOTE + "(.)")
 
-def mask_matches(nick, mask):
-    """Check if a nick matches a mask.
-
-    Returns true if the nick matches, otherwise false.
-    """
-    nick = strings.lower(nick)
-    mask = strings.lower(mask)
-    mask = mask.replace("\\", "\\\\")
-    for ch in ".$|[](){}+":
-        mask = mask.replace(ch, "\\" + ch)
-    mask = mask.replace("?", ".")
-    mask = mask.replace("*", ".*")
-    r = re.compile(mask, re.IGNORECASE)
-    return r.match(nick)
-
 _special = "-[]\\`^{}"
 nick_characters = string.ascii_letters + string.digits + _special
 
