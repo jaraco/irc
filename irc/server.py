@@ -54,12 +54,12 @@ import re
 import six
 from six.moves import socketserver
 
-from . import client
+import irc.client
 from . import logging as log_util
 from . import events
 from . import buffer
 
-SRV_WELCOME = "Welcome to {__name__} v{client.VERSION}.".format(**locals())
+SRV_WELCOME = "Welcome to {__name__} v{irc.client.VERSION}.".format(**locals())
 
 log = logging.getLogger(__name__)
 
@@ -405,7 +405,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         """
         Return the client identifier as included in many command replies.
         """
-        return client.NickMask.from_params(self.nick, self.user,
+        return irc.client.NickMask.from_params(self.nick, self.user,
             self.server.servername)
 
     def finish(self):
