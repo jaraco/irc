@@ -1266,12 +1266,12 @@ class Event(object):
             arguments = []
         self.arguments = arguments
 
-_LOW_LEVEL_QUOTE = "\020"
-_CTCP_LEVEL_QUOTE = "\134"
-_CTCP_DELIMITER = "\001"
+_LOW_LEVEL_QUOTE = '\x10'
+_CTCP_LEVEL_QUOTE = "\\"
+_CTCP_DELIMITER = '\x01'
 
 _low_level_mapping = {
-    "0": "\000",
+    "0": '\x00',
     "n": "\n",
     "r": "\r",
     _LOW_LEVEL_QUOTE: _LOW_LEVEL_QUOTE
