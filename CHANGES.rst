@@ -1,6 +1,11 @@
 Changes
 -------
 
+10.0
+====
+
+Dropped support for Python 2.6.
+
 9.0
 ===
 
