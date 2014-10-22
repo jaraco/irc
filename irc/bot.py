@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 1999-2002  Joel Rosdahl
-# Portions Copyright © 2011-2012 Jason R. Coombs
+# Portions Copyright © 2011-2014 Jason R. Coombs
 
 """
 Simple IRC bot library.
