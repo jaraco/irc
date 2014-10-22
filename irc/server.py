@@ -65,7 +65,8 @@ log = logging.getLogger(__name__)
 
 class IRCError(Exception):
     """
-    Exception thrown by IRC command handlers to notify client of a server/client error.
+    Exception thrown by IRC command handlers to notify client of a
+    server/client error.
     """
     def __init__(self, code, value):
         self.code = code
@@ -246,8 +247,8 @@ class IRCClient(socketserver.BaseRequestHandler):
         """
         Handle client PING requests to keep the connection alive.
         """
-        response = ':%s PONG :%s' % (self.server.servername, self.server.servername)
-        return response
+        response = ':{self.server.servername} PONG :{self.server.servername}'
+        return response.format(**locals())
 
     def handle_join(self, params):
         """
@@ -264,27 +265,33 @@ class IRCClient(socketserver.BaseRequestHandler):
                     '%s :No such channel' % r_channel_name)
 
             # Add user to the channel (create new channel if not exists)
-            channel = self.server.channels.setdefault(r_channel_name, IRCChannel(r_channel_name))
+            channel = self.server.channels.setdefault(r_channel_name,
+                IRCChannel(r_channel_name))
             channel.clients.add(self)
 
             # Add channel to user's channel list
             self.channels[channel.name] = channel
 
             # Send the topic
-            response_join = ':%s TOPIC %s :%s' % (channel.topic_by, channel.name, channel.topic)
+            response_join = ':%s TOPIC %s :%s' % (channel.topic_by,
+                channel.name, channel.topic)
             self.send_queue.append(response_join)
 
-            # Send join message to everybody in the channel, including yourself and
-            # send user list of the channel back to the user.
-            response_join = ':%s JOIN :%s' % (self.client_ident(), r_channel_name)
+            # Send join message to everybody in the channel, including yourself
+            # and send user list of the channel back to the user.
+            response_join = ':%s JOIN :%s' % (self.client_ident(),
+                r_channel_name)
             for client in channel.clients:
                 client.send_queue.append(response_join)
 
             nicks = [client.nick for client in channel.clients]
-            response_userlist = ':%s 353 %s = %s :%s' % (self.server.servername, self.nick, channel.name, ' '.join(nicks))
+            _vals = (self.server.servername, self.nick, channel.name,
+                ' '.join(nicks))
+            response_userlist = ':%s 353 %s = %s :%s' % _vals
             self.send_queue.append(response_userlist)
 
-            response = ':%s 366 %s %s :End of /NAMES list' % (self.server.servername, self.nick, channel.name)
+            _vals = self.server.servername, self.nick, channel.name
+            response = ':%s 366 %s %s :End of /NAMES list' % _vals
             self.send_queue.append(response)
 
     def handle_privmsg(self, params):
@@ -364,7 +371,8 @@ class IRCClient(socketserver.BaseRequestHandler):
                 channel.clients.remove(self)
                 self.channels.pop(pchannel)
             else:
-                response = ':%s 403 %s :%s' % (self.server.servername, pchannel, pchannel)
+                response = ':%s 403 %s :%s' % (self.server.servername,
+                    pchannel, pchannel)
                 self.send_queue.append(response)
 
     def handle_quit(self, params):
