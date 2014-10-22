@@ -59,8 +59,7 @@ from . import logging as log_util
 from . import events
 from . import buffer
 
-SRV_WELCOME = "Welcome to %s v%s, the ugliest IRC server in the world." % (
-    __name__, client.VERSION)
+SRV_WELCOME = "Welcome to {__name__} v{client.VERSION}.".format(**locals())
 
 log = logging.getLogger(__name__)
 
