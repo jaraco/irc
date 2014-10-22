@@ -403,8 +403,8 @@ class IRC(object):
 # for future compatibility
 Manifold = IRC
 
-_rfc_1459_command_regexp = re.compile(
-    "^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?")
+_cmd_pat = "^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?"
+_rfc_1459_command_regexp = re.compile(_cmd_pat)
 
 class Connection(object):
     """
