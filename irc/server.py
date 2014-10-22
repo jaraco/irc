@@ -4,7 +4,7 @@
 irc/server.py
 
 Copyright © 2009 Ferry Boender
-Copyright © 2012 Jason R. Coombs
+Copyright © 2012, 2014 Jason R. Coombs
 
 This server has basic support for:
 
