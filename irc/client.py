@@ -1279,9 +1279,6 @@ _low_level_mapping = {
 
 _low_level_regexp = re.compile(_LOW_LEVEL_QUOTE + "(.)")
 
-_special = "-[]\\`^{}"
-nick_characters = string.ascii_letters + string.digits + _special
-
 def _ctcp_dequote(message):
     """[Internal] Dequote a message according to CTCP specifications.
 

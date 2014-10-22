@@ -11,6 +11,7 @@ Changes
   name for that object. Clients supporting 8.6 and later can use the
   ``Manifold`` name. Latest clients must use the ``Manifold`` name.
 * Removed unused ``irc.client.mask_matches`` function.
+* Removed unused ``irc.client.nick_characters``.
 
 9.0
 ===
