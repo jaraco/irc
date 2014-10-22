@@ -53,7 +53,6 @@ import bisect
 import re
 import select
 import socket
-import string
 import time
 import struct
 import logging
@@ -74,7 +73,6 @@ except ImportError:
 from . import connection
 from . import events
 from . import functools as irc_functools
-from . import strings
 from . import buffer
 from . import schedule
 from . import features
