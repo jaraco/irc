@@ -75,6 +75,7 @@ import select
 import re
 
 import six
+from six.moves import socketserver
 
 from . import client
 from . import logging as log_util
@@ -111,7 +112,7 @@ class IRCChannel(object):
         self.topic = topic
         self.clients = set()
 
-class IRCClient(six.moves.socketserver.BaseRequestHandler):
+class IRCClient(socketserver.BaseRequestHandler):
     """
     IRC client connect and command handling. Client connection is handled by
     the `handle` method which sets up a two-way communication with the client.
@@ -128,8 +129,8 @@ class IRCClient(six.moves.socketserver.BaseRequestHandler):
         self.send_queue = []        # Messages to send to client (strings)
         self.channels = {}          # Channels the client is in
 
-        six.moves.socketserver.BaseRequestHandler.__init__(self, request,
-            client_address, server)
+        socketserver.BaseRequestHandler.__init__(self, request, client_address,
+            server)
 
     def handle(self):
         log.info('Client connected: %s', self.client_ident())
@@ -454,8 +455,7 @@ class IRCClient(six.moves.socketserver.BaseRequestHandler):
             self.realname,
             )
 
-class IRCServer(six.moves.socketserver.ThreadingMixIn,
-        six.moves.socketserver.TCPServer):
+class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
     allow_reuse_address = True
 
