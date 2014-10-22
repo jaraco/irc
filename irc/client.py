@@ -89,14 +89,6 @@ except Exception:
     VERSION_STRING = 'unknown'
     VERSION = ()
 
-# TODO
-# ----
-# (maybe) color parser convenience functions
-# documentation (including all event types)
-# (maybe) add awareness of different types of ircds
-# send data asynchronously to the server (and DCC connections)
-# (maybe) automatically close unused, passive DCC connections after a while
-
 # NOTES
 # -----
 # connection.quit() only sends QUIT to the server.
