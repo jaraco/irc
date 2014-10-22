@@ -1428,6 +1428,15 @@ class NickMask(six.text_type):
 
     >>> isinstance(nm.nick, six.text_type)
     True
+
+    Some messages omit the userhost. In that case, None is returned.
+
+    >>> nm = NickMask('irc.server.net')
+    >>> nm.nick
+    'irc.server.net'
+    >>> nm.userhost
+    >>> nm.host
+    >>> nm.user
     """
     @classmethod
     def from_params(cls, nick, user, host):
@@ -1435,19 +1444,25 @@ class NickMask(six.text_type):
 
     @property
     def nick(self):
-        return self.split("!")[0]
+        nick, sep, userhost = self.partition("!")
+        return nick
 
     @property
     def userhost(self):
-        return self.split("!")[1]
+        nick, sep, userhost = self.partition("!")
+        return userhost or None
 
     @property
     def host(self):
-        return self.split("@")[1]
+        nick, sep, userhost = self.partition("!")
+        user, sep, host = self.userhost.partition('@')
+        return host or None
 
     @property
     def user(self):
-        return self.userhost.split("@")[0]
+        nick, sep, userhost = self.partition("!")
+        user, sep, host = self.userhost.partition('@')
+        return user or None
 
 def _ping_ponger(connection, event):
     "A global handler for the 'ping' event"

@@ -1,11 +1,15 @@
 Changes
 -------
 
-8.10
-====
+9.0
+===
 
 * Issue #46: The ``whois`` command now accepts a single string or iterable for
   the target.
+* NickMask now returns ``None`` when user, host, or userhost are not present.
+  Previously, an ``IndexError`` was raised.
+  See `Pull Request #26 <https://bitbucket.org/jaraco/irc/pull-request/26>`_
+  for details.
 
 8.9
 ===
