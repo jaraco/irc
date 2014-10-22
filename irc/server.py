@@ -158,8 +158,8 @@ class IRCClient(socketserver.BaseRequestHandler):
             command, sep, params = line.partition(' ')
             handler = getattr(self, 'handle_%s' % command.lower(), None)
             if not handler:
-                log.info('No handler for command: %s. '
-                    'Full line: %s' % (command, line))
+                _tmpl = 'No handler for command: %s. Full line: %s'
+                log.info(_tmpl % (command, line))
                 raise IRCError.from_name('unknowncommand',
                     '%s :Unknown command' % command)
             response = handler(params)
@@ -371,8 +371,8 @@ class IRCClient(socketserver.BaseRequestHandler):
                 channel.clients.remove(self)
                 self.channels.pop(pchannel)
             else:
-                response = ':%s 403 %s :%s' % (self.server.servername,
-                    pchannel, pchannel)
+                _vars = self.server.servername, pchannel, pchannel
+                response = ':%s 403 %s :%s' % _vars
                 self.send_queue.append(response)
 
     def handle_quit(self, params):
@@ -478,8 +478,8 @@ def main():
     try:
         bind_address = options.listen_address, options.listen_port
         ircserver = IRCServer(bind_address, IRCClient)
-        log.info('Listening on {listen_address}:{listen_port}'.format(
-            **vars(options)))
+        _tmpl = 'Listening on {listen_address}:{listen_port}'
+        log.info(_tmpl.format(**vars(options)))
         ircserver.serve_forever()
     except socket.error as e:
         log.error(repr(e))
