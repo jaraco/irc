@@ -1324,32 +1324,32 @@ def _ctcp_dequote(message):
 
     if _CTCP_DELIMITER not in message:
         return [message]
-    else:
-        # Split it into parts.  (Does any IRC client actually *use*
-        # CTCP stacking like this?)
-        chunks = message.split(_CTCP_DELIMITER)
 
-        messages = []
-        i = 0
-        while i < len(chunks) - 1:
-            # Add message if it's non-empty.
-            if len(chunks[i]) > 0:
-                messages.append(chunks[i])
+    # Split it into parts.  (Does any IRC client actually *use*
+    # CTCP stacking like this?)
+    chunks = message.split(_CTCP_DELIMITER)
 
-            if i < len(chunks) - 2:
-                # Aye!  CTCP tagged data ahead!
-                messages.append(tuple(chunks[i + 1].split(" ", 1)))
+    messages = []
+    i = 0
+    while i < len(chunks) - 1:
+        # Add message if it's non-empty.
+        if len(chunks[i]) > 0:
+            messages.append(chunks[i])
 
-            i = i + 2
+        if i < len(chunks) - 2:
+            # Aye!  CTCP tagged data ahead!
+            messages.append(tuple(chunks[i + 1].split(" ", 1)))
 
-        if len(chunks) % 2 == 0:
-            # Hey, a lonely _CTCP_DELIMITER at the end!  This means
-            # that the last chunk, including the delimiter, is a
-            # normal message!  (This is according to the CTCP
-            # specification.)
-            messages.append(_CTCP_DELIMITER + chunks[-1])
+        i = i + 2
 
-        return messages
+    if len(chunks) % 2 == 0:
+        # Hey, a lonely _CTCP_DELIMITER at the end!  This means
+        # that the last chunk, including the delimiter, is a
+        # normal message!  (This is according to the CTCP
+        # specification.)
+        messages.append(_CTCP_DELIMITER + chunks[-1])
+
+    return messages
 
 def is_channel(string):
     """Check if a string is a channel name.
