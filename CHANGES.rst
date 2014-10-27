@@ -15,6 +15,7 @@ Changes
   removed in a future version.
 * Removed unused ``irc.client.mask_matches`` function.
 * Removed unused ``irc.client.nick_characters``.
+* Added extra numerics for 'whoisaccount' and 'cannotknock'.
 
 9.0
 ===
