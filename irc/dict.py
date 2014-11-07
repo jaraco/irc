@@ -40,7 +40,7 @@ class IRCDict(KeyTransformingDict):
     0
     """
     @staticmethod
-    def key_transform(key):
+    def transform_key(key):
         if isinstance(key, six.string_types):
             key = strings.IRCFoldedCase(key)
         return key
