@@ -1354,13 +1354,13 @@ class NickMask(six.text_type):
     @property
     def host(self):
         nick, sep, userhost = self.partition("!")
-        user, sep, host = self.userhost.partition('@')
+        user, sep, host = userhost.partition('@')
         return host or None
 
     @property
     def user(self):
         nick, sep, userhost = self.partition("!")
-        user, sep, host = self.userhost.partition('@')
+        user, sep, host = userhost.partition('@')
         return user or None
 
 def _ping_ponger(connection, event):
