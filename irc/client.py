@@ -1331,8 +1331,8 @@ class NickMask(six.text_type):
     Some messages omit the userhost. In that case, None is returned.
 
     >>> nm = NickMask('irc.server.net')
-    >>> nm.nick
-    'irc.server.net'
+    >>> print(nm.nick)
+    irc.server.net
     >>> nm.userhost
     >>> nm.host
     >>> nm.user
