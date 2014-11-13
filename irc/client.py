@@ -61,6 +61,7 @@ import abc
 import collections
 import functools
 import itertools
+import contextlib
 
 import six
 from jaraco.util.itertools import always_iterable
@@ -537,6 +538,18 @@ class ServerConnection(Connection):
         was passed to the connect() method.  """
 
         return self.real_nickname
+
+    @contextlib.contextmanager
+    def as_nick(self, name):
+        """
+        Set the nick for the duration of the context.
+        """
+        orig = self.get_nickname()
+        self.nick(name)
+        try:
+            yield orig
+        finally:
+            self.nick(orig)
 
     def process_data(self):
         "read and process input from self.socket"
