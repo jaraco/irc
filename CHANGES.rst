@@ -1,6 +1,12 @@
 Changes
 -------
 
+10.1
+====
+
+* Added ``ServerConnection.as_nick``, a context manager to set a nick for the
+  duration of the context.
+
 10.0
 ====
 
