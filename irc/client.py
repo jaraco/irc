@@ -462,15 +462,15 @@ class ServerConnection(Connection):
 
         Arguments:
 
-            server -- Server name.
-            port -- Port number.
-            nickname -- The nickname.
-            password -- Password (if any).
-            username -- The username.
-            ircname -- The IRC name ("realname").
-            server_address -- The remote host/port of the server.
-            connect_factory -- A callable that takes the server address and
-                returns a connection (with a socket interface).
+        * server - Server name
+        * port - Port number
+        * nickname - The nickname
+        * password - Password (if any)
+        * username - The username
+        * ircname - The IRC name ("realname")
+        * server_address - The remote host/port of the server
+        * connect_factory - A callable that takes the server address and
+          returns a connection (with a socket interface)
 
         This function can be called to reconnect a closed connection.
 
