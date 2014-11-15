@@ -418,11 +418,6 @@ class Connection(object):
     def __init__(self, reactor):
         self.reactor = reactor
 
-    @property
-    def irclibobj(self):
-        "For compatibility"
-        return self.reactor
-
     ##############################
     ### Convenience wrappers.
 

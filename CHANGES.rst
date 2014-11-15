@@ -9,8 +9,8 @@ Changes
   <http://en.wikipedia.org/wiki/Reactor_pattern>`_.
   This name makes it's function much more clear and inline with standard
   terminology.
-
-  References to the 'manifold' must be updated to refer to 'reactor' instead.
+* Removed deprecated ``manifold`` and ``irclibobj`` properties from Connection.
+  Use ``reactor`` instead.
 
 10.1
 ====
