@@ -1218,21 +1218,12 @@ class SimpleIRCClient(object):
     reactor_class = Reactor
 
     def __init__(self):
-        self.ircobj = self.reactor_class()
+        self.reactor = self.reactor_class()
         self.connection = self.reactor.server()
         self.dcc_connections = []
         self.reactor.add_global_handler("all_events", self._dispatcher, -10)
         self.reactor.add_global_handler("dcc_disconnect",
             self._dcc_disconnect, -10)
-
-    @property
-    def manifold(self):
-        log.warn("The `manifold` member has been renamed `reactor`. Please update your code.")
-        return self.ircobj
-
-    @property
-    def reactor(self):
-        return self.ircobj
 
     def _dispatcher(self, connection, event):
         """

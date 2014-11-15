@@ -11,6 +11,8 @@ Changes
   terminology.
 * Removed deprecated ``manifold`` and ``irclibobj`` properties from Connection.
   Use ``reactor`` instead.
+* Removed deprecated ``ircobj`` from ``SimpleIRCClient``. Use ``reactor``
+  instead.
 
 10.1
 ====
