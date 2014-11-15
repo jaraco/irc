@@ -109,7 +109,8 @@ class Reactor(object):
     """
     Processes events from one or more IRC server connections.
 
-    This is a reactor in the style of the [reactor pattern](http://en.wikipedia.org/wiki/Reactor_pattern)
+    This class implements a reactor in the style of the `reactor pattern
+    <http://en.wikipedia.org/wiki/Reactor_pattern>`_.
 
     When a Reactor object has been instantiated, it can be used to create
     Connection objects that represent the IRC connections.  The
