@@ -423,12 +423,6 @@ class Connection(object):
         "For compatibility"
         return self.reactor
 
-    @property
-    def manifold(self):
-        "For compatibility"
-        log.warn("The `manifold` member has been renamed `reactor`. Please update your code.")
-        return self.reactor
-
     ##############################
     ### Convenience wrappers.
 
