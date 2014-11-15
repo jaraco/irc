@@ -43,6 +43,14 @@ irc.connection module
     :undoc-members:
     :show-inheritance:
 
+irc.ctcp module
+---------------
+
+.. automodule:: irc.ctcp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 irc.dict module
 ---------------
 
@@ -119,14 +127,6 @@ irc.strings module
 ------------------
 
 .. automodule:: irc.strings
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-irc.util module
----------------
-
-.. automodule:: irc.util
     :members:
     :undoc-members:
     :show-inheritance:
