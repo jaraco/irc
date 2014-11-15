@@ -105,13 +105,15 @@ class PrioritizedHandler(
         "when sorting prioritized handlers, only use the priority"
         return self.priority < other.priority
 
-class Manifold(object):
+class Reactor(object):
     """
     Processes events from one or more IRC server connections.
 
-    When a Manifold object has been instantiated, it can be used to create
+    This is a reactor in the style of the [reactor pattern](http://en.wikipedia.org/wiki/Reactor_pattern)
+
+    When a Reactor object has been instantiated, it can be used to create
     Connection objects that represent the IRC connections.  The
-    responsibility of the IRC object is to provide an event-driven
+    responsibility of the reactor object is to provide an event-driven
     framework for the connections and to keep the connections alive.
     It runs a select loop to poll each connection's TCP socket and
     hands over the sockets with incoming data for processing by the
@@ -121,9 +123,19 @@ class Manifold(object):
     add_global_handler, remove_global_handler, execute_at,
     execute_delayed, execute_every, process_once, and process_forever.
 
+    This is functionally an event-loop which can either use it's own
+    internal polling loop, or tie into an external event-loop, by
+    having the external event-system periodically call `process_once`
+    on the instantiated reactor class. This will allow the reactor
+    to process any queued data and/or events.
+
+    Calling `process_forever` will hand off execution to the reactor's
+    internal event-loop, which will not return for the life of the
+    reactor.
+
     Here is an example:
 
-        client = irc.client.Manifold()
+        client = irc.client.Reactor()
         server = client.server()
         server.connect("irc.some.where", 6667, "my_nickname")
         server.privmsg("a_nickname", "Hi there!")
@@ -143,7 +155,7 @@ class Manifold(object):
 
     def __init__(self, on_connect=__do_nothing, on_disconnect=__do_nothing,
             on_schedule=__do_nothing):
-        """Constructor for Manifold objects.
+        """Constructor for Reactor objects.
 
         on_connect: optional callback invoked when a new connection
         is made.
@@ -192,7 +204,7 @@ class Manifold(object):
 
             sockets -- A list of socket objects.
 
-        See documentation for Manifold.__init__.
+        See documentation for Reactor.__init__.
         """
         with self.mutex:
             log.log(logging.DEBUG-2, "process_data()")
@@ -203,7 +215,7 @@ class Manifold(object):
     def process_timeout(self):
         """Called when a timeout notification is due.
 
-        See documentation for Manifold.__init__.
+        See documentation for Reactor.__init__.
         """
         with self.mutex:
             while self.delayed_commands:
@@ -257,7 +269,7 @@ class Manifold(object):
         """
         # This loop should specifically *not* be mutex-locked.
         # Otherwise no other thread would ever be able to change
-        # the shared state of a Manifold object running this function.
+        # the shared state of a Reactor object running this function.
         log.debug("process_forever(timeout=%s)", timeout)
         while 1:
             self.process_once(timeout)
@@ -403,25 +415,31 @@ class Connection(object):
     def socket(self):
         "The socket for this connection"
 
-    def __init__(self, manifold):
-        self.manifold = manifold
+    def __init__(self, reactor):
+        self.reactor = reactor
 
     @property
     def irclibobj(self):
         "For compatibility"
-        return self.manifold
+        return self.reactor
+
+    @property
+    def manifold(self):
+        "For compatibility"
+        log.warn("The `manifold` member has been renamed `reactor`. Please update your code.")
+        return self.reactor
 
     ##############################
     ### Convenience wrappers.
 
     def execute_at(self, at, function, arguments=()):
-        self.manifold.execute_at(at, function, arguments)
+        self.reactor.execute_at(at, function, arguments)
 
     def execute_delayed(self, delay, function, arguments=()):
-        self.manifold.execute_delayed(delay, function, arguments)
+        self.reactor.execute_delayed(delay, function, arguments)
 
     def execute_every(self, period, function, arguments=()):
-        self.manifold.execute_every(period, function, arguments)
+        self.reactor.execute_every(period, function, arguments)
 
 class ServerConnectionError(IRCError):
     pass
@@ -435,14 +453,14 @@ class ServerConnection(Connection):
     An IRC server connection.
 
     ServerConnection objects are instantiated by calling the server
-    method on a Manifold object.
+    method on a Reactor object.
     """
 
     buffer_class = buffer.DecodingLineBuffer
     socket = None
 
-    def __init__(self, manifold):
-        super(ServerConnection, self).__init__(manifold)
+    def __init__(self, reactor):
+        super(ServerConnection, self).__init__(reactor)
         self.connected = False
         self.features = features.FeatureSet()
 
@@ -491,7 +509,7 @@ class ServerConnection(Connection):
         except socket.error as ex:
             raise ServerConnectionError("Couldn't connect to socket: %s" % ex)
         self.connected = True
-        self.manifold._on_connect(self.socket)
+        self.reactor._on_connect(self.socket)
 
         # Log on...
         if self.password:
@@ -514,9 +532,9 @@ class ServerConnection(Connection):
         """
         # Without this thread lock, there is a window during which
         # select() can find a closed socket, leading to an EBADF error.
-        with self.manifold.mutex:
+        with self.reactor.mutex:
             self.disconnect("Closing object")
-            self.manifold._remove_connection(self)
+            self.reactor._remove_connection(self)
 
     def get_server_name(self):
         """Get the (real) server name.
@@ -666,7 +684,7 @@ class ServerConnection(Connection):
 
     def _handle_event(self, event):
         """[Internal]"""
-        self.manifold._handle_event(self, event)
+        self.reactor._handle_event(self, event)
         if event.type in self.handlers:
             for fn in self.handlers[event.type]:
                 fn(self, event)
@@ -683,14 +701,14 @@ class ServerConnection(Connection):
 
         See documentation for IRC.add_global_handler.
         """
-        self.manifold.add_global_handler(*args)
+        self.reactor.add_global_handler(*args)
 
     def remove_global_handler(self, *args):
         """Remove global handler.
 
         See documentation for IRC.remove_global_handler.
         """
-        self.manifold.remove_global_handler(*args)
+        self.reactor.remove_global_handler(*args)
 
     def action(self, target, action):
         """Send a CTCP ACTION command."""
@@ -988,7 +1006,7 @@ class ServerConnection(Connection):
         Set a keepalive to occur every ``interval`` on this connection.
         """
         pinger = functools.partial(self.ping, 'keep-alive')
-        self.manifold.execute_every(period=interval, function=pinger)
+        self.reactor.execute_every(period=interval, function=pinger)
 
 
 class Throttler(object):
@@ -1023,12 +1041,12 @@ class DCCConnection(Connection):
     A DCC (Direct Client Connection).
 
     DCCConnection objects are instantiated by calling the dcc
-    method on a Manifold object.
+    method on a Reactor object.
     """
     socket = None
 
-    def __init__(self, manifold, dcctype):
-        super(DCCConnection, self).__init__(manifold)
+    def __init__(self, reactor, dcctype):
+        super(DCCConnection, self).__init__(reactor)
         self.connected = 0
         self.passive = 0
         self.dcctype = dcctype
@@ -1056,7 +1074,7 @@ class DCCConnection(Connection):
         except socket.error as x:
             raise DCCConnectionError("Couldn't connect to socket: %s" % x)
         self.connected = 1
-        self.manifold._on_connect(self.socket)
+        self.reactor._on_connect(self.socket)
         return self
 
     def listen(self):
@@ -1098,10 +1116,10 @@ class DCCConnection(Connection):
         except socket.error:
             pass
         del self.socket
-        self.manifold._handle_event(
+        self.reactor._handle_event(
             self,
             Event("dcc_disconnect", self.peeraddress, "", [message]))
-        self.manifold._remove_connection(self)
+        self.reactor._remove_connection(self)
 
     def process_data(self):
         """[Internal]"""
@@ -1113,7 +1131,7 @@ class DCCConnection(Connection):
             self.connected = 1
             log.debug("DCC connection from %s:%d", self.peeraddress,
                 self.peerport)
-            self.manifold._handle_event(
+            self.reactor._handle_event(
                 self,
                 Event("dcc_connect", self.peeraddress, None, None))
             return
@@ -1151,7 +1169,7 @@ class DCCConnection(Connection):
             arguments = [chunk]
             log.debug("command: %s, source: %s, target: %s, arguments: %s",
                 command, prefix, target, arguments)
-            self.manifold._handle_event(
+            self.reactor._handle_event(
                 self,
                 Event(command, prefix, target, arguments))
 
@@ -1190,26 +1208,43 @@ class SimpleIRCClient(object):
     handler methods get two arguments: the connection object (same as
     self.connection) and the event object.
 
+    Functionally, any of the event names in `events.py` my be subscribed
+    to by prefixing them with `on_`, and creating a function of that
+    name in the child-class of `SimpleIRCClient`. When the event of
+    `event_name` is received, the appropriately named method will be
+    called (if it exists) by runtime class introspection.
+
+    See `_dispatcher()`, which takes the event name, postpends it to
+    `on_`, and then attemps to look up the class member function by
+    name and call it.
+
     Instance attributes that can be used by sub classes:
 
-        manifold -- The Manifold instance.
+        reactor -- The Reactor instance.
 
         connection -- The ServerConnection instance.
 
         dcc_connections -- A list of DCCConnection instances.
     """
-    manifold_class = Manifold
+    reactor_class = Reactor
+
 
     def __init__(self):
-        self.ircobj = self.manifold_class()
-        self.connection = self.manifold.server()
+        self.ircobj = self.reactor_class()
+        self.connection = self.reactor.server()
         self.dcc_connections = []
-        self.manifold.add_global_handler("all_events", self._dispatcher, -10)
-        self.manifold.add_global_handler("dcc_disconnect",
+        self.reactor.add_global_handler("all_events", self._dispatcher, -10)
+        self.reactor.add_global_handler("dcc_disconnect",
             self._dcc_disconnect, -10)
+
 
     @property
     def manifold(self):
+        log.warn("The `manifold` member has been renamed `reactor`. Please update your code.")
+        return self.ircobj
+
+    @property
+    def reactor(self):
         return self.ircobj
 
     def _dispatcher(self, connection, event):
@@ -1240,7 +1275,7 @@ class SimpleIRCClient(object):
 
         Returns a DCCConnection instance.
         """
-        dcc = self.manifold.dcc(dcctype)
+        dcc = self.reactor.dcc(dcctype)
         self.dcc_connections.append(dcc)
         dcc.connect(address, port)
         return dcc
@@ -1250,14 +1285,14 @@ class SimpleIRCClient(object):
 
         Returns a DCCConnection instance.
         """
-        dcc = self.manifold.dcc(dcctype)
+        dcc = self.reactor.dcc(dcctype)
         self.dcc_connections.append(dcc)
         dcc.listen()
         return dcc
 
     def start(self):
         """Start the IRC client."""
-        self.manifold.process_forever()
+        self.reactor.process_forever()
 
 
 class Event(object):

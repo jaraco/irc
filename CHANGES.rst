@@ -1,6 +1,18 @@
 Changes
 -------
 
+
+10.2
+====
+
+* Renamed ``irc.client.Manifold`` to ``irc.client.Reactor``, because the
+"Manifold" is basically an instance of the [reactor pattern](http://en.wikipedia.org/wiki/Reactor_pattern).
+This makes it's function much more clear, and inline with standard terminology.
+
+There are accessor methods to preserve compatiblility in a number of places, but this should
+be considered a api-compatibility-breaking release.
+
+
 10.1
 ====
 

@@ -2,3 +2,9 @@ build
 dist
 python-irclib.spec
 paver-minilib.zip
+syntax: glob
+.eggs/*
+irc.egg-info/*
+*__pycache__*
+*.egg/*
+*.egg

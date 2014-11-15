@@ -149,12 +149,12 @@ def main():
         port = 6667
     nickname = sys.argv[2]
 
-    client = irc.client.Manifold()
+    reactor = irc.reactor.Reactor()
     sys.stdout.write("Connecting to server...")
     sys.stdout.flush()
     try:
-        c = client.server().connect(server, port, nickname)
-    except irc.client.ServerConnectionError as x:
+        c = reactor.server().connect(server, port, nickname)
+    except irc.reactor.ServerConnectionError as x:
         print(x)
         sys.exit(1)
 
@@ -164,7 +164,7 @@ def main():
     c.add_global_handler("endoflinks", on_endoflinks)
     c.add_global_handler("disconnect", on_disconnect)
 
-    client.process_forever()
+    reactor.process_forever()
 
 if __name__ == '__main__':
     main()
