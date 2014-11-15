@@ -9,8 +9,9 @@ class IRCFoldedCase(FoldedCase):
     A version of FoldedCase that honors the IRC specification for lowercased
     strings (RFC 1459).
 
-    >>> IRCFoldedCase('Foo^').lower() == 'foo~'
-    True
+    >>> print(IRCFoldedCase('Foo^').lower())
+    foo~
+
     >>> IRCFoldedCase('[this]') == IRCFoldedCase('{THIS}')
     True
     """
