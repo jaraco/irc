@@ -1217,7 +1217,6 @@ class SimpleIRCClient(object):
     """
     reactor_class = Reactor
 
-
     def __init__(self):
         self.ircobj = self.reactor_class()
         self.connection = self.reactor.server()
@@ -1225,7 +1224,6 @@ class SimpleIRCClient(object):
         self.reactor.add_global_handler("all_events", self._dispatcher, -10)
         self.reactor.add_global_handler("dcc_disconnect",
             self._dcc_disconnect, -10)
-
 
     @property
     def manifold(self):
