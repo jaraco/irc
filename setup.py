@@ -1,9 +1,11 @@
+import io
+
 import setuptools
 
 def read_long_description():
-    with open('README.rst') as f:
+    with io.open('README.rst', encoding='utf-8') as f:
         data = f.read()
-    with open('CHANGES.rst') as f:
+    with io.open('CHANGES.rst', encoding='utf-8') as f:
         data += '\n\n' + f.read()
     return data
 
