@@ -14,7 +14,7 @@ class DelayedCommand(datetime.datetime):
     manner, such as to use UTC or to have timezone-aware times.
     """
     @classmethod
-    def now(self, tzinfo=None):
+    def now(cls, tzinfo=None):
         return datetime.datetime.now(tzinfo)
 
     @classmethod
