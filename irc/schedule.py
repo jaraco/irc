@@ -5,6 +5,7 @@ Classes for calling functions a schedule.
 import datetime
 import numbers
 
+
 class DelayedCommand(datetime.datetime):
     """
     A command to be executed after some delay (seconds or timedelta).
@@ -49,6 +50,7 @@ class DelayedCommand(datetime.datetime):
     def due(self):
         return self.now() >= self
 
+
 class PeriodicCommand(DelayedCommand):
     """
     Like a delayed command, but expect this command to run every delay
@@ -65,6 +67,7 @@ class PeriodicCommand(DelayedCommand):
             raise ValueError("A PeriodicCommand must have a positive, "
                 "non-zero delay.")
         super(PeriodicCommand, self).__setattr__(key, value)
+
 
 class PeriodicCommandFixedDelay(PeriodicCommand):
     """
