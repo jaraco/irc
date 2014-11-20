@@ -330,7 +330,7 @@ class Reactor(object):
 
         Arguments:
 
-            at -- Execute at this time (standard "time_t" time).
+            at -- Execute at this time (a standard Unix timestamp).
             function -- Function to call.
             arguments -- Arguments to give the function.
         """
