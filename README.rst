@@ -12,7 +12,7 @@ API documentation is available at:
 You can `download project releases from PyPI
 <https://pypi.python.org/pypi/irc>`_.
 
-Tests are `continuously run <https://travis-ci.org/#!/jaraco/irc>`_ using
+Tests are `continually run <https://travis-ci.org/#!/jaraco/irc>`_ using
 Travis-CI.
 
 |BuildStatus|_
