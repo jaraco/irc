@@ -13,6 +13,7 @@ import os
 import struct
 import sys
 import argparse
+import shlex
 
 import irc.client
 import irc.logging
@@ -23,18 +24,21 @@ class DCCReceive(irc.client.SimpleIRCClient):
         self.received_bytes = 0
 
     def on_ctcp(self, connection, event):
-        args = event.arguments[1].split()
-        if args[0] != "SEND":
+        payload = event.arguments[1]
+        parts = shlex.split(payload)
+        command, filename, peer_address, peer_port, size = parts
+        if command != "SEND":
             return
-        self.filename = os.path.basename(args[1])
+        self.filename = os.path.basename(filename)
         if os.path.exists(self.filename):
-            print("A file named", self.filename,)
-            print("already exists. Refusing to save it.")
+            print("A file named", self.filename,
+                "already exists. Refusing to save it.")
             self.connection.quit()
+            return
         self.file = open(self.filename, "wb")
-        peeraddress = irc.client.ip_numstr_to_quad(args[2])
-        peerport = int(args[3])
-        self.dcc = self.dcc_connect(peeraddress, peerport, "raw")
+        peer_address = irc.client.ip_numstr_to_quad(peer_address)
+        peer_port = int(peer_port)
+        self.dcc = self.dcc_connect(peer_address, peer_port, "raw")
 
     def on_dccmsg(self, connection, event):
         data = event.arguments[0]

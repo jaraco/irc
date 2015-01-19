@@ -11,6 +11,7 @@ import os
 import struct
 import sys
 import argparse
+import subprocess
 
 import irc.client
 import irc.logging
@@ -26,14 +27,15 @@ class DCCSend(irc.client.SimpleIRCClient):
 
     def on_welcome(self, connection, event):
         self.dcc = self.dcc_listen("raw")
-        msg_parts = (
+        msg_parts = map(str, (
             'SEND',
             os.path.basename(self.filename),
             irc.client.ip_quad_to_numstr(self.dcc.localaddress),
             self.dcc.localport,
             self.filesize,
-        )
-        self.connection.ctcp("DCC", self.receiver, ' '.join(msg_parts))
+        ))
+        msg = subprocess.list2cmdline(msg_parts)
+        self.connection.ctcp("DCC", self.receiver, msg)
 
     def on_dcc_connect(self, connection, event):
         if self.filesize == 0:
