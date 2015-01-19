@@ -26,13 +26,14 @@ class DCCSend(irc.client.SimpleIRCClient):
 
     def on_welcome(self, connection, event):
         self.dcc = self.dcc_listen("raw")
-        msg = "SEND %s %s %d %d" % (
+        msg_parts = (
+            'SEND',
             os.path.basename(self.filename),
             irc.client.ip_quad_to_numstr(self.dcc.localaddress),
             self.dcc.localport,
             self.filesize,
         )
-        self.connection.ctcp("DCC", self.receiver, msg)
+        self.connection.ctcp("DCC", self.receiver, ' '.join(msg_parts))
 
     def on_dcc_connect(self, connection, event):
         if self.filesize == 0:
