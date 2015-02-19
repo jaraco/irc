@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import re
 
 LOW_LEVEL_QUOTE = '\x10'

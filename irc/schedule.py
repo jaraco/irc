@@ -2,6 +2,8 @@
 Classes for calling functions a schedule.
 """
 
+from __future__ import absolute_import
+
 import datetime
 import numbers
 

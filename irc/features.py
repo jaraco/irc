@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 class FeatureSet(object):
     """
     An implementation of features as loaded from an ISUPPORT server directive.

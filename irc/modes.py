@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 def parse_nick_modes(mode_string):
     """Parse a nick mode string.
 

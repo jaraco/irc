@@ -1,6 +1,11 @@
 Changes
 -------
 
+11.1.1
+======
+
+* Issue #55: Correct import error on Python 2.7.
+
 11.1
 ====
 
