@@ -12,8 +12,8 @@ def read_long_description():
 
 needs_pytest = {'pytest', 'test', 'ptr', 'release'}.intersection(sys.argv)
 pytest_runner = ['pytest_runner'] if needs_pytest else []
-needs_sphinx = {'build_docs', 'upload_docs', 'release'}.intersection(sys.argv)
-sphinx = ['sphinx'] if needs_sphinx else []
+needs_sphinx = {'build_sphinx', 'upload_docs', 'release'}.intersection(sys.argv)
+sphinx = ['sphinx', 'pytest'] if needs_sphinx else []
 
 setup_params = dict(
     name="irc",
