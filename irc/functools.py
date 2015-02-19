@@ -5,8 +5,8 @@ import collections
 
 def save_method_args(method):
     """
-    Wrap a method such that when it is called, we save the args and
-    kwargs with which it was called.
+    Wrap a method such that when it is called, the args and kwargs are
+    saved on the method.
 
     >>> class MyClass(object):
     ...     @save_method_args
@@ -25,6 +25,17 @@ def save_method_args(method):
     ()
     >>> my_ob._saved_method.kwargs == dict(a=3, b='foo')
     True
+
+    The arguments are stored on the instance, allowing for
+    different instance to save different args.
+
+    >>> your_ob = MyClass()
+    >>> your_ob.method({3}, b=[4])
+    {3} [4]
+    >>> your_ob._saved_method.args
+    ({3},)
+    >>> my_ob._saved_method.args
+    ()
     """
     args_and_kwargs = collections.namedtuple('args_and_kwargs', 'args kwargs')
     @functools.wraps(method)
