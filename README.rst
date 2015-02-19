@@ -184,6 +184,15 @@ sequences:
 
     irc.client.ServerConnection.buffer_class.errors = 'replace'
 
+Or, to simply ignore all input that cannot be decoded:
+
+.. code:: python
+
+    class IgnoreErrorsBuffer(irc.buffer.DecodingLineBuffer):
+        def handle_exception(self):
+            pass
+    irc.client.ServerConnection.buffer_class = IgnoreErrorsBuffer
+
 On Python 2, it was possible to use the ``buffer.LineBuffer`` itself, which will
 pass the raw bytes. On Python 3, the library requires text for message
 processing, so a decoding buffer must be used. Therefore, use of the
