@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 4
 
    irc
+   changes
 
 .. include:: ../README.rst
 
