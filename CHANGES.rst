@@ -1,6 +1,12 @@
 Changes
 -------
 
+11.1
+====
+
+* Decoding errors now log a warning giving a reference to the ``Decoding
+  Input`` section of the readme.
+
 11.0
 ====
 
