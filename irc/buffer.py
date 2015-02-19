@@ -1,6 +1,12 @@
 from __future__ import unicode_literals
 
 import re
+import textwrap
+import logging
+
+
+log = logging.getLogger(__name__)
+
 
 class LineBuffer(object):
     r"""
@@ -96,6 +102,11 @@ class DecodingLineBuffer(LineBuffer):
                 self.handle_exception()
 
     def handle_exception(self):
+        msg = textwrap.dedent("""
+            Unknown encoding encountered. See 'Decoding Input'
+            in https://pypi.python.org/pypi/irc for details.
+            """)
+        log.warning(msg)
         raise
 
 class LenientDecodingLineBuffer(LineBuffer):
