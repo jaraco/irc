@@ -5,6 +5,7 @@ Changes
 ====
 
 * Remove dependency on jaraco.util. Instead depend on surgical packages.
+* Deprecated ``irc.logging`` in favor of ``jaraco.logging``.
 
 11.1.1
 ======

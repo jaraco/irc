@@ -14,7 +14,7 @@ import argparse
 import subprocess
 
 import irc.client
-import irc.logging
+import jaraco.logging
 
 class DCCSend(irc.client.SimpleIRCClient):
     def __init__(self, receiver, filename):
@@ -76,12 +76,12 @@ def get_args():
     parser.add_argument('receiver', help="the nickname to receive the file")
     parser.add_argument('filename')
     parser.add_argument('-p', '--port', default=6667, type=int)
-    irc.logging.add_arguments(parser)
+    jaraco.logging.add_arguments(parser)
     return parser.parse_args()
 
 def main():
     args = get_args()
-    irc.logging.setup(args)
+    jaraco.logging.setup(args)
 
     c = DCCSend(args.receiver, args.filename)
     try:

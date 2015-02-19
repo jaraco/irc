@@ -15,8 +15,9 @@ import sys
 import argparse
 import shlex
 
+import jaraco.logging
+
 import irc.client
-import irc.logging
 
 class DCCReceive(irc.client.SimpleIRCClient):
     def __init__(self):
@@ -63,12 +64,12 @@ def get_args():
     parser.add_argument('server')
     parser.add_argument('nickname')
     parser.add_argument('-p', '--port', default=6667, type=int)
-    irc.logging.add_arguments(parser)
+    jaraco.logging.add_arguments(parser)
     return parser.parse_args()
 
 def main():
     args = get_args()
-    irc.logging.setup(args)
+    jaraco.logging.setup(args)
 
     c = DCCReceive()
     try:

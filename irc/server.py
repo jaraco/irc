@@ -50,9 +50,9 @@ import re
 
 import six
 from six.moves import socketserver
+import jaraco.logging
 
 import irc.client
-from . import logging as log_util
 from . import events
 from . import buffer
 
@@ -458,13 +458,13 @@ def get_args():
         default='127.0.0.1', help="IP on which to listen")
     parser.add_argument("-p", "--port", dest="listen_port", default=6667,
         type=int, help="Port on which to listen")
-    log_util.add_arguments(parser)
+    jaraco.logging.add_arguments(parser)
 
     return parser.parse_args()
 
 def main():
     options = get_args()
-    log_util.setup(options)
+    jaraco.logging.setup(options)
 
     log.info("Starting irc.server")
 
