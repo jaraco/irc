@@ -1,6 +1,11 @@
 Changes
 -------
 
+11.2
+====
+
+* Remove dependency on jaraco.util. Instead depend on surgical packages.
+
 11.1.1
 ======
 

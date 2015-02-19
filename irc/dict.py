@@ -1,7 +1,7 @@
 from __future__ import unicode_literals, absolute_import
 
 import six
-from jaraco.util.dictlib import KeyTransformingDict
+from jaraco.collections import KeyTransformingDict
 
 from . import strings
 

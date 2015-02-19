@@ -64,7 +64,7 @@ import itertools
 import contextlib
 
 import six
-from jaraco.util.itertools import always_iterable
+from jaraco.itertools import always_iterable
 
 try:
     import pkg_resources

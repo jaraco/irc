@@ -35,7 +35,9 @@ setup_params = dict(
     ],
     install_requires=[
         'six',
-        'jaraco.util',
+        'jaraco.collections',
+        'jaraco.text',
+        'jaraco.itertools',
     ],
     setup_requires=[
         'hgtools>=5',

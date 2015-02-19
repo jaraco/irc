@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import string
 
-from jaraco.util.string import FoldedCase
+from jaraco.text import FoldedCase
 
 class IRCFoldedCase(FoldedCase):
     """
