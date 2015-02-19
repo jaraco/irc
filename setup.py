@@ -1,4 +1,5 @@
 import io
+import sys
 
 import setuptools
 
@@ -8,6 +9,11 @@ def read_long_description():
     with io.open('CHANGES.rst', encoding='utf-8') as f:
         data += '\n\n' + f.read()
     return data
+
+needs_pytest = {'pytest', 'test', 'ptr', 'release'}.intersection(sys.argv)
+pytest_runner = ['pytest_runner'] if needs_pytest else []
+needs_sphinx = {'build_docs', 'upload_docs', 'release'}.intersection(sys.argv)
+sphinx = ['sphinx'] if needs_sphinx else []
 
 setup_params = dict(
     name="irc",
@@ -33,9 +39,7 @@ setup_params = dict(
     ],
     setup_requires=[
         'hgtools>=5',
-        'pytest-runner',
-        'sphinx',
-    ],
+    ] + pytest_runner + sphinx,
     tests_require=[
         'pytest',
         'mock',
