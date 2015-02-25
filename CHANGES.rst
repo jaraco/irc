@@ -1,11 +1,12 @@
 Changes
 -------
 
-11.2
+12.0
 ====
 
 * Remove dependency on jaraco.util. Instead depend on surgical packages.
 * Deprecated ``irc.logging`` in favor of ``jaraco.logging``.
+* Dropped support for Python 3.2.
 
 11.1.1
 ======
