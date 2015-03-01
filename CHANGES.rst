@@ -1,6 +1,11 @@
 Changes
 -------
 
+12.1
+====
+
+* Remove changelog from package metadata.
+
 12.0
 ====
 
