@@ -30,7 +30,7 @@ def save_method_args(method):
     different instance to save different args.
 
     >>> your_ob = MyClass()
-    >>> your_ob.method({'x': 3}, b=[4])
+    >>> your_ob.method({str('x'): 3}, b=[4])
     {'x': 3} [4]
     >>> your_ob._saved_method.args
     ({'x': 3},)
