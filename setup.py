@@ -6,8 +6,6 @@ import setuptools
 def read_long_description():
     with io.open('README.rst', encoding='utf-8') as f:
         data = f.read()
-    with io.open('CHANGES.rst', encoding='utf-8') as f:
-        data += '\n\n' + f.read()
     return data
 
 needs_pytest = {'pytest', 'test', 'ptr', 'release'}.intersection(sys.argv)
