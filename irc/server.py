@@ -60,6 +60,7 @@ SRV_WELCOME = "Welcome to {__name__} v{irc.client.VERSION}.".format(**locals())
 
 log = logging.getLogger(__name__)
 
+
 class IRCError(Exception):
     """
     Exception thrown by IRC command handlers to notify client of a
@@ -76,15 +77,17 @@ class IRCError(Exception):
     def from_name(cls, name, value):
         return cls(events.codes[name], value)
 
+
 class IRCChannel(object):
     """
-    Object representing an IRC channel.
+    An IRC channel.
     """
     def __init__(self, name, topic='No topic'):
         self.name = name
         self.topic_by = 'Unknown'
         self.topic = topic
         self.clients = set()
+
 
 class IRCClient(socketserver.BaseRequestHandler):
     """
@@ -435,6 +438,7 @@ class IRCClient(socketserver.BaseRequestHandler):
             self.realname,
             )
 
+
 class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
     allow_reuse_address = True
@@ -451,6 +455,7 @@ class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
         self.clients = {}
         six.moves.socketserver.TCPServer.__init__(self, *args, **kwargs)
 
+
 def get_args():
     parser = argparse.ArgumentParser()
 
@@ -462,15 +467,13 @@ def get_args():
 
     return parser.parse_args()
 
+
 def main():
     options = get_args()
     jaraco.logging.setup(options)
 
     log.info("Starting irc.server")
 
-    #
-    # Start server
-    #
     try:
         bind_address = options.listen_address, options.listen_port
         ircserver = IRCServer(bind_address, IRCClient)
@@ -480,6 +483,7 @@ def main():
     except socket.error as e:
         log.error(repr(e))
         raise SystemExit(-2)
+
 
 if __name__ == "__main__":
     main()
