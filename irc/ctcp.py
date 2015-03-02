@@ -15,6 +15,13 @@ low_level_mapping = {
 
 low_level_regexp = re.compile(LOW_LEVEL_QUOTE + "(.)")
 
+def _low_level_replace(match_obj):
+    ch = match_obj.group(1)
+
+    # If low_level_mapping doesn't have the character as key, we
+    # should just return the character.
+    return low_level_mapping.get(ch, ch)
+
 def dequote(message):
     """
     Dequote a message according to CTCP specifications.
@@ -29,13 +36,6 @@ def dequote(message):
 
         message -- The message to be decoded.
     """
-
-    def _low_level_replace(match_obj):
-        ch = match_obj.group(1)
-
-        # If low_level_mapping doesn't have the character as key, we
-        # should just return the character.
-        return low_level_mapping.get(ch, ch)
 
     if LOW_LEVEL_QUOTE in message:
         # Yup, there was a quote.  Release the dequoter, man!
