@@ -48,16 +48,19 @@ def dequote(message):
     # CTCP stacking like this?)
     chunks = message.split(DELIMITER)
 
-    messages = []
+    return list(_gen_messages(chunks))
+
+
+def _gen_messages(chunks):
     i = 0
     while i < len(chunks) - 1:
         # Add message if it's non-empty.
         if len(chunks[i]) > 0:
-            messages.append(chunks[i])
+            yield chunks[i]
 
         if i < len(chunks) - 2:
             # Aye!  CTCP tagged data ahead!
-            messages.append(tuple(chunks[i + 1].split(" ", 1)))
+            yield tuple(chunks[i + 1].split(" ", 1))
 
         i = i + 2
 
@@ -66,6 +69,4 @@ def dequote(message):
         # that the last chunk, including the delimiter, is a
         # normal message!  (This is according to the CTCP
         # specification.)
-        messages.append(DELIMITER + chunks[-1])
-
-    return messages
+        yield DELIMITER + chunks[-1]
