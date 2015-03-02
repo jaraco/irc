@@ -22,6 +22,7 @@ def _low_level_replace(match_obj):
     # should just return the character.
     return low_level_mapping.get(ch, ch)
 
+
 def dequote(message):
     """
     Dequote a message according to CTCP specifications.
@@ -37,9 +38,8 @@ def dequote(message):
         message -- The message to be decoded.
     """
 
-    if LOW_LEVEL_QUOTE in message:
-        # Yup, there was a quote.  Release the dequoter, man!
-        message = low_level_regexp.sub(_low_level_replace, message)
+    # Perform the substitution
+    message = low_level_regexp.sub(_low_level_replace, message)
 
     if DELIMITER not in message:
         return [message]
