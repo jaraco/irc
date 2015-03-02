@@ -44,8 +44,7 @@ def dequote(message):
     if DELIMITER not in message:
         return [message]
 
-    # Split it into parts.  (Does any IRC client actually *use*
-    # CTCP stacking like this?)
+    # Split it into parts.
     chunks = message.split(DELIMITER)
 
     return list(_gen_messages(chunks))
