@@ -1,6 +1,11 @@
 Changes
 -------
 
+12.1.1
+======
+
+* Issue #57: Better handling of Python 3 in testbot.py script.
+
 12.1
 ====
 
