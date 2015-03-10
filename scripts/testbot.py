@@ -50,7 +50,9 @@ class TestBot(irc.bot.SingleServerIRCBot):
         return
 
     def on_dccmsg(self, c, e):
-        c.privmsg("You said: " + e.arguments[0])
+        # non-chat DCC messages are raw bytes; decode as text
+        text = e.arguments[0].decode('utf-8')
+        c.privmsg("You said: " + text)
 
     def on_dccchat(self, c, e):
         if len(e.arguments) != 2:
