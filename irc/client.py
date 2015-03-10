@@ -1159,9 +1159,8 @@ class DCCConnection(Connection):
             arguments = [chunk]
             log.debug("command: %s, source: %s, target: %s, arguments: %s",
                 command, prefix, target, arguments)
-            self.reactor._handle_event(
-                self,
-                Event(command, prefix, target, arguments))
+            event = Event(command, prefix, target, arguments)
+            self.reactor._handle_event(self, event)
 
     def privmsg(self, text):
         """
