@@ -76,14 +76,11 @@ class TestBot(irc.bot.SingleServerIRCBot):
             for chname, chobj in self.channels.items():
                 c.notice(nick, "--- Channel statistics ---")
                 c.notice(nick, "Channel: " + chname)
-                users = chobj.users()
-                users.sort()
+                users = sorted(chobj.users())
                 c.notice(nick, "Users: " + ", ".join(users))
-                opers = chobj.opers()
-                opers.sort()
+                opers = sorted(chobj.opers())
                 c.notice(nick, "Opers: " + ", ".join(opers))
-                voiced = chobj.voiced()
-                voiced.sort()
+                voiced = sorted(chobj.voiced())
                 c.notice(nick, "Voiced: " + ", ".join(voiced))
         elif cmd == "dcc":
             dcc = self.dcc_listen()
