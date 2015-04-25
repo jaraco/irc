@@ -423,7 +423,8 @@ class IRCClient(socketserver.BaseRequestHandler):
                 for client in channel.clients:
                     client.send_queue.append(response)
                 channel.clients.remove(self)
-        self.server.clients.pop(self.nick)
+        if self.nick:
+            self.server.clients.pop(self.nick)
         log.info('Connection finished: %s', self.client_ident())
 
     def __repr__(self):
