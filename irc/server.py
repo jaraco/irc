@@ -106,7 +106,13 @@ class IRCClient(socketserver.BaseRequestHandler):
         self.send_queue = []        # Messages to send to client (strings)
         self.channels = {}          # Channels the client is in
 
-        super(IRCClient, self).__init__(request, client_address, server)
+        # On Python 2, use old, clunky syntax to call parent init
+        if six.PY2:
+            socketserver.BaseRequestHandler.__init__(self, request,
+                client_address, server)
+            return
+
+        super().__init__(request, client_address, server)
 
     def handle(self):
         log.info('Client connected: %s', self.client_ident())
