@@ -149,12 +149,12 @@ def main():
         port = 6667
     nickname = sys.argv[2]
 
-    reactor = irc.reactor.Reactor()
+    reactor = irc.client.Reactor()
     sys.stdout.write("Connecting to server...")
     sys.stdout.flush()
     try:
         c = reactor.server().connect(server, port, nickname)
-    except irc.reactor.ServerConnectionError as x:
+    except irc.client.ServerConnectionError as x:
         print(x)
         sys.exit(1)
 
