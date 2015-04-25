@@ -460,7 +460,12 @@ class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
         self.servername = 'localhost'
         self.channels = {}
         self.clients = {}
-        six.moves.socketserver.TCPServer.__init__(self, *args, **kwargs)
+
+        if six.PY2:
+            socketserver.TCPServer.__init__(self, *args, **kwargs)
+            return
+
+        super().__init__(*args, **kwargs)
 
 
 def get_args():
