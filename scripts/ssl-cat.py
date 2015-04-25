@@ -62,7 +62,7 @@ def main():
             args.nickname,
             connect_factory=ssl_factory,
         )
-    except irc.reactor.ServerConnectionError:
+    except irc.client.ServerConnectionError:
         print(sys.exc_info()[1])
         raise SystemExit(1)
 

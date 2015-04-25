@@ -58,7 +58,7 @@ def main():
     reactor = irc.client.Reactor()
     try:
         c = reactor.server().connect(args.server, args.port, args.nickname)
-    except irc.reactor.ServerConnectionError:
+    except irc.client.ServerConnectionError:
         print(sys.exc_info()[1])
         raise SystemExit(1)
 
