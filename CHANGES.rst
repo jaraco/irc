@@ -5,6 +5,8 @@ Changes
 ======
 
 * Issue #59: Fixed broken references to irc.client members.
+* Issue #60: Fix broken initialization of ``irc.server.IRCClient`` on
+  Python 2.
 
 12.1.1
 ======
