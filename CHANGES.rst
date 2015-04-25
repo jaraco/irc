@@ -1,6 +1,11 @@
 Changes
 -------
 
+12.1.2
+======
+
+* Issue #59: Fixed broken references to irc.client members.
+
 12.1.1
 ======
 
