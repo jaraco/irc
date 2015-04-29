@@ -11,7 +11,7 @@ Documentation is available at:
 
 Change history is available at:
 
-* https://pythonhosted.orgs/irc/history.html
+* https://pythonhosted.org/irc/history.html
 
 You can `download project releases from PyPI
 <https://pypi.python.org/pypi/irc>`_.
