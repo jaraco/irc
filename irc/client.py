@@ -586,7 +586,7 @@ class ServerConnection(Connection):
         source = None
         command = None
         arguments = None
-		tags = None
+        tags = None
         event = Event("all_raw_messages", self.get_server_name(), None,
             [line])
         self._handle_event(event)
@@ -607,14 +607,14 @@ class ServerConnection(Connection):
             if len(a) == 2:
                 arguments.append(a[1])
 
-		if m.group("tags"):
-			tags = []
-			tags_array = m.group("tags").split(";")
-			for tag in tags_array:
-				tag_array = tag.split("=")
-				tags.append({'key': tag_array[0],
-						     'value': tag_array[1] if len(tag_array) > 1 else None
-				})
+        if m.group("tags"):
+            tags = []
+            tags_array = m.group("tags").split(";")
+            for tag in tags_array:
+                tag_array = tag.split("=")
+                tags.append({'key': tag_array[0],
+                             'value': tag_array[1] if len(tag_array) > 1 else None
+                })
 
         # Translate numerics into more readable strings.
         command = events.numeric.get(command, command)
@@ -1305,9 +1305,9 @@ class Event(object):
         if arguments is None:
             arguments = []
         self.arguments = arguments
-		if tags is None:
-			tags = []
-		self.tags = tags
+        if tags is None:
+            tags = []
+        self.tags = tags
 
 def is_channel(string):
     """Check if a string is a channel name.
