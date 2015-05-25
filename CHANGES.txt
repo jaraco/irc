@@ -1,6 +1,13 @@
 Changes
 -------
 
+12.2
+====
+
+* Pull Request #32: Add numeric for WHOX reply.
+* Issue #62 and Pull Request #34: Add support for tags in message
+  processing and ``Event`` class.
+
 12.1.2
 ======
 
