@@ -403,7 +403,7 @@ class Reactor(object):
             self.connections.remove(connection)
             self._on_disconnect(connection.socket)
 
-_cmd_pat = "^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?"
+_cmd_pat = "^(@(?P<tags>(;?[^ ]*?(=[^ ]*?)?)*) )?(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?"
 _rfc_1459_command_regexp = re.compile(_cmd_pat)
 
 class Connection(object):
@@ -586,6 +586,7 @@ class ServerConnection(Connection):
         source = None
         command = None
         arguments = None
+		tags = None
         event = Event("all_raw_messages", self.get_server_name(), None,
             [line])
         self._handle_event(event)
@@ -605,6 +606,15 @@ class ServerConnection(Connection):
             arguments = a[0].split()
             if len(a) == 2:
                 arguments.append(a[1])
+
+		if m.group("tags"):
+			tags = []
+			tags_array = m.group("tags").split(";")
+			for tag in tags_array:
+				tag_array = tag.split("=")
+				tags.append({'key': tag_array[0],
+						     'value': tag_array[1] if len(tag_array) > 1 else None
+				})
 
         # Translate numerics into more readable strings.
         command = events.numeric.get(command, command)
@@ -641,16 +651,16 @@ class ServerConnection(Connection):
 
                     m = list(m)
                     log.debug("command: %s, source: %s, target: %s, "
-                        "arguments: %s", command, source, target, m)
-                    event = Event(command, source, target, m)
+                        "arguments: %s, tags: %s", command, source, target, m, tags)
+                    event = Event(command, source, target, m, tags)
                     self._handle_event(event)
                     if command == "ctcp" and m[0] == "ACTION":
-                        event = Event("action", source, target, m[1:])
+                        event = Event("action", source, target, m[1:], tags)
                         self._handle_event(event)
                 else:
                     log.debug("command: %s, source: %s, target: %s, "
-                        "arguments: %s", command, source, target, [m])
-                    event = Event(command, source, target, [m])
+                        "arguments: %s, tags: %s", command, source, target, [m], tags)
+                    event = Event(command, source, target, [m], tags)
                     self._handle_event(event)
         else:
             target = None
@@ -668,8 +678,8 @@ class ServerConnection(Connection):
                     command = "umode"
 
             log.debug("command: %s, source: %s, target: %s, "
-                "arguments: %s", command, source, target, arguments)
-            event = Event(command, source, target, arguments)
+                "arguments: %s, tags: %s", command, source, target, arguments, tags)
+            event = Event(command, source, target, arguments, tags)
             self._handle_event(event)
 
     def _handle_event(self, event):
@@ -1275,7 +1285,7 @@ class SimpleIRCClient(object):
 
 class Event(object):
     "An IRC event."
-    def __init__(self, type, source, target, arguments=None):
+    def __init__(self, type, source, target, arguments=None, tags=None):
         """
         Initialize an Event.
 
@@ -1295,6 +1305,9 @@ class Event(object):
         if arguments is None:
             arguments = []
         self.arguments = arguments
+		if tags is None:
+			tags = []
+		self.tags = tags
 
 def is_channel(string):
     """Check if a string is a channel name.
