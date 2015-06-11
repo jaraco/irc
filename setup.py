@@ -35,7 +35,7 @@ setup_params = dict(
         'jaraco.logging',
     ],
     setup_requires=[
-        'setuptools_scm',
+        'setuptools_scm>=1.5.3',
     ] + pytest_runner + sphinx,
     tests_require=[
         'pytest',
