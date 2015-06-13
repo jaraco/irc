@@ -403,7 +403,7 @@ class Reactor(object):
             self.connections.remove(connection)
             self._on_disconnect(connection.socket)
 
-_cmd_pat = "^(@(?P<tags>(;?[^ ]*?(=[^ ]*?)?)*) )?(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?"
+_cmd_pat = "^(@(?P<tags>[^ ]*) )?(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?"
 _rfc_1459_command_regexp = re.compile(_cmd_pat)
 
 class Connection(object):
