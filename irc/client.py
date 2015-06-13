@@ -611,9 +611,17 @@ class ServerConnection(Connection):
             tags = []
             tags_array = m.group("tags").split(";")
             for tag in tags_array:
-                tag_array = tag.split("=")
-                tags.append({'key': tag_array[0],
-                             'value': tag_array[1] if len(tag_array) > 1 else None
+                if '=' in tag:
+                    tag_key, tag_value = tag.split('=', 1)
+                    tag_value = tag_value.replace('\\:', ';')
+                    tag_value = tag_value.replace('\\s', ' ')
+                    tag_value = tag_value.replace('\\n', '\n')
+                    tag_value = tag_value.replace('\\r', '\r')
+                    tag_value = tag_value.replace('\\\\', '\\')
+                else:
+                    tag_key, tag_value = None
+                tags.append({'key': tag_key,
+                             'value': tag_value,
                 })
 
         # Translate numerics into more readable strings.
