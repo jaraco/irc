@@ -619,7 +619,7 @@ class ServerConnection(Connection):
                     tag_value = tag_value.replace('\\r', '\r')
                     tag_value = tag_value.replace('\\\\', '\\')
                 else:
-                    tag_key, tag_value = None
+                    tag_key, tag_value = tag, None
                 tags.append({'key': tag_key,
                              'value': tag_value,
                 })
