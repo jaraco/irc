@@ -1,6 +1,11 @@
 Changes
 -------
 
+12.3
+====
+
+* Pull Request #33: Fix apparent escaping issue with IRCv3 tags.
+
 12.2
 ====
 
