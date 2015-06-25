@@ -608,21 +608,8 @@ class ServerConnection(Connection):
                 arguments.append(a[1])
 
         if m.group("tags"):
-            tags = []
-            tags_array = m.group("tags").split(";")
-            for tag in tags_array:
-                if '=' in tag:
-                    tag_key, tag_value = tag.split('=', 1)
-                    tag_value = tag_value.replace('\\:', ';')
-                    tag_value = tag_value.replace('\\s', ' ')
-                    tag_value = tag_value.replace('\\n', '\n')
-                    tag_value = tag_value.replace('\\r', '\r')
-                    tag_value = tag_value.replace('\\\\', '\\')
-                else:
-                    tag_key, tag_value = tag, None
-                tags.append({'key': tag_key,
-                             'value': tag_value,
-                })
+            tag_items = m.group("tags").split(";")
+            tags = list(map(self._parse_tag, tag_items))
 
         # Translate numerics into more readable strings.
         command = events.numeric.get(command, command)
@@ -696,6 +683,21 @@ class ServerConnection(Connection):
         if event.type in self.handlers:
             for fn in self.handlers[event.type]:
                 fn(self, event)
+
+    def _parse_tag(self, tag_item):
+        if '=' in tag_item:
+            tag_key, tag_value = tag_item.split('=', 1)
+            tag_value = tag_value.replace('\\:', ';')
+            tag_value = tag_value.replace('\\s', ' ')
+            tag_value = tag_value.replace('\\n', '\n')
+            tag_value = tag_value.replace('\\r', '\r')
+            tag_value = tag_value.replace('\\\\', '\\')
+        else:
+            tag_key, tag_value = tag_item, None
+        return {
+            'key': tag_key,
+            'value': tag_value,
+        }
 
     def is_connected(self):
         """Return connection status.
