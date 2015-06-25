@@ -78,6 +78,7 @@ from . import buffer
 from . import schedule
 from . import features
 from . import ctcp
+from . import message
 
 log = logging.getLogger(__name__)
 
@@ -609,7 +610,7 @@ class ServerConnection(Connection):
 
         if m.group("tags"):
             tag_items = m.group("tags").split(";")
-            tags = list(map(self._parse_tag, tag_items))
+            tags = list(map(message.Tag.parse, tag_items))
 
         # Translate numerics into more readable strings.
         command = events.numeric.get(command, command)
@@ -625,8 +626,8 @@ class ServerConnection(Connection):
             self.features.load(arguments)
 
         if command in ["privmsg", "notice"]:
-            target, message = arguments[0], arguments[1]
-            messages = ctcp.dequote(message)
+            target, msg = arguments[0], arguments[1]
+            messages = ctcp.dequote(msg)
 
             if command == "privmsg":
                 if is_channel(target):
@@ -683,20 +684,6 @@ class ServerConnection(Connection):
         if event.type in self.handlers:
             for fn in self.handlers[event.type]:
                 fn(self, event)
-
-    @staticmethod
-    def _parse_tag(item):
-        key, sep, value = item.partition('=')
-        value = value.replace('\\:', ';')
-        value = value.replace('\\s', ' ')
-        value = value.replace('\\n', '\n')
-        value = value.replace('\\r', '\r')
-        value = value.replace('\\\\', '\\')
-        value = value or None
-        return {
-            'key': key,
-            'value': value,
-        }
 
     def is_connected(self):
         """Return connection status.
