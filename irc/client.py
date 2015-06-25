@@ -684,7 +684,8 @@ class ServerConnection(Connection):
             for fn in self.handlers[event.type]:
                 fn(self, event)
 
-    def _parse_tag(self, item):
+    @staticmethod
+    def _parse_tag(item):
         key, sep, value = item.partition('=')
         value = value.replace('\\:', ';')
         value = value.replace('\\s', ' ')
