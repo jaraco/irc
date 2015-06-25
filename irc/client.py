@@ -684,19 +684,17 @@ class ServerConnection(Connection):
             for fn in self.handlers[event.type]:
                 fn(self, event)
 
-    def _parse_tag(self, tag_item):
-        if '=' in tag_item:
-            tag_key, tag_value = tag_item.split('=', 1)
-            tag_value = tag_value.replace('\\:', ';')
-            tag_value = tag_value.replace('\\s', ' ')
-            tag_value = tag_value.replace('\\n', '\n')
-            tag_value = tag_value.replace('\\r', '\r')
-            tag_value = tag_value.replace('\\\\', '\\')
-        else:
-            tag_key, tag_value = tag_item, None
+    def _parse_tag(self, item):
+        key, sep, value = item.partition('=')
+        value = value.replace('\\:', ';')
+        value = value.replace('\\s', ' ')
+        value = value.replace('\\n', '\n')
+        value = value.replace('\\r', '\r')
+        value = value.replace('\\\\', '\\')
+        value = value or None
         return {
-            'key': tag_key,
-            'value': tag_value,
+            'key': key,
+            'value': value,
         }
 
     def is_connected(self):
