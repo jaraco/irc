@@ -38,3 +38,13 @@ class Tag(object):
             'key': key,
             'value': value,
         }
+
+    @classmethod
+    def from_group(cls, group):
+        """
+        Construct tags from the regex group
+        """
+        if not group:
+            return
+        tag_items = group.split(";")
+        return list(map(cls.parse, tag_items))

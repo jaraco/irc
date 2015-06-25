@@ -587,7 +587,6 @@ class ServerConnection(Connection):
         source = None
         command = None
         arguments = None
-        tags = None
         event = Event("all_raw_messages", self.get_server_name(), None,
             [line])
         self._handle_event(event)
@@ -608,9 +607,7 @@ class ServerConnection(Connection):
             if len(a) == 2:
                 arguments.append(a[1])
 
-        if m.group("tags"):
-            tag_items = m.group("tags").split(";")
-            tags = list(map(message.Tag.parse, tag_items))
+        tags = message.Tag.from_group(m.group('tags'))
 
         # Translate numerics into more readable strings.
         command = events.numeric.get(command, command)
