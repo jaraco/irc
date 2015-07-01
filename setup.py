@@ -33,6 +33,7 @@ setup_params = dict(
         'jaraco.text',
         'jaraco.itertools',
         'jaraco.logging',
+        'jaraco.functools>=1.4',
     ],
     setup_requires=[
         'setuptools_scm>=1.5.3',

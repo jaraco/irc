@@ -1,6 +1,12 @@
 Changes
 -------
 
+12.4
+====
+
+* Moved ``Throttler`` class to `jaraco.functools
+  <https://bitbucket.org/jaraco/jaraco.functools>`_ 1.4.
+
 12.3
 ====
 
