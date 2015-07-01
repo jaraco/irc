@@ -1,10 +1,8 @@
 from __future__ import print_function
 
-import itertools
-import time
+from unittest import mock
 
 import pytest
-import mock
 import six
 
 import irc.client
