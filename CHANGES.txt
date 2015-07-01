@@ -1,6 +1,11 @@
 Changes
 -------
 
+12.4.2
+======
+
+* Bump to jaraco.functools 1.5 to throttler failures in Python 2.
+
 12.4
 ====
 
