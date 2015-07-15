@@ -408,11 +408,12 @@ class Reactor(object):
 _cmd_pat = "^(@(?P<tags>[^ ]*) )?(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?"
 _rfc_1459_command_regexp = re.compile(_cmd_pat)
 
+
+@six.add_metaclass(abc.ABCMeta)
 class Connection(object):
     """
     Base class for IRC connections.
     """
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractproperty
     def socket(self):
