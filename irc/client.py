@@ -587,7 +587,6 @@ class ServerConnection(Connection):
 
     def _process_line(self, line):
         source = None
-        command = None
         event = Event("all_raw_messages", self.get_server_name(), None,
             [line])
         self._handle_event(event)
@@ -599,8 +598,7 @@ class ServerConnection(Connection):
                 self.real_server_name = prefix
             source = NickMask(prefix)
 
-        if m.group("command"):
-            command = m.group("command").lower()
+        command = m.group("command").lower()
 
         arguments = message.Arguments.from_group(m.group('arguments'))
 
