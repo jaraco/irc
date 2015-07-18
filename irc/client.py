@@ -588,7 +588,6 @@ class ServerConnection(Connection):
     def _process_line(self, line):
         source = None
         command = None
-        arguments = None
         event = Event("all_raw_messages", self.get_server_name(), None,
             [line])
         self._handle_event(event)
@@ -603,11 +602,7 @@ class ServerConnection(Connection):
         if m.group("command"):
             command = m.group("command").lower()
 
-        if m.group("argument"):
-            a = m.group("argument").split(" :", 1)
-            arguments = a[0].split()
-            if len(a) == 2:
-                arguments.append(a[1])
+        arguments = message.Arguments.from_group(m.group('arguments'))
 
         tags = message.Tag.from_group(m.group('tags'))
 

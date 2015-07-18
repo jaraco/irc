@@ -48,3 +48,20 @@ class Tag(object):
             return
         tag_items = group.split(";")
         return list(map(cls.parse, tag_items))
+
+
+class Arguments(list):
+    @staticmethod
+    def from_group(group):
+        """
+        Construct arguments from the regex group
+        """
+        if not group:
+            return
+
+        a = group.split(" :", 1)
+        arguments = a[0].split()
+        if len(a) == 2:
+            arguments.append(a[1])
+
+        return arguments
