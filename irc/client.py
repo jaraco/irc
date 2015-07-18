@@ -586,17 +586,16 @@ class ServerConnection(Connection):
             self._process_line(line)
 
     def _process_line(self, line):
-        source = None
         event = Event("all_raw_messages", self.get_server_name(), None,
             [line])
         self._handle_event(event)
 
         m = _rfc_1459_command_regexp.match(line)
-        if m.group("prefix"):
-            prefix = m.group("prefix")
-            if not self.real_server_name:
-                self.real_server_name = prefix
-            source = NickMask(prefix)
+
+        source = NickMask.from_group(m.group("prefix"))
+
+        if source and not self.real_server_name:
+            self.real_server_name = source
 
         command = m.group("command").lower()
 
@@ -1366,6 +1365,11 @@ class NickMask(six.text_type):
         nick, sep, userhost = self.partition("!")
         user, sep, host = userhost.partition('@')
         return user or None
+
+    @classmethod
+    def from_group(cls, group):
+        return cls(group) if group else None
+
 
 def _ping_ponger(connection, event):
     "A global handler for the 'ping' event"
