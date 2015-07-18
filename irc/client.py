@@ -657,7 +657,7 @@ class ServerConnection(Connection):
             elif command == "ping":
                 target = arguments[0]
             else:
-                target = arguments[0]
+                target = arguments[0] if arguments else None
                 arguments = arguments[1:]
 
             if command == "mode":

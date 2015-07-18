@@ -57,7 +57,7 @@ class Arguments(list):
         Construct arguments from the regex group
         """
         if not group:
-            return
+            return []
 
         a = group.split(" :", 1)
         arguments = a[0].split()
