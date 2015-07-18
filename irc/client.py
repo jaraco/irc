@@ -599,7 +599,7 @@ class ServerConnection(Connection):
 
         command = m.group("command").lower()
 
-        arguments = message.Arguments.from_group(m.group('arguments'))
+        arguments = message.Arguments.from_group(m.group('argument'))
 
         tags = message.Tag.from_group(m.group('tags'))
 
