@@ -41,3 +41,10 @@ class TestHandlers(object):
 		handler2 = irc.client.PrioritizedHandler(1, lambda: 'other')
 		assert not handler1 < handler2
 		assert not handler2 < handler1
+
+@mock.patch('irc.connection.socket')
+def test_command_without_arguments(self):
+	"A command without arguments should not crash"
+	server = irc.client.Reactor().server()
+	server.connect('foo', 6667, 'bestnick')
+	server._process_line('GLOBALUSERSTATE')
