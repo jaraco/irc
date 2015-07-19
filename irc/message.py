@@ -55,6 +55,24 @@ class Arguments(list):
     def from_group(group):
         """
         Construct arguments from the regex group
+
+        >>> Arguments.from_group('foo')
+        ['foo']
+
+        >>> Arguments.from_group(None)
+        []
+
+        >>> Arguments.from_group('')
+        []
+
+        >>> Arguments.from_group('foo bar')
+        ['foo', 'bar']
+
+        >>> Arguments.from_group('foo bar :baz')
+        ['foo', 'bar', 'baz']
+
+        >>> Arguments.from_group('foo bar :baz bing')
+        ['foo', 'bar', 'baz bing']
         """
         if not group:
             return []
