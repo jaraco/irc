@@ -607,57 +607,58 @@ class ServerConnection(Connection):
             self.features.load(arguments)
 
         if command in ["privmsg", "notice"]:
-            target, msg = arguments[:2]
-            messages = ctcp.dequote(msg)
-
-            if command == "privmsg":
-                if is_channel(target):
-                    command = "pubmsg"
-            else:
-                if is_channel(target):
-                    command = "pubnotice"
-                else:
-                    command = "privnotice"
-
-            for m in messages:
-                if isinstance(m, tuple):
-                    if command in ["privmsg", "pubmsg"]:
-                        command = "ctcp"
-                    else:
-                        command = "ctcpreply"
-
-                    m = list(m)
-                    log.debug("command: %s, source: %s, target: %s, "
-                        "arguments: %s, tags: %s", command, source, target, m, tags)
-                    event = Event(command, source, target, m, tags)
-                    self._handle_event(event)
-                    if command == "ctcp" and m[0] == "ACTION":
-                        event = Event("action", source, target, m[1:], tags)
-                        self._handle_event(event)
-                else:
-                    log.debug("command: %s, source: %s, target: %s, "
-                        "arguments: %s, tags: %s", command, source, target, [m], tags)
-                    event = Event(command, source, target, [m], tags)
-                    self._handle_event(event)
+            self._handle_message(arguments, command, source, tags)
         else:
-            target = None
+            self._handle_other(arguments, command, source, tags)
 
-            if command == "quit":
-                arguments = [arguments[0]]
-            elif command == "ping":
-                target = arguments[0]
+    def _handle_message(self, arguments, command, source, tags):
+        target, msg = arguments[:2]
+        messages = ctcp.dequote(msg)
+        if command == "privmsg":
+            if is_channel(target):
+                command = "pubmsg"
+        else:
+            if is_channel(target):
+                command = "pubnotice"
             else:
-                target = arguments[0] if arguments else None
-                arguments = arguments[1:]
+                command = "privnotice"
+        for m in messages:
+            if isinstance(m, tuple):
+                if command in ["privmsg", "pubmsg"]:
+                    command = "ctcp"
+                else:
+                    command = "ctcpreply"
 
-            if command == "mode":
-                if not is_channel(target):
-                    command = "umode"
+                m = list(m)
+                log.debug("command: %s, source: %s, target: %s, "
+                          "arguments: %s, tags: %s", command, source, target, m, tags)
+                event = Event(command, source, target, m, tags)
+                self._handle_event(event)
+                if command == "ctcp" and m[0] == "ACTION":
+                    event = Event("action", source, target, m[1:], tags)
+                    self._handle_event(event)
+            else:
+                log.debug("command: %s, source: %s, target: %s, "
+                          "arguments: %s, tags: %s", command, source, target, [m], tags)
+                event = Event(command, source, target, [m], tags)
+                self._handle_event(event)
 
-            log.debug("command: %s, source: %s, target: %s, "
-                "arguments: %s, tags: %s", command, source, target, arguments, tags)
-            event = Event(command, source, target, arguments, tags)
-            self._handle_event(event)
+    def _handle_other(self, arguments, command, source, tags):
+        target = None
+        if command == "quit":
+            arguments = [arguments[0]]
+        elif command == "ping":
+            target = arguments[0]
+        else:
+            target = arguments[0] if arguments else None
+            arguments = arguments[1:]
+        if command == "mode":
+            if not is_channel(target):
+                command = "umode"
+        log.debug("command: %s, source: %s, target: %s, "
+                  "arguments: %s, tags: %s", command, source, target, arguments, tags)
+        event = Event(command, source, target, arguments, tags)
+        self._handle_event(event)
 
     @staticmethod
     def _command_from_group(group):
