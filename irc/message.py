@@ -77,9 +77,9 @@ class Arguments(list):
         if not group:
             return []
 
-        a = group.split(" :", 1)
-        arguments = a[0].split()
-        if len(a) == 2:
-            arguments.append(a[1])
+        main, sep, ext = group.partition(" :")
+        arguments = main.split()
+        if sep:
+            arguments.append(ext)
 
         return arguments
