@@ -606,10 +606,12 @@ class ServerConnection(Connection):
         elif command == "featurelist":
             self.features.load(arguments)
 
-        if command in ["privmsg", "notice"]:
-            self._handle_message(arguments, command, source, tags)
-        else:
-            self._handle_other(arguments, command, source, tags)
+        handler = (
+            self._handle_message
+            if command in ["privmsg", "notice"]
+            else self._handle_other
+        )
+        handler(arguments, command, source, tags)
 
     def _handle_message(self, arguments, command, source, tags):
         target, msg = arguments[:2]
