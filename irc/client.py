@@ -613,7 +613,7 @@ class ServerConnection(Connection):
             self.features.load(arguments)
 
         if command in ["privmsg", "notice"]:
-            target, msg = arguments[0], arguments[1]
+            target, msg = arguments[:2]
             messages = ctcp.dequote(msg)
 
             if command == "privmsg":
