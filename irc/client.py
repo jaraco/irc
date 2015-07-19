@@ -586,15 +586,12 @@ class ServerConnection(Connection):
             [line])
         self._handle_event(event)
 
-        m = _rfc_1459_command_regexp.match(line)
+        grp = _rfc_1459_command_regexp.match(line).group
 
-        source = NickMask.from_group(m.group("prefix"))
-
-        command = self._command_from_group(m.group("command"))
-
-        arguments = message.Arguments.from_group(m.group('argument'))
-
-        tags = message.Tag.from_group(m.group('tags'))
+        source = NickMask.from_group(grp("prefix"))
+        command = self._command_from_group(grp("command"))
+        arguments = message.Arguments.from_group(grp('argument'))
+        tags = message.Tag.from_group(grp('tags'))
 
         if source and not self.real_server_name:
             self.real_server_name = source
