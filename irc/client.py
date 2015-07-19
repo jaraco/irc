@@ -590,17 +590,14 @@ class ServerConnection(Connection):
 
         source = NickMask.from_group(m.group("prefix"))
 
-        if source and not self.real_server_name:
-            self.real_server_name = source
-
-        command = m.group("command").lower()
+        command = self._command_from_group(m.group("command"))
 
         arguments = message.Arguments.from_group(m.group('argument'))
 
         tags = message.Tag.from_group(m.group('tags'))
 
-        # Translate numerics into more readable strings.
-        command = events.numeric.get(command, command)
+        if source and not self.real_server_name:
+            self.real_server_name = source
 
         if command == "nick":
             if source.nick == self.real_nickname:
@@ -664,6 +661,12 @@ class ServerConnection(Connection):
                 "arguments: %s, tags: %s", command, source, target, arguments, tags)
             event = Event(command, source, target, arguments, tags)
             self._handle_event(event)
+
+    @staticmethod
+    def _command_from_group(group):
+        command = group.lower()
+        # Translate numerics into more readable strings.
+        return events.numeric.get(command, command)
 
     def _handle_event(self, event):
         """[Internal]"""
