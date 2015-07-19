@@ -535,19 +535,15 @@ class ServerConnection(Connection):
         This method returns the (real) server name, or, more
         specifically, what the server calls itself.
         """
-
-        if self.real_server_name:
-            return self.real_server_name
-        else:
-            return ""
+        return self.real_server_name or ""
 
     def get_nickname(self):
         """Get the (real) nick name.
 
         This method returns the (real) nickname.  The library keeps
         track of nick changes, so it might not be the nick name that
-        was passed to the connect() method.  """
-
+        was passed to the connect() method.
+        """
         return self.real_nickname
 
     @contextlib.contextmanager
