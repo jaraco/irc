@@ -34,6 +34,7 @@ setup_params = dict(
         'jaraco.itertools',
         'jaraco.logging',
         'jaraco.functools>=1.5',
+        'pytz',
     ],
     setup_requires=[
         'setuptools_scm>=1.5.3',

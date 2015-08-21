@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Classes for calling functions a schedule.
 """
@@ -7,17 +9,33 @@ from __future__ import absolute_import
 import datetime
 import numbers
 
+import pytz
+
+
+def now():
+    """
+    Provide the current timezone-aware datetime.
+
+    A client may override this function to change the default behavior,
+    such as to use local time or timezone-naïve times.
+    """
+    return datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+
+
+def from_timestamp(ts):
+    """
+    Convert a numeric timestamp to a timezone-aware datetime.
+
+    A client may override this function to change the default behavior,
+    such as to use local time or timezone-naïve times.
+    """
+    return datetime.datetime.utcfromtimestamp(ts).replace(tzinfo=pytz.utc)
+
 
 class DelayedCommand(datetime.datetime):
     """
     A command to be executed after some delay (seconds or timedelta).
-
-    Clients may override .now() to have dates interpreted in a different
-    manner, such as to use UTC or to have timezone-aware times.
     """
-    @classmethod
-    def now(cls, tzinfo=None):
-        return datetime.datetime.now(tzinfo)
 
     @classmethod
     def from_datetime(cls, other):
@@ -29,28 +47,37 @@ class DelayedCommand(datetime.datetime):
     def after(cls, delay, function):
         if not isinstance(delay, datetime.timedelta):
             delay = datetime.timedelta(seconds=delay)
-        due_time = cls.now() + delay
+        due_time = now() + delay
         cmd = cls.from_datetime(due_time)
         cmd.delay = delay
         cmd.function = function
         return cmd
 
+    @staticmethod
+    def _from_timestamp(input):
+        """
+        If input is a real number, interpret it as a Unix timestamp
+        (seconds sinc Epoch in UTC) and return a timezone-aware
+        datetime object. Otherwise return input unchanged.
+        """
+        if not isinstance(input, numbers.Real):
+            return input
+        return from_timestamp(input)
+
     @classmethod
     def at_time(cls, at, function):
         """
         Construct a DelayedCommand to come due at `at`, where `at` may be
-        a datetime or timestamp. If `at` is a real number, it will be
-        interpreted as a naive local timestamp.
+        a datetime or timestamp.
         """
-        if isinstance(at, numbers.Real):
-            at = datetime.datetime.fromtimestamp(at)
+        at = cls._from_timestamp(at)
         cmd = cls.from_datetime(at)
-        cmd.delay = at - cmd.now()
+        cmd.delay = at - now()
         cmd.function = function
         return cmd
 
     def due(self):
-        return self.now() >= self
+        return now() >= self
 
 
 class PeriodicCommand(DelayedCommand):
@@ -80,8 +107,7 @@ class PeriodicCommandFixedDelay(PeriodicCommand):
 
     @classmethod
     def at_time(cls, at, delay, function):
-        if isinstance(at, int):
-            at = datetime.datetime.fromtimestamp(at)
+        at = cls._from_timestamp(at)
         cmd = cls.from_datetime(at)
         if not isinstance(delay, datetime.timedelta):
             delay = datetime.timedelta(seconds=delay)
@@ -97,6 +123,6 @@ class PeriodicCommandFixedDelay(PeriodicCommand):
         daily = datetime.timedelta(days=1)
         # convert when to the next datetime matching this time
         when = datetime.datetime.combine(datetime.date.today(), at)
-        if when < cls.now():
+        if when < now():
             when += daily
         return cls.at_time(when, daily, function)

@@ -7,6 +7,13 @@ import pytest
 from irc import schedule
 
 
+@pytest.fixture(autouse=True)
+def naive_times(monkeypatch):
+	monkeypatch.setattr('irc.schedule.from_timestamp',
+		datetime.datetime.fromtimestamp)
+	monkeypatch.setattr('irc.schedule.now', datetime.datetime.now)
+
+
 def test_delayed_command_order():
 	"""
 	delayed commands should be sorted by delay time

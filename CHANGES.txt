@@ -1,6 +1,26 @@
 Changes
 -------
 
+13.0
+====
+
+* Updated ``schedule`` module to properly support timezone aware
+  times and use them by default. Clients that rely on the timezone
+  naïve datetimes may restore the old behavior by overriding the
+  ``schedule.now`` and ``schedule.from_timestamp`` functions
+  like so:
+
+    schedule.from_timestamp = datetime.datetime.fromtimestamp
+    schedule.now = datetime.datetime.now
+
+  Clients that were previously patching
+  ``schedule.DelayedCommand.now`` will need to instead patch
+  the aforementioned module-global methods. The
+  classmethod technique was a poor interface for effectively
+  controlling timezone awareness, so was likely unused. Please
+  file a ticket with the project for support with your client
+  as needed.
+
 12.4.2
 ======
 
