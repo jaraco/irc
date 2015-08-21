@@ -3,11 +3,12 @@ import random
 import datetime
 
 import pytest
+import pytz
 
 from irc import schedule
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def naive_times(monkeypatch):
 	monkeypatch.setattr('irc.schedule.from_timestamp',
 		datetime.datetime.fromtimestamp)
@@ -38,7 +39,7 @@ def test_periodic_command_fixed_delay():
 	delay.
 	"""
 	fd = schedule.PeriodicCommandFixedDelay.at_time(
-		at = datetime.datetime.now(),
+		at = schedule.now(),
 		delay = datetime.timedelta(seconds=2),
 		function = lambda: None,
 		)
@@ -58,11 +59,25 @@ class TestCommands(object):
 		"""
 		Create a periodic command that's run at noon every day.
 		"""
-		when = datetime.time(12,0)
+		when = datetime.time(12, 0, tzinfo=pytz.utc)
 		cmd = schedule.PeriodicCommandFixedDelay.daily_at(when, function=None)
 		assert cmd.due() is False
 		next_cmd = cmd.next()
 		daily = datetime.timedelta(days=1)
-		day_from_now = datetime.datetime.now() + daily
+		day_from_now = schedule.now() + daily
 		two_days_from_now = day_from_now + daily
 		assert day_from_now < next_cmd < two_days_from_now
+
+
+class TestTimezones:
+	def test_alternate_timezone_west(self):
+		target_tz = pytz.timezone('US/Pacific')
+		target = schedule.now().astimezone(target_tz)
+		cmd = schedule.DelayedCommand.at_time(target, function=None)
+		assert cmd.due()
+
+	def test_alternate_timezone_east(self):
+		target_tz = pytz.timezone('Europe/Amsterdam')
+		target = schedule.now().astimezone(target_tz)
+		cmd = schedule.DelayedCommand.at_time(target, function=None)
+		assert cmd.due()
