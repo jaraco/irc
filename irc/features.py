@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import collections
+
 class FeatureSet(object):
     """
     An implementation of features as loaded from an ISUPPORT server directive.
@@ -11,6 +13,11 @@ class FeatureSet(object):
     >>> f.load(['target', 'PREFIX=(abc)+-/', 'your message sir'])
     >>> f.prefix == {'+': 'a', '-': 'b', '/': 'c'}
     True
+
+    Order of prefix is relevant, so it is retained.
+
+    >>> tuple(f.prefix)
+    ('+', '-', '/')
 
     >>> f.load_feature('CHANMODES=foo,bar,baz')
     >>> f.chanmodes
@@ -63,7 +70,7 @@ class FeatureSet(object):
         "channel user prefixes"
         channel_modes, channel_chars = value.split(')')
         channel_modes = channel_modes[1:]
-        return dict(zip(channel_chars, channel_modes))
+        return collections.OrderedDict(zip(channel_chars, channel_modes))
 
     @staticmethod
     def _parse_CHANMODES(value):

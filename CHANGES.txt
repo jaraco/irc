@@ -1,6 +1,12 @@
 Changes
 -------
 
+13.1
+====
+
+* Issue #64: ISUPPORT PREFIX now retains the order of
+  permissions for each prefix.
+
 13.0
 ====
 
