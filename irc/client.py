@@ -897,27 +897,30 @@ class ServerConnection(Connection):
         # unless you've been connected for at least 5 minutes!
         self.send_raw("QUIT" + (message and (" :" + message)))
 
+    def _prep_message(self, string):
+        # The string should not contain any carriage return other than the
+        # one added here.
+        if '\n' in string:
+            msg = "Carriage returns not allowed in privmsg(text)"
+            raise InvalidCharacters(msg)
+        bytes = string.encode('utf-8') + b'\r\n'
+        # According to the RFC http://tools.ietf.org/html/rfc2812#page-6,
+        # clients should not transmit more than 512 bytes.
+        if len(bytes) > 512:
+            msg = "Messages limited to 512 bytes including CR/LF"
+            raise MessageTooLong(msg)
+        return bytes
+
     def send_raw(self, string):
         """Send raw string to the server.
 
         The string will be padded with appropriate CR LF.
         """
-        # The string should not contain any carriage return other than the
-        # one added here.
-        if '\n' in string:
-            raise InvalidCharacters(
-                "Carriage returns not allowed in privmsg(text)")
-        bytes = string.encode('utf-8') + b'\r\n'
-        # According to the RFC http://tools.ietf.org/html/rfc2812#page-6,
-        # clients should not transmit more than 512 bytes.
-        if len(bytes) > 512:
-            raise MessageTooLong(
-                "Messages limited to 512 bytes including CR/LF")
         if self.socket is None:
             raise ServerNotConnectedError("Not connected.")
         sender = getattr(self.socket, 'write', self.socket.send)
         try:
-            sender(bytes)
+            sender(self._prep_message(string))
             log.debug("TO SERVER: %s", string)
         except socket.error:
             # Ouch!
