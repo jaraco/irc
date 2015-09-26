@@ -405,6 +405,7 @@ class Reactor(object):
             self.connections.remove(connection)
             self._on_disconnect(connection.socket)
 
+
 _cmd_pat = "^(@(?P<tags>[^ ]*) )?(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?"
 _rfc_1459_command_regexp = re.compile(_cmd_pat)
 
@@ -1376,3 +1377,84 @@ class NickMask(six.text_type):
 def _ping_ponger(connection, event):
     "A global handler for the 'ping' event"
     connection.pong(event.target)
+
+
+class AsyncIOReactor(Reactor, asyncio.BaseEventLoop):
+    def schedule_command(self, command):
+        self.call_at(command.timestamp(), command.function)
+
+
+class Protocol(asyncio.Protocol, ServerConnection):
+    password = None
+    real_server_name = ""
+
+    def __init__(self, nickname, **kwargs):
+        self.nickname = nickname
+        vars(self).update(kwargs)
+        self.features = FeatureSet()
+
+    @NonDataProperty
+    def user_name(self):
+        return self.nickname
+
+    @NonDataProperty
+    def real_name(self):
+        return self.nickname
+
+    @NonDataProperty
+    def real_nickname(self):
+        return self.nickname
+
+    def connection_made(self, transport):
+        self.transport = transport
+        self.buffer = self.buffer_class()
+        # Log on...
+        if self.password:
+            self.pass_(self.password)
+        self.nick(self.nickname)
+        self.user(self.user_name, self.real_name)
+
+    def data_received(self, data):
+        self.buffer.feed(new_data)
+
+        # process each non-empty line after logging all lines
+        for line in self.buffer:
+            log.debug("FROM SERVER: %s", line)
+            if not line: continue
+            self._process_line(line)
+
+    def _handle_event(self, event):
+        """
+        Dispatch events to on_<event.type> method, if present.
+        """
+        log.debug("handling: %s", event.type)
+
+        do_nothing = lambda c, e: None
+        method = getattr(self, "on_" + event.type, do_nothing)
+        method(connection, event)
+
+    def send_raw(self, string):
+        """
+        Send raw string to the server.
+
+        The string will be padded with appropriate CR LF.
+        """
+        self.transport.write(self._prep_message(string))
+        log.debug("TO SERVER: %s", string)
+
+
+class AsyncIRCClient:
+
+    def __init__(self):
+        self.reactor = AsyncIOReactor()
+
+    def connect(self, protocol, *args, **kwargs):
+        proto_factory = lambda: protocol
+        self.connection = self.reactor.create_connection(proto_factory, *args, **kwargs)
+        transport, protocol = self.reactor.run_until_complete(self.connection)
+        self.protocol = protocol
+        self.transport = transport
+
+    def start(self):
+        """Start the IRC client."""
+        self.reactor.process_forever()
