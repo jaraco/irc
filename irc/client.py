@@ -62,10 +62,12 @@ import collections
 import functools
 import itertools
 import contextlib
+import asyncio
 
 import six
 from jaraco.itertools import always_iterable
 from jaraco.functools import Throttler
+from jaraco.classes.properties import NonDataProperty
 
 try:
     import pkg_resources
@@ -1379,11 +1381,6 @@ def _ping_ponger(connection, event):
     connection.pong(event.target)
 
 
-class AsyncIOReactor(Reactor, asyncio.BaseEventLoop):
-    def schedule_command(self, command):
-        self.call_at(command.timestamp(), command.function)
-
-
 class Protocol(asyncio.Protocol, ServerConnection):
     password = None
     real_server_name = ""
@@ -1391,7 +1388,7 @@ class Protocol(asyncio.Protocol, ServerConnection):
     def __init__(self, nickname, **kwargs):
         self.nickname = nickname
         vars(self).update(kwargs)
-        self.features = FeatureSet()
+        self.features = features.FeatureSet()
 
     @NonDataProperty
     def user_name(self):
@@ -1415,7 +1412,7 @@ class Protocol(asyncio.Protocol, ServerConnection):
         self.user(self.user_name, self.real_name)
 
     def data_received(self, data):
-        self.buffer.feed(new_data)
+        self.buffer.feed(data)
 
         # process each non-empty line after logging all lines
         for line in self.buffer:
@@ -1429,9 +1426,9 @@ class Protocol(asyncio.Protocol, ServerConnection):
         """
         log.debug("handling: %s", event.type)
 
-        do_nothing = lambda c, e: None
+        do_nothing = lambda event: None
         method = getattr(self, "on_" + event.type, do_nothing)
-        method(connection, event)
+        method(event)
 
     def send_raw(self, string):
         """
@@ -1457,4 +1454,4 @@ class AsyncIRCClient:
 
     def start(self):
         """Start the IRC client."""
-        self.reactor.process_forever()
+        self.reactor.run_forever()
