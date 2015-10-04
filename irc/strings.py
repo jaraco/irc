@@ -14,6 +14,9 @@ class IRCFoldedCase(FoldedCase):
 
     >>> IRCFoldedCase('[this]') == IRCFoldedCase('{THIS}')
     True
+
+    >>> IRCFoldedCase().lower() == ''
+    True
     """
     translation = dict(zip(
         map(ord, string.ascii_uppercase + r"[]\^"),
