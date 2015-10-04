@@ -1,6 +1,12 @@
 Changes
 -------
 
+13.1.1
+======
+
+* Issue #67: Fix infinite recursion for ``irc.strings.IRCFoldedCase``
+  and ``irc.strings.lower``.
+
 13.1
 ====
 
