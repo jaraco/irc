@@ -2,24 +2,6 @@
 #
 # Example program using irc.client.
 #
-# Copyright (C) 1999-2002  Joel Rosdahl
-#
-# This library is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; either
-# version 2.1 of the License, or (at your option) any later version.
-#
-# This library is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
-#
-# Joel Rosdahl <joel@rosdahl.net>
-#
 # servermap connects to an IRC server and finds out what other IRC
 # servers there are in the net and prints a tree-like map of their
 # interconnections.
@@ -59,8 +41,12 @@
 #     |   `-lineone.uk.eu.dal.net
 #     `-omega.ca.us.dal.net
 
-import irc.client
+import argparse
 import sys
+
+import jaraco.logging
+
+import irc.client
 
 def on_connect(connection, event):
     sys.stdout.write("\nGetting links...")
@@ -128,32 +114,27 @@ def print_tree(level, active_levels, root, map, last=0):
             print_tree(level+1, active_levels[:]+[level], r, map)
         print_tree(level+1, active_levels[:], list[-1], map, 1)
 
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('server')
+    parser.add_argument('nickname')
+    parser.add_argument('-p', '--port', default=6667, type=int)
+    jaraco.logging.add_arguments(parser)
+    return parser.parse_args()
+
 def main():
     global links
 
-    if len(sys.argv) != 3:
-        print("Usage: servermap <server[:port]> <nickname>")
-        sys.exit(1)
+    args = get_args()
+    jaraco.logging.setup(args)
 
     links = []
-
-    s = sys.argv[1].split(":", 1)
-    server = s[0]
-    if len(s) == 2:
-        try:
-            port = int(s[1])
-        except ValueError:
-            print("Error: Erroneous port.")
-            sys.exit(1)
-    else:
-        port = 6667
-    nickname = sys.argv[2]
 
     reactor = irc.client.Reactor()
     sys.stdout.write("Connecting to server...")
     sys.stdout.flush()
     try:
-        c = reactor.server().connect(server, port, nickname)
+        c = reactor.server().connect(args.server, args.port, args.nickname)
     except irc.client.ServerConnectionError as x:
         print(x)
         sys.exit(1)
