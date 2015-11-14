@@ -40,7 +40,7 @@ setup_params = dict(
         'setuptools_scm>=1.5.3',
     ] + pytest_runner + sphinx,
     tests_require=[
-        'pytest',
+        'pytest>=2.8',
         'backports.unittest_mock',
     ],
     classifiers=[

@@ -1314,14 +1314,14 @@ class NickMask(six.text_type):
     A nickmask (the source of an Event)
 
     >>> nm = NickMask('pinky!username@example.com')
-    >>> print(nm.nick)
-    pinky
+    >>> nm.nick
+    'pinky'
 
-    >>> print(nm.host)
-    example.com
+    >>> nm.host
+    'example.com'
 
-    >>> print(nm.user)
-    username
+    >>> nm.user
+    'username'
 
     >>> isinstance(nm, six.text_type)
     True
@@ -1336,8 +1336,8 @@ class NickMask(six.text_type):
     Some messages omit the userhost. In that case, None is returned.
 
     >>> nm = NickMask('irc.server.net')
-    >>> print(nm.nick)
-    irc.server.net
+    >>> nm.nick
+    'irc.server.net'
     >>> nm.userhost
     >>> nm.host
     >>> nm.user

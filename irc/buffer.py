@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from __future__ import unicode_literals, absolute_import
 
 import re
@@ -69,8 +71,8 @@ class DecodingLineBuffer(LineBuffer):
     >>> utf8_word = b'Ol\xc3\xa9'
     >>> b = DecodingLineBuffer()
     >>> b.feed(b'bar\r\nbaz\n' + utf8_word + b'\n')
-    >>> list(b.lines()) == ['bar', 'baz', utf8_word.decode('utf-8')]
-    True
+    >>> list(b.lines())
+    ['bar', 'baz', 'Ol\xe9']
     >>> len(b)
     0
 
@@ -118,8 +120,8 @@ class LenientDecodingLineBuffer(LineBuffer):
     >>> utf8_word = b'Ol\xc3\xa9'
     >>> b.feed(utf8_word + b'\n')
     >>> b.feed(b'Ol\xe9\n')
-    >>> list(b.lines()) == [utf8_word.decode('utf-8')]*2
-    True
+    >>> list(b.lines())
+    ['Ol\xe9', 'Ol\xe9']
     """
 
     def lines(self):
