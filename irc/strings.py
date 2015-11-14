@@ -24,10 +24,11 @@ class IRCFoldedCase(FoldedCase):
     ))
 
     def lower(self):
-        if not self:
+        return (
+            self.translate(self.translation) if self
             # bypass translate, which returns self
-            return super(IRCFoldedCase, self).lower()
-        return self.translate(self.translation)
+            else super(IRCFoldedCase, self).lower()
+        )
 
 def lower(str):
     return IRCFoldedCase(str).lower()
