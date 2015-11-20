@@ -92,7 +92,7 @@ class IRCChannel(object):
 class IRCClient(socketserver.BaseRequestHandler):
     """
     IRC client connect and command handling. Client connection is handled by
-    the `handle` method which sets up a two-way communication with the client.
+    the ``handle`` method which sets up a two-way communication with the client.
     It then handles commands sent by the client by dispatching them to the
     handle_ methods.
     """
