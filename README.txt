@@ -3,7 +3,7 @@ Internet Relay Chat (IRC) protocol client library
 
 The home of irclib is:
 
-* https://bitbucket.org/jaraco/irc
+* https://github.com/jaraco/irc
 
 Documentation is available at:
 
@@ -215,5 +215,5 @@ Original Author:
 Joel Rosdahl <joel@rosdahl.net>
 
 Copyright © 1999-2002 Joel Rosdahl
-Copyright © 2011-2014 Jason R. Coombs
+Copyright © 2011-2015 Jason R. Coombs
 Copyright © 2009 Ferry Boender
