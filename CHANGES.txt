@@ -1,6 +1,11 @@
 Changes
 -------
 
+13.3
+====
+
+* Removed deprecated irc.logging module.
+
 13.2
 ====
 
