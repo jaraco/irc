@@ -7,7 +7,7 @@ Welcome to irc documentation!
    history
    irc
 
-.. include:: ../README.txt
+.. include:: ../README.rst
 
 
 Indices and tables
