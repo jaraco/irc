@@ -51,6 +51,24 @@ class TestChannel(object):
         channel.add_user('tester1')
         assert channel.has_user('Tester1')
 
+    def test_set_mode_clear_mode(self):
+        channel = irc.bot.Channel()
+        channel.add_user('tester1')
+        channel.set_mode('o', 'tester1')
+        assert channel.is_oper('tester1')
+        channel.clear_mode('o', 'tester1')
+        assert not channel.is_oper('tester1')
+
+    def test_remove_add_clears_mode(self):
+        channel = irc.bot.Channel()
+        channel.add_user('tester1')
+        channel.set_mode('v', 'tester1')
+        assert channel.is_voiced('tester1')
+        channel.remove_user('tester1')
+        channel.add_user('tester1')
+        assert not channel.is_voiced('tester1')
+
+
 class TestBot(object):
     def test_construct_bot(self):
         bot = irc.bot.SingleServerIRCBot(
