@@ -137,17 +137,17 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
     def _on_mode(self, c, e):
         modes = irc.modes.parse_channel_modes(" ".join(e.arguments))
         t = e.target
-        if irc.client.is_channel(t):
-            ch = self.channels[t]
-            for mode in modes:
-                if mode[0] == "+":
-                    f = ch.set_mode
-                else:
-                    f = ch.clear_mode
-                f(mode[1], mode[2])
-        else:
-            # Mode on self... XXX
-            pass
+        if not irc.client.is_channel(t):
+            # mode on self; disregard
+            return
+
+        ch = self.channels[t]
+        for mode in modes:
+            if mode[0] == "+":
+                f = ch.set_mode
+            else:
+                f = ch.clear_mode
+            f(mode[1], mode[2])
 
     def _on_namreply(self, c, e):
         """
