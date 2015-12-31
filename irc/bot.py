@@ -269,6 +269,12 @@ class Channel(object):
     A class for keeping information about an IRC channel.
     """
 
+    user_modes = 'ovqha'
+    """
+    Modes which are applicable to individual users, and which
+    should be tracked in the mode_users dictionary.
+    """
+
     def __init__(self):
         self._users = IRCDict()
         self.mode_users = collections.defaultdict(IRCDict)
@@ -355,7 +361,7 @@ class Channel(object):
 
             value -- Value
         """
-        if mode in 'ovqha':
+        if mode in self.user_modes:
             self.mode_users[mode][value] = 1
         else:
             self.modes[mode] = value
@@ -370,7 +376,7 @@ class Channel(object):
             value -- Value
         """
         try:
-            if mode in 'ovqha':
+            if mode in self.user_modes:
                 del self.mode_users[mode][value]
             else:
                 del self.modes[mode]
