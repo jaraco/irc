@@ -10,6 +10,8 @@ write simpler bots.
 from __future__ import absolute_import
 
 import sys
+import collections
+import itertools
 
 import irc.client
 import irc.modes
@@ -269,11 +271,7 @@ class Channel(object):
 
     def __init__(self):
         self.userdict = IRCDict()
-        self.operdict = IRCDict()
-        self.voiceddict = IRCDict()
-        self.ownerdict = IRCDict()
-        self.halfopdict = IRCDict()
-        self.admindict = IRCDict()
+        self.mode_users = collections.defaultdict(IRCDict)
         self.modes = {}
 
     def users(self):
@@ -282,24 +280,24 @@ class Channel(object):
 
     def opers(self):
         """Returns an unsorted list of the channel's operators."""
-        return self.operdict.keys()
+        return self.mode_users['o'].keys()
 
     def voiced(self):
         """Returns an unsorted list of the persons that have voice
         mode set in the channel."""
-        return self.voiceddict.keys()
+        return self.mode_users['v'].keys()
 
     def owners(self):
         """Returns an unsorted list of the channel's owners."""
-        return self.ownerdict.keys()
+        return self.mode_users['q'].keys()
 
     def halfops(self):
         """Returns an unsorted list of the channel's half-operators."""
-        return self.halfopdict.keys()
+        return self.mode_users['h'].keys()
 
     def admins(self):
         """Returns an unsorted list of the channel's admins."""
-        return self.admindict.keys()
+        return self.mode_users['a'].keys()
 
     def has_user(self, nick):
         """Check whether the channel has a user."""
@@ -307,44 +305,41 @@ class Channel(object):
 
     def is_oper(self, nick):
         """Check whether a user has operator status in the channel."""
-        return nick in self.operdict
+        return nick in self.mode_users['o']
 
     def is_voiced(self, nick):
         """Check whether a user has voice mode set in the channel."""
-        return nick in self.voiceddict
+        return nick in self.mode_users['v']
 
     def is_owner(self, nick):
         """Check whether a user has owner status in the channel."""
-        return nick in self.ownerdict
+        return nick in self.mode_users['q']
 
     def is_halfop(self, nick):
         """Check whether a user has half-operator status in the channel."""
-        return nick in self.halfopdict
+        return nick in self.mode_users['h']
 
     def is_admin(self, nick):
         """Check whether a user has admin status in the channel."""
-        return nick in self.admindict
+        return nick in self.mode_users['a']
 
     def add_user(self, nick):
         self.userdict[nick] = 1
 
     def remove_user(self, nick):
-        for d in self.userdict, self.operdict, self.voiceddict:
+        all_dicts = itertools.chain(
+            (self.userdict,),
+            map(self.mode_users.__getitem__, 'ov'),
+        )
+        for d in all_dicts:
             if nick in d:
                 del d[nick]
 
     def change_nick(self, before, after):
         self.userdict[after] = self.userdict.pop(before)
-        if before in self.operdict:
-            self.operdict[after] = self.operdict.pop(before)
-        if before in self.voiceddict:
-            self.voiceddict[after] = self.voiceddict.pop(before)
-        if before in self.ownerdict:
-            self.ownerdict[after] = self.ownerdict.pop(before)
-        if before in self.halfopdict:
-            self.halfopdict[after] = self.halfopdict.pop(before)
-        if before in self.admindict:
-            self.admindict[after] = self.admindict.pop(before)
+        for mode_lookup in self.mode_users.values():
+            if before in mode_lookup:
+                mode_lookup[after] = mode_lookup.pop(before)
 
     def set_userdetails(self, nick, details):
         if nick in self.userdict:
@@ -359,16 +354,8 @@ class Channel(object):
 
             value -- Value
         """
-        if mode == "o":
-            self.operdict[value] = 1
-        elif mode == "v":
-            self.voiceddict[value] = 1
-        elif mode == "q":
-            self.ownerdict[value] = 1
-        elif mode == "h":
-            self.halfopdict[value] = 1
-        elif mode == "a":
-            self.admindict[value] = 1
+        if mode in 'ovqha':
+            self.mode_users[mode][value] = 1
         else:
             self.modes[mode] = value
 
@@ -382,16 +369,8 @@ class Channel(object):
             value -- Value
         """
         try:
-            if mode == "o":
-                del self.operdict[value]
-            elif mode == "v":
-                del self.voiceddict[value]
-            elif mode == "q":
-                del self.ownerdict[value]
-            elif mode == "h":
-                del self.halfopdict[value]
-            elif mode == "a":
-                del self.admindict[value]
+            if mode in 'ovqha':
+                del self.mode_users[mode][value]
             else:
                 del self.modes[mode]
         except KeyError:
