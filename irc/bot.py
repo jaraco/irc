@@ -330,6 +330,10 @@ class Channel(object):
             self.operdict[after] = self.operdict.pop(before)
         if before in self.voiceddict:
             self.voiceddict[after] = self.voiceddict.pop(before)
+        if before in self.ownerdict:
+            self.ownerdict[after] = self.ownerdict.pop(before)
+        if before in self.halfopdict:
+            self.halfopdict[after] = self.halfopdict.pop(before)
 
     def set_userdetails(self, nick, details):
         if nick in self.userdict:
