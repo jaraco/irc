@@ -270,13 +270,13 @@ class Channel(object):
     """
 
     def __init__(self):
-        self.userdict = IRCDict()
+        self._users = IRCDict()
         self.mode_users = collections.defaultdict(IRCDict)
         self.modes = {}
 
     def users(self):
         """Returns an unsorted list of the channel's users."""
-        return self.userdict.keys()
+        return self._users.keys()
 
     def opers(self):
         """Returns an unsorted list of the channel's operators."""
@@ -301,7 +301,7 @@ class Channel(object):
 
     def has_user(self, nick):
         """Check whether the channel has a user."""
-        return nick in self.userdict
+        return nick in self._users
 
     def is_oper(self, nick):
         """Check whether a user has operator status in the channel."""
@@ -324,26 +324,27 @@ class Channel(object):
         return nick in self.mode_users['a']
 
     def add_user(self, nick):
-        self.userdict[nick] = 1
+        self._users[nick] = 1
+
+    @property
+    def user_dicts(self):
+        yield self._users
+        for d in self.mode_users.values():
+            yield d
 
     def remove_user(self, nick):
-        all_dicts = itertools.chain(
-            (self.userdict,),
-            self.mode_users.values(),
-        )
-        for d in all_dicts:
-            if nick in d:
-                del d[nick]
+        for d in self.user_dicts:
+            d.pop(nick, None)
 
     def change_nick(self, before, after):
-        self.userdict[after] = self.userdict.pop(before)
+        self._users[after] = self._users.pop(before)
         for mode_lookup in self.mode_users.values():
             if before in mode_lookup:
                 mode_lookup[after] = mode_lookup.pop(before)
 
     def set_userdetails(self, nick, details):
-        if nick in self.userdict:
-            self.userdict[nick] = details
+        if nick in self._users:
+            self._users[nick] = details
 
     def set_mode(self, mode, value=None):
         """Set mode on the channel.
