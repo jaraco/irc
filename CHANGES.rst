@@ -4,6 +4,10 @@ Changes
 13.3
 ====
 
+* Issue #75: In ``irc.bot``, add support for tracking admin
+  status (mode 'a') in channels. Use ``channel.is_admin``
+  or ``channel.admins`` to identify admin users for a channel.
+
 * Removed deprecated irc.logging module.
 
 13.2

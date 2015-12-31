@@ -273,6 +273,7 @@ class Channel(object):
         self.voiceddict = IRCDict()
         self.ownerdict = IRCDict()
         self.halfopdict = IRCDict()
+        self.admindict = IRCDict()
         self.modes = {}
 
     def users(self):
@@ -296,6 +297,10 @@ class Channel(object):
         """Returns an unsorted list of the channel's half-operators."""
         return self.halfopdict.keys()
 
+    def admins(self):
+        """Returns an unsorted list of the channel's admins."""
+        return self.admindict.keys()
+
     def has_user(self, nick):
         """Check whether the channel has a user."""
         return nick in self.userdict
@@ -316,6 +321,10 @@ class Channel(object):
         """Check whether a user has half-operator status in the channel."""
         return nick in self.halfopdict
 
+    def is_admin(self, nick):
+        """Check whether a user has admin status in the channel."""
+        return nick in self.admindict
+
     def add_user(self, nick):
         self.userdict[nick] = 1
 
@@ -334,6 +343,8 @@ class Channel(object):
             self.ownerdict[after] = self.ownerdict.pop(before)
         if before in self.halfopdict:
             self.halfopdict[after] = self.halfopdict.pop(before)
+        if before in self.admindict:
+            self.admindict[after] = self.admindict.pop(before)
 
     def set_userdetails(self, nick, details):
         if nick in self.userdict:
@@ -356,6 +367,8 @@ class Channel(object):
             self.ownerdict[value] = 1
         elif mode == "h":
             self.halfopdict[value] = 1
+        elif mode == "a":
+            self.admindict[value] = 1
         else:
             self.modes[mode] = value
 
@@ -377,6 +390,8 @@ class Channel(object):
                 del self.ownerdict[value]
             elif mode == "h":
                 del self.halfopdict[value]
+            elif mode == "a":
+                del self.admindict[value]
             else:
                 del self.modes[mode]
         except KeyError:
