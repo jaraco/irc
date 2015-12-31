@@ -329,7 +329,7 @@ class Channel(object):
     def remove_user(self, nick):
         all_dicts = itertools.chain(
             (self.userdict,),
-            map(self.mode_users.__getitem__, 'ov'),
+            self.mode_users.values(),
         )
         for d in all_dicts:
             if nick in d:
