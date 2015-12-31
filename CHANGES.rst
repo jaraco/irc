@@ -1,6 +1,15 @@
 Changes
 -------
 
+13.3.1
+======
+
+* Now remove mode for owners, halfops, and admins when the user
+  is removed from a channel.
+* Refactored the Channel class implementation for cleaner, less
+  repetitive code.
+* Expanded tests coverage for Channel class.
+
 13.3
 ====
 
