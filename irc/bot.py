@@ -135,13 +135,13 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.channels[channel].remove_user(nick)
 
     def _on_mode(self, c, e):
-        modes = irc.modes.parse_channel_modes(" ".join(e.arguments))
         t = e.target
         if not irc.client.is_channel(t):
             # mode on self; disregard
             return
-
         ch = self.channels[t]
+
+        modes = irc.modes.parse_channel_modes(" ".join(e.arguments))
         for sign, mode, argument in modes:
             f = {"+": ch.set_mode, "-": ch.clear_mode}[sign]
             f(mode, argument)
