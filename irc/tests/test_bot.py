@@ -37,6 +37,7 @@ class TestChannel(object):
         channel = irc.bot.Channel()
         channel.add_user('tester1')
         channel.remove_user('tester1')
+        assert 'tester1' not in channel.users()
         channel.add_user('tester1')
         assert 'tester1' in channel.users()
 
