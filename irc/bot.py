@@ -11,7 +11,6 @@ from __future__ import absolute_import
 
 import sys
 import collections
-import itertools
 
 import irc.client
 import irc.modes
