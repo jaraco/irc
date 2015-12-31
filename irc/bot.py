@@ -143,10 +143,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
 
         ch = self.channels[t]
         for sign, mode, argument in modes:
-            if sign == "+":
-                f = ch.set_mode
-            else:
-                f = ch.clear_mode
+            f = {"+": ch.set_mode, "-": ch.clear_mode}[sign]
             f(mode, argument)
 
     def _on_namreply(self, c, e):
