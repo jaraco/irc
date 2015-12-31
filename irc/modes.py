@@ -57,10 +57,9 @@ def _parse_modes(mode_string, unary_modes=""):
 
     >>> import random
     >>> import six
-    >>> unichr = chr if six.PY3 else unichr
     >>> def random_text(min_len = 3, max_len = 80):
     ...     len = random.randint(min_len, max_len)
-    ...     chars_to_choose = [unichr(x) for x in range(0,1024)]
+    ...     chars_to_choose = [six.unichr(x) for x in range(0,1024)]
     ...     chars = (random.choice(chars_to_choose) for x in range(len))
     ...     return ''.join(chars)
     >>> def random_texts(min_len = 3, max_len = 80):
