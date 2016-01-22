@@ -17,6 +17,10 @@ sphinx = ['sphinx'] if needs_sphinx else []
 needs_wheel = {'release', 'bdist_wheel'}.intersection(sys.argv)
 wheel = ['wheel'] if needs_wheel else []
 
+test_require = [ 'pytest>=2.8' ]
+if sys.version_info <= (3, 2):
+    test_require.append('backports.unittest_mock')
+
 setup_params = dict(
     name='irc',
     use_scm_version=True,
@@ -43,10 +47,7 @@ setup_params = dict(
     setup_requires=[
         'setuptools_scm>=1.9',
     ] + pytest_runner + sphinx,
-    tests_require=[
-        'pytest>=2.8',
-        'backports.unittest_mock',
-    ],
+    tests_require=test_require,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
