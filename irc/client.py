@@ -1276,8 +1276,15 @@ class Event(object):
         self.tags = tags
 
     def __str__(self):
-        return "type: {}, source: {}, target: {}, arguments: {}, tags: {}".format(self.type,
-                self.source, self.target, self.arguments, self.tags)
+        tmpl = (
+            "type: {type}, "
+            "source: {source}, "
+            "target: {target}, "
+            "arguments: {arguments}, "
+            "tags: {tags}"
+        )
+        return tmpl.format(**vars(self))
+
 
 def is_channel(string):
     """Check if a string is a channel name.
