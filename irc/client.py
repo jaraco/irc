@@ -1275,6 +1275,10 @@ class Event(object):
             tags = []
         self.tags = tags
 
+    def __str__(self):
+        return "type: {}, source: {}, target: {}, arguments: {}, tags: {}".format(self.type,
+                self.source, self.target, self.arguments, self.tags)
+
 def is_channel(string):
     """Check if a string is a channel name.
 
