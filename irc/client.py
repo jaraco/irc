@@ -1250,7 +1250,12 @@ class SimpleIRCClient(object):
 
 
 class Event(object):
-    "An IRC event."
+    """
+    An IRC event.
+
+    >>> print(Event('privmsg', '@somebody', '#channel'))
+    type: privmsg, source: @somebody, target: #channel, arguments: [], tags: []
+    """
     def __init__(self, type, source, target, arguments=None, tags=None):
         """
         Initialize an Event.
