@@ -34,7 +34,7 @@ class Factory(object):
 
     family = socket.AF_INET
 
-    def __init__(self, bind_address=('', 0), wrapper=identity, ipv6=False):
+    def __init__(self, bind_address=None, wrapper=identity, ipv6=False):
         self.bind_address = bind_address
         self.wrapper = wrapper
         if ipv6:
@@ -42,7 +42,7 @@ class Factory(object):
 
     def connect(self, server_address):
         sock = self.wrapper(socket.socket(self.family, socket.SOCK_STREAM))
-        sock.bind(self.bind_address)
+        self.bind_address and sock.bind(self.bind_address)
         sock.connect(server_address)
         return sock
     __call__ = connect

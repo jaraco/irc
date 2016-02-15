@@ -5,7 +5,10 @@ Changes
 ====
 
 * Dropped deprecated constructor
-  ``irc.connection.Factory.from_legacy_params``.
+  ``connection.Factory.from_legacy_params``. Use the
+  natural constructor instead.
+* Issue #83: ``connection.Factory`` no longer attempts
+  to bind before connect unless a bind address is specified.
 
 13.3.1
 ======
