@@ -1,6 +1,12 @@
 Changes
 -------
 
+14.0
+====
+
+* Dropped deprecated constructor
+  ``irc.connection.Factory.from_legacy_params``.
+
 13.3.1
 ======
 
