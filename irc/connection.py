@@ -52,7 +52,8 @@ class Factory(object):
 
     def connect(self, server_address):
         sock = self.wrapper(socket.socket(self.family, socket.SOCK_STREAM))
-        sock.bind(self.bind_address)
+        if self.bind_address != ('', 0):
+            sock.bind(self.bind_address)
         sock.connect(server_address)
         return sock
     __call__ = connect
