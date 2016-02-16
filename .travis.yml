@@ -1,11 +1,10 @@
-language: python
 sudo: false
+language: python
 python:
-  - 2.7
-  - 3.3
-  - 3.4
-  - 3.5
-# command to run tests
+ - 2.7
+ - 3.3
+ - 3.4
+ - 3.5
 script:
- - pip install 'pytest>=2.8'
+ - pip install -U pytest
  - python setup.py test
