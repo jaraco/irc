@@ -1173,7 +1173,7 @@ class SimpleIRCClient(object):
     handler methods get two arguments: the connection object (same as
     self.connection) and the event object.
 
-    Functionally, any of the event names in `events.py` my be subscribed
+    Functionally, any of the event names in `events.py` may be subscribed
     to by prefixing them with `on_`, and creating a function of that
     name in the child-class of `SimpleIRCClient`. When the event of
     `event_name` is received, the appropriately named method will be
