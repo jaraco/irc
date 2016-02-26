@@ -94,12 +94,26 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
                   "namreply", "nick", "part", "quit"]:
             self.connection.add_global_handler(i, getattr(self, "_on_" + i),
                 -20)
+        self._check_scheduled = False
+
+    def _schedule_connection_check (self):
+        """[Internal]"""
+        if self._check_scheduled:
+            print "check pending, not scheduling"
+            return
+        print "scheduling check"
+
+        intvl = self.reconnection_interval
+        self.connection.execute_delayed (intvl, self._connected_checker)
+        print "will check connection in "+ repr (intvl) +" sec"
+        self._check_scheduled = True
 
     def _connected_checker(self):
         """[Internal]"""
+        self._check_scheduled = False
+        print "checking connection"
         if not self.connection.is_connected():
-            self.connection.execute_delayed(self.reconnection_interval,
-                                            self._connected_checker)
+            self._schedule_connection_check ()
             self.jump_server()
 
     def _connect(self):
@@ -108,6 +122,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         """
         server = self.server_list[0]
         try:
+            print "attempting to connect to "+ repr (server.host)
             self.connect(server.host, server.port, self._nickname,
                 server.password, ircname=self._realname,
                 **self.__connect_params)
@@ -116,8 +131,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
 
     def _on_disconnect(self, c, e):
         self.channels = IRCDict()
-        self.connection.execute_delayed(self.reconnection_interval,
-                                        self._connected_checker)
+        self._schedule_connection_check ()
 
     def _on_join(self, c, e):
         ch = e.target
@@ -233,6 +247,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         The bot will skip to next server in the server_list each time
         jump_server is called.
         """
+        print "jumping server"
         if self.connection.is_connected():
             self.connection.disconnect(msg)
 
