@@ -11,6 +11,7 @@ from __future__ import absolute_import
 
 import sys
 import collections
+from random import random
 
 import irc.client
 import irc.modes
@@ -47,7 +48,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
     self.channels attribute, which is an IRCDict of Channels.
     """
     def __init__(self, server_list, nickname, realname,
-            reconnection_interval=60, **connect_params):
+            reconnection_interval=60, max_reconnection_interval=300, **connect_params):
         """Constructor for SingleServerIRCBot objects.
 
         Arguments:
@@ -63,6 +64,9 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
 
             reconnection_interval -- How long the bot should wait
                                      before trying to reconnect.
+
+            max_reconnection_interval -- The maximum time the bot should
+                                         wait before trying to reconnect.
 
             dcc_connections -- A list of initiated/accepted DCC
             connections.
@@ -87,6 +91,9 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         if not reconnection_interval or reconnection_interval < 0:
             reconnection_interval = 2 ** 31
         self.reconnection_interval = reconnection_interval
+        if not max_reconnection_interval or max_reconnection_interval < reconnection_interval:
+            max_reconnection_interval = reconnection_interval
+        self.max_reconnection_interval = max_reconnection_interval
 
         self._nickname = nickname
         self._realname = realname
@@ -94,12 +101,31 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
                   "namreply", "nick", "part", "quit"]:
             self.connection.add_global_handler(i, getattr(self, "_on_" + i),
                 -20)
+        self._check_scheduled = False
+        self.connection_attempts = 1
+
+    def _schedule_connection_check (self):
+        """[Internal]"""
+        if self._check_scheduled:
+            return
+
+        intvl = (2**(self.connection_attempts) - 1)
+        self.connection_attempts += 1
+
+        if intvl > self.max_reconnection_interval:
+            intvl = self.max_reconnection_interval
+        intvl = int(intvl * random ())
+        if intvl < self.reconnection_interval:
+            intvl = self.reconnection_interval
+
+        self.connection.execute_delayed (intvl, self._connected_checker)
+        self._check_scheduled = True
 
     def _connected_checker(self):
         """[Internal]"""
+        self._check_scheduled = False
         if not self.connection.is_connected():
-            self.connection.execute_delayed(self.reconnection_interval,
-                                            self._connected_checker)
+            self._schedule_connection_check ()
             self.jump_server()
 
     def _connect(self):
@@ -111,13 +137,13 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             self.connect(server.host, server.port, self._nickname,
                 server.password, ircname=self._realname,
                 **self.__connect_params)
+            self.connection_attempts = 1
         except irc.client.ServerConnectionError:
             pass
 
     def _on_disconnect(self, c, e):
         self.channels = IRCDict()
-        self.connection.execute_delayed(self.reconnection_interval,
-                                        self._connected_checker)
+        self._schedule_connection_check ()
 
     def _on_join(self, c, e):
         ch = e.target
