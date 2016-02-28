@@ -1,6 +1,26 @@
 Changes
 -------
 
+14.1
+====
+
+* ``SingleServerIRCBot`` now accepts a ``recon``
+  parameter implementing a ReconnectStrategy. The new
+  default strategy is ExponentialBackoff, implementing an
+  exponential backoff with jitter.
+  The ``reconnection_interval`` parameter is now deprecated
+  but retained for compatibility. To customize the minimum
+  time before reconnect, create a custom ExponentialBackoff
+  instance or create another ReconnectStrategy object and
+  pass that as the ``recon`` parameter. The
+  ``reconnection_interval`` parameter will be removed in
+  future versions.
+* Issue #82: The ``ExponentialBackoff`` implementation
+  now protects from multiple scheduled reconnects, avoiding
+  the issue where reconnect attempts accumulate
+  exponentially when the bot is immediately disconnected
+  by the server.
+
 14.0
 ====
 
