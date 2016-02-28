@@ -82,11 +82,9 @@ class ExponentialBackoff(ReconnectStrategy):
         # calculate interval in seconds based on connection attempts
         intvl = 2**next(self.attempt_count) - 1
 
-        if intvl > self.max_interval:
-            intvl = self.max_interval
+        intvl = min(intvl, self.max_interval)
         intvl = int(intvl * random.random())
-        if intvl < self.min_interval:
-            intvl = self.min_interval
+        intvl = max(intvl, self.min_interval)
 
         self.bot.connection.execute_delayed(intvl, self.check)
         self._check_scheduled = True
