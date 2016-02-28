@@ -43,6 +43,11 @@ class ServerSpec(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class ReconnectStrategy(object):
+    """
+    An abstract base class describing the interface used by
+    SingleServerIRCBot for handling reconnect following
+    disconnect events.
+    """
     @abc.abstractmethod
     def run(self, bot):
         """
@@ -53,13 +58,17 @@ class ReconnectStrategy(object):
 
 
 class ExponentialBackoff(ReconnectStrategy):
-    def __init__(self, min_interval=60, max_interval=300):
-        if not min_interval or min_interval < 0:
-            min_interval = 2 ** 31
-        self.min_interval = min_interval
-        if not max_interval or max_interval < min_interval:
-            max_interval = min_interval
-        self.max_interval = max_interval
+    """
+    A ReconnectStrategy implementing exponential backoff
+    with jitter.
+    """
+
+    min_interval = 60
+    max_interval = 300
+
+    def __init__(self, **attrs):
+        vars(self).update(attrs)
+        assert 0 <= self.min_interval <= self.max_interval
         self._check_scheduled = False
         self.connection_attempts = 1
 
