@@ -128,11 +128,12 @@ class TestBot(object):
         Ensure that disconnects from the server don't lead to
         exponential growth in reconnect attempts.
         """
+        recon = irc.bot.ExponentialBackoff(min_interval=0.01)
         bot = irc.bot.SingleServerIRCBot(
             server_list=[disconnecting_server.socket.getsockname()],
             realname='reconnect_test',
             nickname='reconnect_test',
-            reconnection_interval=0.01,
+            recon=recon,
         )
         bot._connect()
         for x in range(4):
