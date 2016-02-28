@@ -13,6 +13,7 @@ import sys
 import collections
 import warnings
 import abc
+import itertools
 from random import random
 
 import six
@@ -70,7 +71,7 @@ class ExponentialBackoff(ReconnectStrategy):
         vars(self).update(attrs)
         assert 0 <= self.min_interval <= self.max_interval
         self._check_scheduled = False
-        self.connection_attempts = 1
+        self.attempt_count = itertools.count(1)
 
     def run(self, bot):
         self.bot = bot
@@ -78,8 +79,8 @@ class ExponentialBackoff(ReconnectStrategy):
         if self._check_scheduled:
             return
 
-        intvl = (2**(self.connection_attempts) - 1)
-        self.connection_attempts += 1
+        # calculate interval in seconds based on connection attempts
+        intvl = 2**next(self.attempt_count) - 1
 
         if intvl > self.max_interval:
             intvl = self.max_interval
