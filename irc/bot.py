@@ -97,7 +97,7 @@ class ExponentialBackoff(ReconnectStrategy):
     def check(self):
         self._check_scheduled = False
         if not self.bot.connection.is_connected():
-            self.recon.schedule_check()
+            self.run(self.bot)
             self.bot.jump_server()
 
 
@@ -158,7 +158,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         if reconnection_interval is not missing:
             warnings.warn("reconnection_interval is deprecated; "
                 "pass a ReconnectStrategy object instead")
-            self.recon = ExponentialBackoff(reconnection_interval)
+            self.recon = ExponentialBackoff(min_interval=reconnection_interval)
 
         self._nickname = nickname
         self._realname = realname
