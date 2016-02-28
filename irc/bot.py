@@ -12,8 +12,10 @@ from __future__ import absolute_import
 import sys
 import collections
 import warnings
+import abc
 from random import random
 
+import six
 import irc.client
 import irc.modes
 from .dict import IRCDict
@@ -39,7 +41,18 @@ class ServerSpec(object):
         self.password = password
 
 
-class ReconnectStrategy:
+@six.add_metaclass(abc.ABCMeta)
+class ReconnectStrategy(object):
+    @abc.abstractmethod
+    def run(self, bot):
+        """
+        Invoked by the bot on disconnect. Here
+        a strategy can determine how to react to a
+        disconnect.
+        """
+
+
+class ExponentialBackoff(ReconnectStrategy):
     def __init__(self, min_interval=60, max_interval=300):
         if not min_interval or min_interval < 0:
             min_interval = 2 ** 31
@@ -90,7 +103,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
     """
     def __init__(self, server_list, nickname, realname,
             reconnection_interval=missing,
-            recon=ReconnectStrategy(), **connect_params):
+            recon=ExponentialBackoff(), **connect_params):
         """Constructor for SingleServerIRCBot objects.
 
         Arguments:
@@ -130,8 +143,9 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         self.recon = recon
         # for compatibility
         if reconnection_interval is not missing:
-            warnings.warn("Pass a ReconnectStrategy object")
-            self.recon = ReconnectStrategy(reconnection_interval)
+            warnings.warn("reconnection_interval is deprecated; "
+                "pass a ReconnectStrategy object instead")
+            self.recon = ExponentialBackoff(reconnection_interval)
 
         self._nickname = nickname
         self._realname = realname
