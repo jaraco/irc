@@ -14,7 +14,7 @@ import collections
 import warnings
 import abc
 import itertools
-from random import random
+import random
 
 import six
 import irc.client
@@ -84,7 +84,7 @@ class ExponentialBackoff(ReconnectStrategy):
 
         if intvl > self.max_interval:
             intvl = self.max_interval
-        intvl = int(intvl * random ())
+        intvl = int(intvl * random.random())
         if intvl < self.min_interval:
             intvl = self.min_interval
 
