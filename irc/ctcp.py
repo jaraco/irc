@@ -1,3 +1,8 @@
+"""
+Handle Client-to-Client protocol per the `best available
+spec <http://www.irchelp.org/irchelp/rfc/ctcpspec.html>`_.
+"""
+
 from __future__ import absolute_import
 
 import re
