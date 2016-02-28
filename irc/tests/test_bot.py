@@ -1,8 +1,13 @@
+import time
+import threading
 
 import six
 
+import pytest
+
 import irc.client
 import irc.bot
+import irc.server
 from irc.bot import ServerSpec
 
 class TestServerSpec(object):
@@ -69,6 +74,30 @@ class TestChannel(object):
         assert not channel.is_voiced('tester1')
 
 
+class DisconnectHandler(irc.server.IRCClient):
+    """
+    Immediately disconnect the client after connecting
+    """
+    def handle(self):
+        self.request.close()
+
+
+@pytest.yield_fixture
+def disconnecting_server():
+    """
+    An IRC server that disconnects the client immediately.
+    """
+    # bind to localhost on an ephemeral port
+    bind_address = '127.0.0.1', 0
+    try:
+        srv = irc.server.IRCServer(bind_address, DisconnectHandler)
+        threading.Thread(target=srv.serve_forever).start()
+        yield srv
+    finally:
+        srv.shutdown()
+        srv.server_close()
+
+
 class TestBot(object):
     def test_construct_bot(self):
         bot = irc.bot.SingleServerIRCBot(
@@ -93,3 +122,20 @@ class TestBot(object):
         _on_namreply = six.get_unbound_function(
             irc.bot.SingleServerIRCBot._on_namreply)
         _on_namreply(None, None, event)
+
+    def test_reconnects_are_stable(self, disconnecting_server):
+        """
+        Ensure that disconnects from the server don't lead to
+        exponential growth in reconnect attempts.
+        """
+        bot = irc.bot.SingleServerIRCBot(
+            server_list=[disconnecting_server.socket.getsockname()],
+            realname='reconnect_test',
+            nickname='reconnect_test',
+            reconnection_interval=0.01,
+        )
+        bot._connect()
+        for x in range(4):
+            bot.reactor.process_once()
+            time.sleep(0.01)
+        assert len(bot.reactor.delayed_commands) <= 1
