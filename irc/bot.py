@@ -130,7 +130,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
 
             realname -- The bot's realname.
 
-            recon -- A handler for reconnecting on
+            recon -- A ReconnectStrategy for reconnecting on
                 disconnect or failed connection.
 
             dcc_connections -- A list of initiated/accepted DCC
