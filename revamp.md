@@ -3,7 +3,7 @@
 
 Changes of the cleanup:
 
-  * **Removal of needless complexity of SimpleIRCClient -> Reactor -> ServerConnection**
+  * **Lowering of complexity of SimpleIRCClient -> Reactor -> ServerConnection**
     
     The reactor already manages multiple server connections similar to an
     overarching client class. Wrapping around a SimpleIRCClient which is then
@@ -14,7 +14,7 @@ Changes of the cleanup:
     Therefore, the Reactor was changed to Client with SimpleIRCClient removed
     to make the new chain of:
 
-    Client -> ServerConnection
+    ```Client -> ServerConnection```
 
     (and the SimpleIRCClient class was removed entirely)
 
