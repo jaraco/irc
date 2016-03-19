@@ -1,7 +1,7 @@
 
 # Library revamp changes
 
-Changes of the cleanup:
+Changes of the current work-in-progress code revamp:
 
   * **Lowering of complexity of SimpleIRCClient -> Reactor -> ServerConnection**
     
