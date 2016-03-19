@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Simple IRC bot library.
+Simple IRC bot example.
 
 This module contains a single-server IRC bot class that can be used to
 write simpler bots.
