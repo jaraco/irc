@@ -581,7 +581,7 @@ class ServerConnection(Connection):
                 self.disconnect("Connection reset by peer")
                 return
 
-            self.buffer.feed(new_data)
+            self.buffer += new_data
 
         # If we got no line, the server is violating the protocol:
         if self.buffer.find(b"\n") < 0:
@@ -592,10 +592,12 @@ class ServerConnection(Connection):
         next_break = self.buffer.find(b"\n")
         while next_break >= 0:
             next_line = self.buffer[:next_break]
-            if next_line.endswith("\r"):
+            self.buffer = self.buffer[next_break+1:]
+            if next_line.endswith(b"\r"):
                 next_line = next_line[:-1]
-            self.buffer = self.buffer[next_break:]
             log.debug("FROM SERVER: %s", next_line)
+
+            # Decode preferrably with utf-8:
             decoded_line = None
             try:
                 decoded_line = next_line.decode("utf-8")
@@ -605,7 +607,12 @@ class ServerConnection(Connection):
                 except Exception as e:
                     decoded_line = next_line.decode("utf-8", "replace")
 
-            self._process_line(next_line)
+            # Process line if not empty:
+            if len(decoded_line) > 0:
+                self._process_line(decoded_line)
+
+            # Advance to next line:
+            next_break = self.buffer.find(b"\n")
 
     def _process_line(self, line):
         event = Event("all_raw_messages", self.get_server_name(), None,
