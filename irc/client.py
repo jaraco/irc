@@ -485,7 +485,7 @@ class ServerConnection(Connection):
         if self.connected:
             self.disconnect("Changing servers")
 
-        self.buffer = self.buffer_class()
+        self.buffer = b""
         self.handlers = {}
         self.real_server_name = ""
         self.real_nickname = nickname
@@ -559,27 +559,49 @@ class ServerConnection(Connection):
             self.nick(orig)
 
     def process_data(self):
-        "read and process input from self.socket"
+        """"
+        Read and process input from self.socket
+        """
 
-        try:
-            reader = getattr(self.socket, 'read', self.socket.recv)
-            new_data = reader(2 ** 14)
-        except socket.error:
-            # The server hung up.
-            self.disconnect("Connection reset by peer")
+        # Read bytes until we got a line or a full buffer:
+        while len(self.buffer) < 600 and self.buffer.find(b"\n") < 0:
+            try:
+                reader = getattr(self.socket, 'read', self.socket.recv)
+                new_data = reader(1)
+            except socket.error:
+                # The server hung up.
+                self.disconnect("Connection reset by peer")
+                return
+            if not new_data:
+                # Read nothing: connection must be down.
+                self.disconnect("Connection reset by peer")
+                return
+
+            self.buffer.feed(new_data)
+
+        # If we got no line, the server is violating the protocol:
+        if self.buffer.find(b"\n") < 0:
+            self.buffer = b""
             return
-        if not new_data:
-            # Read nothing: connection must be down.
-            self.disconnect("Connection reset by peer")
-            return
 
-        self.buffer.feed(new_data)
+        # Process each non-empty line:
+        next_break = self.buffer.find(b"\n")
+        while next_break >= 0:
+            next_line = self.buffer[:next_break]
+            if next_line.endswith("\r"):
+                next_line = next_line[:-1]
+            self.buffer = self.buffer[next_break:]
+            log.debug("FROM SERVER: %s", next_line)
+            decoded_line = None
+            try:
+                decoded_line = next_line.decode("utf-8")
+            except UnicodeDecodeError:
+                try:
+                    decoded_line = next_line.decode("latin-1")
+                except Exception as e:
+                    decoded_line = next_line.decode("utf-8", "replace")
 
-        # process each non-empty line after logging all lines
-        for line in self.buffer:
-            log.debug("FROM SERVER: %s", line)
-            if not line: continue
-            self._process_line(line)
+            self._process_line(next_line)
 
     def _process_line(self, line):
         event = Event("all_raw_messages", self.get_server_name(), None,
