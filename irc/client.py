@@ -131,11 +131,14 @@ class Client(object):
 
     Here is a simple code example:
 
+    ```
         client = irc.client.Client()
+        client.add_global_handler("welcome",
+            lambda connection, event: connection.privmsg("a_nickname",
+                "Hi there!")
+        ) # do this before add_server to ensure it's triggered
         client.add_server("irc.some.where", 6667, "my_own_nickname")
-        client.add_global_handler("welcome", function(connection, event)
-            connection.privmsg("a_nickname", "Hi there!")
-        end)
+    ```
 
     This will connect to the IRC server irc.some.where on port 6667
     using the nickname my_own_nickname and send the message "Hi there!"
@@ -314,6 +317,12 @@ class ServerConnection(threading.Thread):
     method on a Reactor object.
     """
 
+    class Channel(object):
+        def __init__(self, name):
+            self.name = name
+            self.users = None
+            self._names_response_temporary = []
+
     def __init__(self, owning_client, server, port, nickname,
             password=None, username=None, ircname=None,
             connect_factory=connection.Factory()):
@@ -325,11 +334,12 @@ class ServerConnection(threading.Thread):
         self.socket = None
         self.server = server
         self.port = port
-        self.nickname = nickname
+        self.nickname_on_connect = nickname
         self.username = username or nickname
         self.password = password
         self.ircname = ircname or nickname
         self.connect_factory = connect_factory
+        self._channels = dict()
 
         self.mutex = threading.Lock()
 
@@ -386,7 +396,7 @@ class ServerConnection(threading.Thread):
             # Log on...
             if self.password:
                 self.pass_(self.password)
-            self.nick(self.nickname)
+            self.nick(self.nickname_on_connect)
             self.user(self.username, self.ircname)
 
     def reconnect(self):
@@ -409,7 +419,8 @@ class ServerConnection(threading.Thread):
                 self.disconnect("Closing object")
                 self.client._remove_connection(self)
 
-    def get_server_name(self):
+    @property
+    def server_name(self):
         """
         Get the (real) server name.
 
@@ -418,15 +429,52 @@ class ServerConnection(threading.Thread):
         """
         return self.real_server_name or ""
 
-    def get_nickname(self):
+    @property
+    def nickname(self):
         """
-        Get the (real) nick name.
+        The current nickname you have on this connection.
 
-        This method returns the (real) nickname.  The library keeps
-        track of nick changes, so it might not be the nick name that
-        was passed to the connect() method.
+        Depending on whether the desired nickname on connect was taken or on
+        whether the server has done any forced renames, this might differ
+        from the original nickname choice.
         """
         return self.real_nickname
+
+    @property
+    def channels(self):
+        """
+        All the channels on this server you are currently in.
+
+        Being in a channel is usually required to see all the users in it, to
+        read all the messages in there and to be able to send messages to
+        participate in a conversation.
+        To join an additional channel or leave one, use join()/part().
+        Please note join()/part() is not instant.
+        """
+        channel_list = []
+        with self.mutex:
+            for chan in self._channels.keys():
+                channel_list.append(self._channels[chan].name)
+        return channel_list
+
+    @property
+    def channel_users(self, channel):
+        """
+        The nicknames of all the users that are inside a channel you are
+        currently in (including yourself).
+
+        This will throw a ValueError if not currently in this channel.
+        Please note .join() will not be instant and you need to wait for
+        the "join" event before you can use this.
+        """
+        try:
+            users = self._channels[channel.lower()].users
+        except KeyError:
+            raise ValueError("not currently in channel " + str(channel) +\
+                " - did you wait for the \"join\" event after using .join()?")
+        if users == None:
+            users = []
+        return users
 
     @staticmethod
     def _check_if_data_available(socket, timeout=0):
@@ -513,7 +561,7 @@ class ServerConnection(threading.Thread):
         if source and not self.real_server_name:
             self.real_server_name = source
 
-        if command == "nick":
+        if command == "nick" and len(arguments) >= 1:
             if source.nick == self.real_nickname:
                 self.real_nickname = arguments[0]
         elif command == "welcome":
@@ -522,7 +570,21 @@ class ServerConnection(threading.Thread):
             self.real_nickname = arguments[0]
         elif command == "featurelist":
             self.features.load(arguments)
-
+        elif command == "join" and len(arguments) >= 1:
+            if source.partition("!")[0].lower() == self.real_nickname.lower():
+                self._channels[arguments[0].lower()] = None
+        elif command == "part" and len(arguments) >= 1:
+            if source.partition("!")[0].lower() == self.real_nickname.lower():
+                try:
+                    del(self._channels[arguments[0].lower()])
+                except KeyError:
+                    pass
+        elif command == "kick" and len(arguments) >= 2:
+            if arguments[1].lower() == self.real_nickname.lower():
+                try:
+                    del(self._channels[arguments[0].lower()])
+                except KeyError:
+                    pass
         handler = (
             self._handle_message
             if command in ["privmsg", "notice"]
@@ -740,7 +802,11 @@ class ServerConnection(threading.Thread):
         self.send_raw("ISON " + " ".join(nicks))
 
     def join(self, channel, key=""):
-        """ Send a JOIN command. """
+        """ Send a JOIN command.
+        Please note this command will not be instant. Subscribe with the
+        owning client's .add_global_handler() to the "join" event to find out
+        about completed channel joins.
+        """
         self.send_raw("JOIN %s%s" % (channel, (key and (" " + key))))
 
     def kick(self, channel, nick, comment=""):
@@ -805,7 +871,11 @@ class ServerConnection(threading.Thread):
         self.send_raw("OPER %s %s" % (nick, password))
 
     def part(self, channels, message=""):
-        """ Send a PART command."""
+        """ Send a PART command.
+        Please note this command will not be instant. Subscribe with the
+        owning client's .add_global_handler() to the "part" event to find out
+        about completed channel parts.
+        """
         if isinstance(channels, str) or isintance(channels,
                 basestring):
             channels = [ channels ]

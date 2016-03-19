@@ -142,7 +142,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
 
         super(SingleServerIRCBot, self).__init__()
         self.__connect_params = connect_params
-        self.channels = IRCDict()
+        self.channels = dict()
         self.server_list = [
             ServerSpec(*server)
                 if isinstance(server, (tuple, list))
@@ -181,7 +181,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             pass
 
     def _on_disconnect(self, c, e):
-        self.channels = IRCDict()
+        self.channels = dict()
         self.recon.run(self)
 
     def _on_join(self, c, e):
@@ -340,7 +340,7 @@ class Channel(object):
     """
 
     def __init__(self):
-        self._users = IRCDict()
+        self._users = dict()
         self.mode_users = collections.defaultdict(IRCDict)
         self.modes = {}
 
