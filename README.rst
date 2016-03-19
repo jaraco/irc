@@ -215,5 +215,6 @@ Original Author:
 Joel Rosdahl <joel@rosdahl.net>
 
 Copyright © 1999-2002 Joel Rosdahl
-Copyright © 2011-2015 Jason R. Coombs
+Copyright © 2011-2016 Jason R. Coombs
 Copyright © 2009 Ferry Boender
+Copyright © 2016 Jonas Thiem
