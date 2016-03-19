@@ -35,7 +35,12 @@ Changes of the cleanup:
     All the ServerConnection's now run their own processing in a thread. This
     removes the need for process_once()/process_forever(), all the
     documentation associated with it and allows any GTK/Tk user to easily run
-    their own main loop as usual.
+    their own main loop as usual. This also means the user generally doesn't
+    have to bother about the library's event loop at all.
+
+    As a downside, registered handlers will now trigger in another thread, so
+    the user needs to maintain basic thread-safety for their own application's
+    callbacks.
 
   * **Delayed 001 / "welcome" event handler to wait for 004 and 005**
 
