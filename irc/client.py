@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
 """
+Copyright (C) 1999-2002 Joel Rosdahl
+Copyright (C) 2011-2016 Jason R. Coombs
+Copyright (C) 2009 Ferry Boender
+Copyright (C) 2016 Jonas Thiem
+
 Internet Relay Chat (IRC) protocol client library.
 
 This library is intended to encapsulate the IRC protocol in Python.
@@ -64,7 +69,6 @@ import itertools
 import contextlib
 
 import six
-from jaraco.itertools import always_iterable
 from jaraco.functools import Throttler
 
 try:
@@ -485,7 +489,7 @@ class ServerConnection(Connection):
         if self.connected:
             self.disconnect("Changing servers")
 
-        self.buffer = self.buffer_class()
+        self.buffer = b""
         self.handlers = {}
         self.real_server_name = ""
         self.real_nickname = nickname
@@ -558,28 +562,72 @@ class ServerConnection(Connection):
         finally:
             self.nick(orig)
 
+    @staticmethod
+    def _check_if_data_available(socket):
+        socket_list = [socket]
+
+        # Check whether socket is in read event list:
+        read_sockets, write_sockets, error_sockets = select.select(socket_list , [], [])
+        if socket in read_sockets:
+            # It is. -> data available (or disconnect event)
+            return True
+        return False
+
     def process_data(self):
-        "read and process input from self.socket"
+        """"
+        Read and process input from self.socket
+        """
 
-        try:
-            reader = getattr(self.socket, 'read', self.socket.recv)
-            new_data = reader(2 ** 14)
-        except socket.error:
-            # The server hung up.
-            self.disconnect("Connection reset by peer")
+        # Read bytes until we got a line or a full buffer:
+        while len(self.buffer) < 600 and self.buffer.find(b"\n") < 0:
+            try:
+                reader = getattr(self.socket, 'read', self.socket.recv)
+                new_data = reader(1)
+            except socket.error:
+                # The server hung up.
+                self.disconnect("Connection reset by peer")
+                return
+            if not new_data:
+                # Read nothing: connection must be down.
+                self.disconnect("Connection reset by peer")
+                return
+
+            self.buffer += new_data
+
+            # If no further data can be read without blocking, abort:
+            if not self._check_if_data_available(self.socket):
+                break
+
+        # If we got no line, the server is violating the protocol:
+        if self.buffer.find(b"\n") < 0:
+            self.buffer = b""
             return
-        if not new_data:
-            # Read nothing: connection must be down.
-            self.disconnect("Connection reset by peer")
-            return
 
-        self.buffer.feed(new_data)
+        # Process each non-empty line:
+        next_break = self.buffer.find(b"\n")
+        while next_break >= 0:
+            next_line = self.buffer[:next_break]
+            self.buffer = self.buffer[next_break+1:]
+            if next_line.endswith(b"\r"):
+                next_line = next_line[:-1]
+            log.debug("FROM SERVER: %s", next_line)
 
-        # process each non-empty line after logging all lines
-        for line in self.buffer:
-            log.debug("FROM SERVER: %s", line)
-            if not line: continue
-            self._process_line(line)
+            # Decode preferrably with utf-8:
+            decoded_line = None
+            try:
+                decoded_line = next_line.decode("utf-8")
+            except UnicodeDecodeError:
+                try:
+                    decoded_line = next_line.decode("latin-1")
+                except Exception as e:
+                    decoded_line = next_line.decode("utf-8", "replace")
+
+            # Process line if not empty:
+            if len(decoded_line) > 0:
+                self._process_line(decoded_line)
+
+            # Advance to next line:
+            next_break = self.buffer.find(b"\n")
 
     def _process_line(self, line):
         event = Event("all_raw_messages", self.get_server_name(), None,
@@ -822,8 +870,8 @@ class ServerConnection(Connection):
     def list(self, channels=None, server=""):
         """Send a LIST command."""
         command = "LIST"
-        channels = ",".join(always_iterable(channels))
-        if channels:
+        if channels != None:
+            channels = ",".join(channels)
             command += ' ' + channels
         if server:
             command = command + " " + server
@@ -844,7 +892,11 @@ class ServerConnection(Connection):
     def names(self, channels=None):
         """Send a NAMES command."""
         tmpl = "NAMES {channels}" if channels else "NAMES"
-        channels = ','.join(always_iterable(channels))
+        if channels != None:
+            if isinstance(channels, str) or isintance(channels,
+                    basestring):
+                channels = [ channels ]
+            channels = ','.join(channels)
         self.send_raw(tmpl.format(channels=channels))
 
     def nick(self, newnick):
@@ -862,7 +914,9 @@ class ServerConnection(Connection):
 
     def part(self, channels, message=""):
         """Send a PART command."""
-        channels = always_iterable(channels)
+        if isinstance(channels, str) or isintance(channels,
+                basestring):
+            channels = [ channels ]
         cmd_parts = [
             'PART',
             ','.join(channels),
@@ -975,7 +1029,10 @@ class ServerConnection(Connection):
 
     def whois(self, targets):
         """Send a WHOIS command."""
-        self.send_raw("WHOIS " + ",".join(always_iterable(targets)))
+        if isinstance(targets, str) or isintance(targets,
+                basestring):
+            targets = [ targets ]
+        self.send_raw("WHOIS " + ",".join(targets))
 
     def whowas(self, nick, max="", server=""):
         """Send a WHOWAS command."""
