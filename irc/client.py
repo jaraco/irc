@@ -457,8 +457,7 @@ class ServerConnection(threading.Thread):
                 channel_list.append(self._channels[chan].name)
         return channel_list
 
-    @property
-    def channel_users(self, channel):
+    def get_channel_users(self, channel):
         """
         The nicknames of all the users that are inside a channel you are
         currently in (including yourself).

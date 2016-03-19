@@ -3,7 +3,7 @@
 
 Changes of the current work-in-progress code revamp:
 
-  * **Lowering of complexity of SimpleIRCClient -> Reactor -> ServerConnection**
+  * **Simplifying class chain SimpleIRCClient -> Reactor -> ServerConnection**
     
     The reactor already manages multiple server connections similar to an
     overarching client class. Wrapping around a SimpleIRCClient which is then
@@ -56,10 +56,20 @@ Changes of the current work-in-progress code revamp:
     putting functionality related to this into just the example bot in bot.py,
     this is now properly handled by the Client (previously Reactor) class.
 
+    There is now a respective property named .channels and there is a
+    .get_channel_users(channel) function.
+
   * **Moving of bot.py into irc/contrib/ and removal of server.py**
 
     The server implementation seems somewhat off-topic for a client protocol
     library. The bot implementation is also not really relevant to the core
     implementation, which is why it was moved into irc/contrib/
 
+  * **Removal of scheduled function runs**
+
+    The possibility to run a function in a scheduled amount of time was
+    removed, and with it execute_at()/execute_delayed()/execute_every().
+    It wasn't used by the library itself, and it seems off-topic to provide
+    an advanced event management in a basic protocol library when there are
+    already better libraries to do this.
 
