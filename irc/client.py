@@ -562,6 +562,17 @@ class ServerConnection(Connection):
         finally:
             self.nick(orig)
 
+    @staticmethod
+    def _check_if_data_available(socket):
+        socket_list = [socket]
+
+        # Check whether socket is in read event list:
+        read_sockets, write_sockets, error_sockets = select.select(socket_list , [], [])
+        if socket in read_sockets:
+            # It is. -> data available (or disconnect event)
+            return True
+        return False
+
     def process_data(self):
         """"
         Read and process input from self.socket
@@ -582,6 +593,10 @@ class ServerConnection(Connection):
                 return
 
             self.buffer += new_data
+
+            # If no further data can be read without blocking, abort:
+            if not self._check_if_data_available(self.socket):
+                break
 
         # If we got no line, the server is violating the protocol:
         if self.buffer.find(b"\n") < 0:
