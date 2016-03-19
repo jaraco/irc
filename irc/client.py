@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
 """
+Copyright (C) 1999-2002 Joel Rosdahl
+Copyright (C) 2011-2016 Jason R. Coombs
+Copyright (C) 2009 Ferry Boender
+Copyright (C) 2016 Jonas Thiem
+
 Internet Relay Chat (IRC) protocol client library.
 
 This library is intended to encapsulate the IRC protocol in Python.
@@ -64,7 +69,6 @@ import itertools
 import contextlib
 
 import six
-from jaraco.itertools import always_iterable
 from jaraco.functools import Throttler
 
 try:
@@ -844,8 +848,8 @@ class ServerConnection(Connection):
     def list(self, channels=None, server=""):
         """Send a LIST command."""
         command = "LIST"
-        channels = ",".join(always_iterable(channels))
-        if channels:
+        if channels != None:
+            channels = ",".join(channels)
             command += ' ' + channels
         if server:
             command = command + " " + server
@@ -866,7 +870,11 @@ class ServerConnection(Connection):
     def names(self, channels=None):
         """Send a NAMES command."""
         tmpl = "NAMES {channels}" if channels else "NAMES"
-        channels = ','.join(always_iterable(channels))
+        if channels != None:
+            if isinstance(channels, str) or isintance(channels,
+                    basestring):
+                channels = [ channels ]
+            channels = ','.join(channels)
         self.send_raw(tmpl.format(channels=channels))
 
     def nick(self, newnick):
@@ -884,7 +892,9 @@ class ServerConnection(Connection):
 
     def part(self, channels, message=""):
         """Send a PART command."""
-        channels = always_iterable(channels)
+        if isinstance(channels, str) or isintance(channels,
+                basestring):
+            channels = [ channels ]
         cmd_parts = [
             'PART',
             ','.join(channels),
@@ -997,7 +1007,10 @@ class ServerConnection(Connection):
 
     def whois(self, targets):
         """Send a WHOIS command."""
-        self.send_raw("WHOIS " + ",".join(always_iterable(targets)))
+        if isinstance(targets, str) or isintance(targets,
+                basestring):
+            targets = [ targets ]
+        self.send_raw("WHOIS " + ",".join(targets))
 
     def whowas(self, nick, max="", server=""):
         """Send a WHOWAS command."""
