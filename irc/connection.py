@@ -43,6 +43,8 @@ class Factory(object):
     def connect(self, server_address):
         sock = self.wrapper(socket.socket(self.family, socket.SOCK_STREAM))
         self.bind_address and sock.bind(self.bind_address)
+        sock.settimeout(20)
         sock.connect(server_address)
+        sock.settimeout(None)
         return sock
     __call__ = connect

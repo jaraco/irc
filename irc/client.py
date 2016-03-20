@@ -205,6 +205,7 @@ class Client(object):
         with self.mutex:
             self.connections.append(c)
         c.start()
+        return c
 
     def disconnect_all(self, message=""):
         """ Disconnects all connections. """
@@ -338,10 +339,11 @@ class ServerConnection(threading.Thread):
             password=None, username=None, ircname=None,
             connect_factory=connection.Factory()):
         super(ServerConnection, self).__init__()
-        self.connected = False
+        self._connected = False
         self.features = features.FeatureSet()
         self.client = owning_client
 
+        self._welcome_event_triggered = False
         self.socket = None
         self.server = server
         self.port = port
@@ -372,8 +374,14 @@ class ServerConnection(threading.Thread):
                             self._handle_event(self.delayed_001_event)
                             self.delayed_001 = False
 
+    @property
+    def ready(self):
+        with self.mutex:
+            return (self.connected and self._welcome_event_triggered)
+
     def _do_connect(self):
         with self.mutex:
+            self._welcome_event_triggered = False
             with self.client.mutex:
                 # (Re-)set information for delayed "welcome" / 001 event:
                 self.delayed_001 = False
@@ -400,7 +408,7 @@ class ServerConnection(threading.Thread):
                 except socket.error as ex:
                     raise ServerConnectionError(
                         "Couldn't connect to socket: %s" % ex)
-                self.connected = True
+                self._connected = True
 
             threading.Thread(target=self.client._on_connect).start()
 
@@ -838,6 +846,7 @@ class ServerConnection(threading.Thread):
                 log.debug("001 DELAY: emitting delayed welcome " +\
                     "event now. [005 received]")
                 self._handle_event(self.delayed_001_event)
+                self._welcome_event_triggered = True
                 self.delayed_001 = False
         # .. otherwise, if we get a 004 / RPL_MYINFO, schedule a 001 emit:
         elif command == "myinfo" and self.delayed_001:
@@ -856,12 +865,13 @@ class ServerConnection(threading.Thread):
             for fn in self.handlers[event.type]:
                 fn(self, event)
 
-    def is_connected(self):
+    @property
+    def connected(self):
         """ Return connection status.
 
         Returns true if connected, otherwise false.
         """
-        return self.connected
+        return self._connected
 
     def add_global_handler(self, *args):
         """ Add global handler.
@@ -953,7 +963,7 @@ class ServerConnection(threading.Thread):
                 self.socket = None
             return
 
-        self.connected = 0
+        self._connected = False
 
         self.quit(message)
 
