@@ -28,19 +28,23 @@ Changes of the current work-in-progress code revamp:
                 "Hi there!")
         ) # do this before add_server to ensure it's triggered
         client.add_server("irc.some.where", 6667, "my_own_nickname")
+        while True:
+            client.process(max_wait=1.0)
     ```
 
-  * **Removal of process_once()/process_forever() explicit loop management**
+  * **Replacing process_once()/process_forever() with process(max_wait=..)**
 
     All the ServerConnection's now run their own processing in a thread. This
     removes the need for process_once()/process_forever(), all the
     documentation associated with it and allows any GTK/Tk user to easily run
-    their own main loop as usual. This also means the user generally doesn't
-    have to bother about the library's event loop at all.
+    their own main loop as usual.
 
-    As a downside, registered handlers will now trigger in another thread, so
-    the user needs to maintain basic thread-safety for their own application's
-    callbacks.
+    Events triggered by the threaded ServerConnection will pile up in an
+    internal queue.
+
+    The user just needs to call .process() to actually get the events whenever
+    their code is ready to process them. The max_wait parameter allows to wait
+    for events when there is nothing to do to save CPU time.
 
   * **Delayed 001 / "welcome" event handler to wait for 004 and 005**
 

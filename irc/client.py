@@ -78,6 +78,10 @@ import contextlib
 import time
 import six
 from jaraco.functools import Throttler
+try:
+    import queue
+except ImportError:
+    import Queue as queue
 
 try:
     import pkg_resources
@@ -138,6 +142,8 @@ class Client(object):
                 "Hi there!")
         ) # do this before add_server to ensure it's triggered
         client.add_server("irc.some.where", 6667, "my_own_nickname")
+        while True:
+            client.process(max_wait=1.0)
     ```
 
     This will connect to the IRC server irc.some.where on port 6667
@@ -145,8 +151,7 @@ class Client(object):
     to the nickname a_nickname.
 
     The methods of this class are thread-safe; accesses to and modifications
-    of its internal lists of connections, handlers, and delayed commands
-    are guarded by a mutex.
+    of its internal data is guarded by a mutex.
     """
 
     def __do_nothing(*args, **kwargs):
@@ -171,10 +176,10 @@ class Client(object):
 
         self.connections = []
         self.handlers = {}
-        self.delayed_commands = []  # list of DelayedCommands
         # Modifications to these shared lists and dict need to be thread-safe
         self.mutex = threading.RLock()
         self.event_handling_mutex = threading.Lock()
+        self.event_handling_queue = queue.Queue()
 
         self.add_global_handler("ping", _ping_ponger, -42)
 
@@ -288,10 +293,32 @@ class Client(object):
                 )
                 for handler in matching_handlers:
                     handlers_to_be_called.append(handler)
-            for handler in handlers_to_be_called:
-                result = handler.callback(connection, event)
+            self.event_handling_queue.put((connection, event,
+                handlers_to_be_called))
+
+    def process(self, max_wait=0):
+        """
+        Trigger scheduled events inside your main application loop/thread.
+        """
+        event_info = None
+
+        # Wait for item in event queue up to specified wait time:
+        try:
+            event_info = self.event_handling_queue.get(True,
+                timeout=max_wait)
+        except queue.Empty:
+            pass
+        while event_info != None:
+            # Trigger the event handlers:
+            for handler in event_info[2]:
+                result = handler.callback(event_info[0], event_info[1])
                 if result is False:
                     return
+            # Also get all other events that are to be handled right now:
+            try:
+                event_info = self.event_handling_queue.get(False)
+            except queue.Empty:
+                return
 
     def _remove_connection(self, connection):
         """[Internal]"""
@@ -371,6 +398,7 @@ class ServerConnection(threading.Thread):
                         if self.delayed_001_time + 10 < time.monotonic():
                             log.debug("001 DELAY: emitting delayed " +\
                                 "welcome event now. [005 timeout]")
+                            self._welcome_event_triggered = True
                             self._handle_event(self.delayed_001_event)
                             self.delayed_001 = False
 
