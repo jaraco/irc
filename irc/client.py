@@ -176,8 +176,12 @@ class Client(object):
 
         self.connections = []
         self.handlers = {}
-        # Modifications to these shared lists and dict need to be thread-safe
+
+        # General access mutex:
         self.mutex = threading.RLock()
+
+        # Event handling: (needs separate mutex so it can run in parallel
+        # to regular operation of the irc lib)
         self.event_handling_mutex = threading.Lock()
         self.event_handling_queue = queue.Queue()
 
@@ -281,6 +285,8 @@ class Client(object):
 
     def _handle_event(self, connection, event):
         """
+        Internal function.
+
         Handle an Event event incoming on ServerConnection connection.
         """
         with self.event_handling_mutex:
@@ -1086,6 +1092,8 @@ class ServerConnection(threading.Thread):
 
     def notice(self, target, text):
         """ Send a NOTICE command."""
+        text = text.partition("\n")[0]
+        text = text.partition("\r")[0]
         # Should limit len(text) here!
         self.send_raw("NOTICE %s :%s" % (target, text))
 
@@ -1123,6 +1131,8 @@ class ServerConnection(threading.Thread):
 
     def privmsg(self, target, text):
         """ Send a PRIVMSG command."""
+        text = text.partition("\n")[0]
+        text = text.partition("\r")[0]
         self.send_raw("PRIVMSG %s :%s" % (target, text))
 
     def privmsg_many(self, targets, text):
