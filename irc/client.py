@@ -321,7 +321,18 @@ class ServerConnection(threading.Thread):
         def __init__(self, name):
             self.name = name
             self.users = None
+            self.topic = None
             self._names_response_temporary = []
+            self.delayed_join_event = None
+            self.delayed_join_event_time = time.monotonic()
+
+        def _should_trigger_delayed_join_event(self):
+            if self.delayed_join_event == None:
+                return False
+            if (self.topic != None and self.users != None) or \
+                    self.delayed_join_event_time + 20 < time.monotonic():
+                return True
+            return False
 
     def __init__(self, owning_client, server, port, nickname,
             password=None, username=None, ircname=None,
@@ -371,7 +382,7 @@ class ServerConnection(threading.Thread):
                 self.delayed_001_saw_004 = False
 
                 log.debug("connect(server=%r, port=%r, nickname=%r, ...)",
-                    self.server, self.port, self.nickname)
+                    self.server, self.port, self.nickname_on_connect)
 
                 if self.connected:
                     self.disconnect("Changing servers")
@@ -382,7 +393,7 @@ class ServerConnection(threading.Thread):
                 self.buffer = b""
                 self.handlers = {}
                 self.real_server_name = ""
-                self.real_nickname = self.nickname
+                self.real_nickname = self.nickname_on_connect
                 self.server_address = (self.server, self.port)
                 try:
                     self.socket = self.connect_factory(self.server_address)
@@ -454,6 +465,8 @@ class ServerConnection(threading.Thread):
         channel_list = []
         with self.mutex:
             for chan in self._channels.keys():
+                if self._channels[chan].delayed_join_event != None:
+                    continue
                 channel_list.append(self._channels[chan].name)
         return channel_list
 
@@ -474,6 +487,19 @@ class ServerConnection(threading.Thread):
         if users == None:
             users = []
         return users
+
+    def get_channel_topic(self, channel):
+        """
+        Get the current topic of the specified channel.
+
+        This will throw a ValueError if not currently in this channel.
+        """
+        try:
+            topic = self._channels[channel.lower()].topic
+        except KeyError:
+            raise ValueError("not currently in channel " + str(channel) +\
+                " - did you wait for the \"join\" event after using .join()?")
+        return (topic or "")
 
     @staticmethod
     def _check_if_data_available(socket, timeout=0):
@@ -546,7 +572,7 @@ class ServerConnection(threading.Thread):
             next_break = self.buffer.find(b"\n")
 
     def _process_line(self, line):
-        event = Event("all_raw_messages", self.get_server_name(), None,
+        event = Event("all_raw_messages", self.server_name, None,
             [line])
         self._handle_event(event)
 
@@ -560,9 +586,45 @@ class ServerConnection(threading.Thread):
         if source and not self.real_server_name:
             self.real_server_name = source
 
+        # Helper function to trigger delayed JOIN event for a channel:
+        def trigger_delayed_join(channel, force=False):
+            try:
+                if self._channels[channel].delayed_join_event == None:
+                    return
+                if self._channels[channel].\
+                        _should_trigger_delayed_join_event() or force:
+                    ev = self._channels[channel].delayed_join_event
+                    self._channels[channel].delayed_join_event = None
+                    self._handle_event(ev)
+            except KeyError:
+                pass
+
+        # Special handling of events for internal use:
         if command == "nick" and len(arguments) >= 1:
-            if source.nick == self.real_nickname:
+            if source.nick.lower() == self.real_nickname.lower():
+                # Handle ourselves renaming:
                 self.real_nickname = arguments[0]
+            else:
+                # Update channel user lists for someone else renaming:
+                for channel in self._channels:
+                    # Rename nick in known users list:
+                    if channel.users != None:
+                        index = 0
+                        for user in channel.users:
+                            if user.lower() == source.nick.lower():
+                                del(channel.users[index])
+                                channel.users.append(arguments[0])
+                                break
+                            index += 1
+                    # Rename nick in currently being transmitted NAMES list:
+                    index = 0
+                    for user in channel._names_response_temporary:
+                        if user.lower() == source.nick.lower():
+                            del(channel._names_response_temporary[index])
+                            channel._names_response_temporary.append(
+                                arguments[0])
+                            break
+                        index += 1
         elif command == "welcome":
             # Record the nickname in case the client changed nick
             # in a nicknameinuse callback.
@@ -571,19 +633,132 @@ class ServerConnection(threading.Thread):
             self.features.load(arguments)
         elif command == "join" and len(arguments) >= 1:
             if source.partition("!")[0].lower() == self.real_nickname.lower():
-                self._channels[arguments[0].lower()] = None
+                # Handle ourselves joining a new channel:
+                self._channels[arguments[0].lower()] = self.Channel(
+                    arguments[0])
+            else:
+                # Update channel user lists for someone else joining:
+                try:
+                    if self.channels[arguments[0].lower()].users != None:
+                        self.channels[arguments[0].lower()].users.append(
+                            source.partition("!")[0])
+                except KeyError:
+                    pass
         elif command == "part" and len(arguments) >= 1:
             if source.partition("!")[0].lower() == self.real_nickname.lower():
+                # Handle ourselves leaving a channel:
                 try:
                     del(self._channels[arguments[0].lower()])
+                except KeyError:
+                    pass
+            else:
+                # Update channel user lists for someone else leaving:
+                try:
+                    if self.channels[arguments[0].lower()].users != None:
+                        index = 0
+                        for user in \
+                                self._channels[arguments[0].lower()].users:
+                            if user.lower() == \
+                                    source.partition("!")[0].lower():
+                                del(self._channels[arguments[0].lower()].\
+                                    users[index])
+                                break
+                            index += 1
                 except KeyError:
                     pass
         elif command == "kick" and len(arguments) >= 2:
             if arguments[1].lower() == self.real_nickname.lower():
+                # Handle ourselves getting kicked from the channel:
                 try:
                     del(self._channels[arguments[0].lower()])
                 except KeyError:
                     pass
+            else:
+                # Update channel user lists for someone else getting kicked:
+                try: 
+                    if self.channels[arguments[0].lower()].users != None:
+                        index = 0
+                        for user in \
+                                self._channels[arguments[0].lower()].users:
+                            if user.lower() == arguments[0].lower():
+                                del(self._channels[arguments[0].lower()].\
+                                    users[index])
+                                break
+                            index += 1
+                except KeyError:
+                    pass
+        elif command == "quit":
+            if arguments[0].lower() != self.real_nickname.lower():
+                # Update channel user lists for someone else quitting:
+                for channel in self._channels:
+                    if channel.name.users != None:
+                        index = 0
+                        for user in channel.name.users:
+                            if user.lower() ==\
+                                    source.partition("!")[0].lower():
+                                del(channel.name.users[index])
+                                break
+                            index += 1
+        elif command == "kill":
+            if arguments[0].lower() != self.real_nickname.lower():
+                # Update channel user lists for someone else getting killed:
+                for channel in self._channels:
+                    if channel.name.users != None:
+                        index = 0
+                        for user in channel.name.users:
+                            if user.lower() == arguments[0].lower():
+                                del(channel.name.users[index])
+                                break
+                            index += 1
+        elif command == "namreply" and len(arguments) >= 4:
+            try:
+                def remove_prefix(nick):
+                    # This is intentionally written to strip multiple prefixes
+                    # for IRCv3 multi-prefix support.
+                    removed = True
+                    while removed:
+                        removed = False
+                        for prefix in self.features.prefix:
+                            if nick.startswith(prefix):
+                                nick = nick[1:]
+                                removed = True
+                    return nick
+                self._channels[arguments[2].lower()].\
+                    _names_response_temporary += [\
+                    remove_prefix(nick) for nick in arguments[3].split(" ")]
+            except KeyError:
+                pass
+        elif command == "currenttopic" and len(arguments) >= 3:
+            try:
+                # Set channel topic:
+                self._channels[arguments[1].lower()].topic = arguments[2]
+
+                # Trigger delayed join if required:
+                trigger_delayed_join(arguments[1].lower())
+            except KeyError:
+                pass
+        elif command == "endofnames" and len(arguments) >= 2:
+            try:
+                # Set updated channel user list:
+                self._channels[arguments[1].lower()].users = \
+                    self._channels[arguments[1].lower()].\
+                        _names_response_temporary
+                self._channels[arguments[1].lower()].\
+                    _names_response_temporary = []
+
+                # Trigger delayed join if required:
+                trigger_delayed_join(arguments[1].lower())
+            except KeyError:
+                pass
+        elif (command == "privmsg" or command == "notice" or \
+                command == "join" or command == "part" or \
+                command == "kick" or command == "mode" or \
+                command == "topic" or command == "notice") \
+                and len(arguments) >= 0:
+            # Force delayed JOIN event if not happened yet:
+            trigger_delayed_join(arguments[0].lower(), force=True)
+
+        # Trigger user callbacks:
         handler = (
             self._handle_message
             if command in ["privmsg", "notice"]
@@ -638,12 +813,23 @@ class ServerConnection(threading.Thread):
         log.debug("command: %s, source: %s, target: %s, "
                   "arguments: %s, tags: %s", command, source, target, arguments, tags)
         event = Event(command, source, target, arguments, tags)
+
+        # Delay 001 / RPL_WELCOME event:
         if command == "welcome" and not self.delayed_001:
             self.delayed_001 = True
             self.delayed_001_event = event
             self.delayed_001_time = time.monotonic()
             log.debug("001 DELAY: welcome event delayed.")
             return
+        # Delay JOIN events for topic / names info:
+        elif command == "join" and target != None:
+            try:
+                self._channels[target].delayed_join_event =\
+                    event
+                return
+            except KeyError:
+                pass
+
         self._handle_event(event)
 
         # If getting 005 / RPL_ISUPPORT, emit delayed 001 if we delayed it:
