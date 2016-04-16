@@ -36,6 +36,7 @@ setup_params = dict(
         'jaraco.itertools',
         'jaraco.logging',
         'jaraco.functools>=1.5',
+        'jaraco.stream',
         'pytz',
     ],
     extras_require={

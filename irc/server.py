@@ -51,10 +51,10 @@ import re
 import six
 from six.moves import socketserver
 import jaraco.logging
+from jaraco.stream import buffer
 
 import irc.client
 from . import events
-from . import buffer
 
 SRV_WELCOME = "Welcome to {__name__} v{irc.client.VERSION}.".format(**locals())
 

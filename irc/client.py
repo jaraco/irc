@@ -66,6 +66,7 @@ import contextlib
 import six
 from jaraco.itertools import always_iterable
 from jaraco.functools import Throttler
+from jaraco.stream import buffer
 
 try:
     import pkg_resources
@@ -75,7 +76,6 @@ except ImportError:
 from . import connection
 from . import events
 from . import functools as irc_functools
-from . import buffer
 from . import schedule
 from . import features
 from . import ctcp

@@ -1,6 +1,13 @@
 Changes
 -------
 
+14.2
+====
+
+* Moved buffer module to `jaraco.stream
+  <https://pypi.python.org/pypi/jaraco.stream>`_ for
+  use in other packages.
+
 14.1
 ====
 
