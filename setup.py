@@ -13,22 +13,26 @@ with io.open('README.rst', encoding='utf-8') as readme:
 needs_pytest = {'pytest', 'test'}.intersection(sys.argv)
 pytest_runner = ['pytest_runner'] if needs_pytest else []
 needs_sphinx = {'release', 'build_sphinx', 'upload_docs'}.intersection(sys.argv)
-sphinx = ['sphinx'] if needs_sphinx else []
+sphinx = ['sphinx', 'rst.linker'] if needs_sphinx else []
 needs_wheel = {'release', 'bdist_wheel'}.intersection(sys.argv)
 wheel = ['wheel'] if needs_wheel else []
 
+name = 'irc'
+description = 'IRC (Internet Relay Chat) protocol library for Python'
+
 setup_params = dict(
-    name='irc',
+    name=name,
     use_scm_version=True,
     author="Joel Rosdahl",
     author_email="joel@rosdahl.net",
     maintainer="Jason R. Coombs",
     maintainer_email="jaraco@jaraco.com",
-    description="IRC (Internet Relay Chat) protocol client library for Python",
+    description=description or name,
     long_description=long_description,
-    url="https://github.com/jaraco/irc",
+    url="https://github.com/jaraco/" + name,
     packages=setuptools.find_packages(),
     include_package_data=True,
+    namespace_packages=name.split('.')[:-1],
     install_requires=[
         'six',
         'jaraco.collections',
