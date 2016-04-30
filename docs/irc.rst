@@ -19,14 +19,6 @@ irc.bot module
     :undoc-members:
     :show-inheritance:
 
-irc.buffer module
------------------
-
-.. automodule:: irc.buffer
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 irc.client module
 -----------------
 
@@ -79,14 +71,6 @@ irc.functools module
 --------------------
 
 .. automodule:: irc.functools
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-irc.logging module
-------------------
-
-.. automodule:: irc.logging
     :members:
     :undoc-members:
     :show-inheritance:
