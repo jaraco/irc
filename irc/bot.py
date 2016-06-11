@@ -113,33 +113,30 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
     clients that are present in the channels and which of those that
     have operator or voice modes.  The "database" is kept in the
     self.channels attribute, which is an IRCDict of Channels.
+
+    Arguments:
+
+        server_list -- A list of ServerSpec objects or tuples of
+            parameters suitable for constructing ServerSpec
+            objects. Defines the list of servers the bot will
+            use (in order).
+
+        nickname -- The bot's nickname.
+
+        realname -- The bot's realname.
+
+        recon -- A ReconnectStrategy for reconnecting on
+            disconnect or failed connection.
+
+        dcc_connections -- A list of initiated/accepted DCC
+            connections.
+
+        **connect_params -- parameters to pass through to the connect
+            method.
     """
     def __init__(self, server_list, nickname, realname,
             reconnection_interval=missing,
             recon=ExponentialBackoff(), **connect_params):
-        """Constructor for SingleServerIRCBot objects.
-
-        Arguments:
-
-            server_list -- A list of ServerSpec objects or tuples of
-                           parameters suitable for constructing ServerSpec
-                           objects. Defines the list of servers the bot will
-                           use (in order).
-
-            nickname -- The bot's nickname.
-
-            realname -- The bot's realname.
-
-            recon -- A ReconnectStrategy for reconnecting on
-                disconnect or failed connection.
-
-            dcc_connections -- A list of initiated/accepted DCC
-            connections.
-
-            **connect_params -- parameters to pass through to the connect
-                                method.
-        """
-
         super(SingleServerIRCBot, self).__init__()
         self.__connect_params = connect_params
         self.channels = IRCDict()
