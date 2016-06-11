@@ -153,7 +153,9 @@ expected. Since assuming UTF-8 is not reasonable in the general case, the IRC
 library provides options to customize decoding of input by customizing the
 ``ServerConnection`` class. The ``buffer_class`` attribute on the
 ``ServerConnection`` determines which class is used for buffering lines from the
-input stream. By default it is ``buffer.DecodingLineBuffer``, but may be
+input stream, using the ``buffer`` module in `jaraco.stream
+<https://pypi.python.org/pypi/jaraco.stream>`_. By default it is
+``buffer.DecodingLineBuffer``, but may be
 re-assigned with another class, following the interface of ``buffer.LineBuffer``.
 The ``buffer_class`` attribute may be assigned for all instances of
 ``ServerConnection`` by overriding the class attribute.
@@ -162,7 +164,8 @@ For example:
 
 .. code:: python
 
-    irc.client.ServerConnection.buffer_class = irc.buffer.LenientDecodingLineBuffer
+    from jaraco.stream import buffer
+    irc.client.ServerConnection.buffer_class = buffer.LenientDecodingLineBuffer
 
 The ``LenientDecodingLineBuffer`` attempts UTF-8 but falls back to latin-1, which
 will avoid ``UnicodeDecodeError`` in all cases (but may produce unexpected
@@ -174,7 +177,7 @@ overridden before the connection is established):
 .. code:: python
 
     server = irc.client.IRC().server()
-    server.buffer_class = irc.buffer.LenientDecodingLineBuffer
+    server.buffer_class = buffer.LenientDecodingLineBuffer
     server.connect()
 
 Alternatively, some clients may still want to decode the input using a
@@ -196,7 +199,7 @@ Or, to simply ignore all input that cannot be decoded:
 
 .. code:: python
 
-    class IgnoreErrorsBuffer(irc.buffer.DecodingLineBuffer):
+    class IgnoreErrorsBuffer(buffer.DecodingLineBuffer):
         def handle_exception(self):
             pass
     irc.client.ServerConnection.buffer_class = IgnoreErrorsBuffer
