@@ -1,6 +1,12 @@
 Changes
 -------
 
+14.2.1
+======
+
+* Issue #97: Restore ``irc.buffer`` module for
+  compatibility.
+
 14.2
 ====
 
