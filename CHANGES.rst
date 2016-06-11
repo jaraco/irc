@@ -6,6 +6,10 @@ Changes
 
 * Issue #97: Restore ``irc.buffer`` module for
   compatibility.
+* Issue #95: Update docs to remove missing or
+  deprecated modules.
+* Issue #96: Declare Gitter support as a badge in the
+  docs.
 
 14.2
 ====
