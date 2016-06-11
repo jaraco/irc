@@ -1,6 +1,13 @@
 Changes
 -------
 
+14.2.2
+======
+
+* Issue #98: Add an ugly hack to force ``build_sphinx``
+  command to have the requisite libraries to build
+  module documentation.
+
 14.2.1
 ======
 
