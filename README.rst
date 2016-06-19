@@ -18,7 +18,8 @@ Change history is available at:
 * https://pythonhosted.org/irc/history.html
 
 You can `download project releases from PyPI
-<https://pypi.python.org/pypi/irc>`_.
+<https://pypi.io/project/irc>`_. The license is also indicated
+there.
 
 Tests are `continually run <https://travis-ci.org/#!/jaraco/irc>`_ using
 Travis-CI.
