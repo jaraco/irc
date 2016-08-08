@@ -576,10 +576,13 @@ class ServerConnection(Connection):
         self.buffer.feed(new_data)
 
         # process each non-empty line after logging all lines
-        for line in self.buffer:
-            log.debug("FROM SERVER: %s", line)
-            if not line: continue
-            self._process_line(line)
+        try:
+            for line in self.buffer:
+                log.debug("FROM SERVER: %s", line)
+                if not line: continue
+                self._process_line(line)
+        except:
+            pass
 
     def _process_line(self, line):
         event = Event("all_raw_messages", self.get_server_name(), None,
