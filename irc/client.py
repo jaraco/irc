@@ -189,6 +189,7 @@ class Reactor(object):
         self.delayed_commands = []  # list of DelayedCommands
         # Modifications to these shared lists and dict need to be thread-safe
         self.mutex = threading.RLock()
+        self.active = True
 
         self.add_global_handler("ping", _ping_ponger, -42)
 
@@ -274,7 +275,7 @@ class Reactor(object):
         # Otherwise no other thread would ever be able to change
         # the shared state of a Reactor object running this function.
         log.debug("process_forever(timeout=%s)", timeout)
-        while 1:
+        while self.active:
             self.process_once(timeout)
 
     def disconnect_all(self, message=""):
@@ -1246,7 +1247,12 @@ class SimpleIRCClient(object):
 
     def start(self):
         """Start the IRC client."""
+        self.reactor.active = True
         self.reactor.process_forever()
+
+    def stop(self):
+        """Stop the IRC client."""
+        self.reactor.active = False
 
 
 class Event(object):
