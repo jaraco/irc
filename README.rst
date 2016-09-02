@@ -5,6 +5,16 @@ Internet Relay Chat (IRC) protocol client library
    :alt: Join the chat at https://gitter.im/jaraco/irc
    :target: https://gitter.im/jaraco/irc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
+.. image:: https://img.shields.io/pypi/v/irc.svg
+   :target: https://pypi.org/project/irc
+
+.. image:: https://img.shields.io/pypi/pyversions/irc.svg
+
+.. image:: https://img.shields.io/pypi/dm/irc.svg
+
+.. image:: https://img.shields.io/travis/jaraco/irc/master.svg
+   :target: http://travis-ci.org/jaraco/irc
+
 The home of irclib is:
 
 * https://github.com/jaraco/irc
