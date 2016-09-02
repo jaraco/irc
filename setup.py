@@ -11,11 +11,12 @@ install_requires=[
     'six',
     'jaraco.collections',
     'jaraco.text',
-    'jaraco.itertools',
+    'jaraco.itertools>=1.8',
     'jaraco.logging',
     'jaraco.functools>=1.5',
     'jaraco.stream',
     'pytz',
+    'more_itertools',
 ]
 
 with io.open('README.rst', encoding='utf-8') as readme:

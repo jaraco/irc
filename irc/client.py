@@ -64,9 +64,10 @@ import itertools
 import contextlib
 
 import six
-from jaraco.itertools import always_iterable
+from jaraco.itertools import always_iterable, infinite_call
 from jaraco.functools import Throttler
 from jaraco.stream import buffer
+from more_itertools.recipes import consume
 
 try:
     import pkg_resources
@@ -274,8 +275,8 @@ class Reactor(object):
         # Otherwise no other thread would ever be able to change
         # the shared state of a Reactor object running this function.
         log.debug("process_forever(timeout=%s)", timeout)
-        while 1:
-            self.process_once(timeout)
+        one = functools.partial(self.process_once, timeout=timeout)
+        consume(infinite_call(one))
 
     def disconnect_all(self, message=""):
         """Disconnects all connections."""
