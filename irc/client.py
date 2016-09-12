@@ -62,6 +62,7 @@ import collections
 import functools
 import itertools
 import contextlib
+import warnings
 
 import six
 from jaraco.itertools import always_iterable, infinite_call
@@ -125,8 +126,8 @@ class Reactor(object):
     corresponding connection.
 
     The methods of most interest for an IRC client writer are server,
-    add_global_handler, remove_global_handler, execute_at,
-    execute_delayed, execute_every, process_once, and process_forever.
+    add_global_handler, remove_global_handler,
+    process_once, and process_forever.
 
     This is functionally an event-loop which can either use it's own
     internal polling loop, or tie into an external event-loop, by
@@ -328,6 +329,10 @@ class Reactor(object):
             function -- Function to call.
             arguments -- Arguments to give the function.
         """
+        warnings.warn(
+            "Call Reactor.scheduler.execute_every directly",
+            DeprecationWarning,
+        )
         function = functools.partial(function, *arguments)
         self.scheduler.execute_at(at, function)
 
@@ -339,6 +344,10 @@ class Reactor(object):
         function -- Function to call.
         arguments -- Arguments to give the function.
         """
+        warnings.warn(
+            "Call Reactor.scheduler.execute_every directly",
+            DeprecationWarning,
+        )
         function = functools.partial(function, *arguments)
         self.scheduler.execute_after(delay, function)
 
@@ -350,6 +359,10 @@ class Reactor(object):
         function -- Function to call.
         arguments -- Arguments to give the function.
         """
+        warnings.warn(
+            "Call Reactor.scheduler.execute_every directly",
+            DeprecationWarning,
+        )
         function = functools.partial(function, *arguments)
         self.scheduler.execute_every(period, function)
 
@@ -407,7 +420,7 @@ class Connection(object):
         self.reactor = reactor
 
     ##############################
-    ### Convenience wrappers.
+    ### Convenience wrappers - deprecated; do not use
 
     def execute_at(self, at, function, arguments=()):
         self.reactor.execute_at(at, function, arguments)
@@ -417,6 +430,7 @@ class Connection(object):
 
     def execute_every(self, period, function, arguments=()):
         self.reactor.execute_every(period, function, arguments)
+
 
 class ServerConnectionError(IRCError):
     pass
@@ -979,7 +993,7 @@ class ServerConnection(Connection):
         Set a keepalive to occur every ``interval`` on this connection.
         """
         pinger = functools.partial(self.ping, 'keep-alive')
-        self.reactor.execute_every(period=interval, function=pinger)
+        self.reactor.scheduler.execute_every(period=interval, function=pinger)
 
 
 class DCCConnectionError(IRCError):

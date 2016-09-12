@@ -1,6 +1,14 @@
 Changes
 -------
 
+15.0.1
+======
+
+* Deprecated calls to Connection.execute_*
+  and Reactor.execute_*. Instead, call the
+  equivalently-named methods on the reactor's
+  scheduler.
+
 15.0
 ====
 
