@@ -64,6 +64,7 @@ import itertools
 import contextlib
 
 import six
+from tempora import schedule
 from jaraco.itertools import always_iterable, infinite_call
 from jaraco.functools import Throttler
 from jaraco.stream import buffer
@@ -77,7 +78,6 @@ except ImportError:
 from . import connection
 from . import events
 from . import functools as irc_functools
-from . import schedule
 from . import features
 from . import ctcp
 from . import message

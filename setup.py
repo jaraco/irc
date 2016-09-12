@@ -17,6 +17,7 @@ install_requires=[
     'jaraco.stream',
     'pytz',
     'more_itertools',
+    'tempora>=1.6',
 ]
 
 with io.open('README.rst', encoding='utf-8') as readme:

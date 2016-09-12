@@ -14,6 +14,10 @@ Changes
   signal during scheduling should hook into the ``add``
   method of the relevant scheduler class.
 
+* Moved the underlying scheduler implementation to
+  `tempora <https://pypi.org/project/tempora>`_, allowing
+  it to be re-used for other purposes.
+
 14.2.2
 ======
 
