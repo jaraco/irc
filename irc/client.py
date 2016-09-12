@@ -108,6 +108,37 @@ class PrioritizedHandler(
         "when sorting prioritized handlers, only use the priority"
         return self.priority < other.priority
 
+
+@six.add_metaclass(abc.ABCMeta)
+class IScheduler(object):
+    @abc.abstractmethod
+    def execute_every(self, period, func):
+        "execute func every period"
+
+    @abc.abstractmethod
+    def execute_at(self, when, func):
+        "execute func at when"
+
+    @abc.abstractmethod
+    def execute_after(self, delay, func):
+        "execute func after delay"
+
+    @abc.abstractmethod
+    def run_pending(self):
+        "invoke the functions that are due"
+
+
+class DefaultScheduler(schedule.InvokeScheduler, IScheduler):
+    def execute_every(self, period, func):
+        self.add(schedule.PeriodicCommand.after(period, func))
+
+    def execute_at(self, when, func):
+        self.add(schedule.DelayedCommand.at(when, func))
+
+    def execute_after(self, delay, func):
+        self.add(schedule.DelayedCommand.after(delay, func))
+
+
 class Reactor(object):
     """
     Processes events from one or more IRC server connections.
@@ -154,11 +185,12 @@ class Reactor(object):
     are guarded by a mutex.
     """
 
+    scheduler_class = DefaultScheduler
+
     def __do_nothing(*args, **kwargs):
         pass
 
-    def __init__(self, on_connect=__do_nothing, on_disconnect=__do_nothing,
-            on_schedule=__do_nothing):
+    def __init__(self, on_connect=__do_nothing, on_disconnect=__do_nothing):
         """Constructor for Reactor objects.
 
         on_connect: optional callback invoked when a new connection
@@ -167,13 +199,7 @@ class Reactor(object):
         on_disconnect: optional callback invoked when a socket is
         disconnected.
 
-        on_schedule: optional callback, usually supplied by an external
-        event loop, to indicate in float seconds that the client needs to
-        process events that many seconds in the future. An external event
-        loop will implement this callback to schedule a call to
-        process_timeout.
-
-        The three arguments mainly exist to be able to use an external
+        The arguments mainly exist to be able to use an external
         main loop (for example Tkinter's or PyGTK's main app loop)
         instead of calling the process_forever method.
 
@@ -183,11 +209,13 @@ class Reactor(object):
 
         self._on_connect = on_connect
         self._on_disconnect = on_disconnect
-        self._on_schedule = on_schedule
+
+        scheduler = self.scheduler_class()
+        assert isinstance(scheduler, IScheduler)
+        self.scheduler = scheduler
 
         self.connections = []
         self.handlers = {}
-        self.delayed_commands = []  # list of DelayedCommands
         # Modifications to these shared lists and dict need to be thread-safe
         self.mutex = threading.RLock()
 
@@ -222,14 +250,7 @@ class Reactor(object):
         See documentation for Reactor.__init__.
         """
         with self.mutex:
-            while self.delayed_commands:
-                command = self.delayed_commands[0]
-                if not command.due():
-                    break
-                command.target()
-                if isinstance(command, schedule.PeriodicCommand):
-                    self._schedule_command(command.next())
-                del self.delayed_commands[0]
+            self.scheduler.run_pending()
 
     @property
     def sockets(self):
@@ -338,8 +359,7 @@ class Reactor(object):
             arguments -- Arguments to give the function.
         """
         function = functools.partial(function, *arguments)
-        command = schedule.DelayedCommand.at_time(at, function)
-        self._schedule_command(command)
+        self.scheduler.execute_at(at, function)
 
     def execute_delayed(self, delay, function, arguments=()):
         """
@@ -350,8 +370,7 @@ class Reactor(object):
         arguments -- Arguments to give the function.
         """
         function = functools.partial(function, *arguments)
-        command = schedule.DelayedCommand.after(delay, function)
-        self._schedule_command(command)
+        self.scheduler.execute_after(delay, function)
 
     def execute_every(self, period, function, arguments=()):
         """
@@ -362,13 +381,7 @@ class Reactor(object):
         arguments -- Arguments to give the function.
         """
         function = functools.partial(function, *arguments)
-        command = schedule.PeriodicCommand.after(period, function)
-        self._schedule_command(command)
-
-    def _schedule_command(self, command):
-        with self.mutex:
-            bisect.insort(self.delayed_commands, command)
-            self._on_schedule(command.delay.total_seconds())
+        self.scheduler.execute_every(period, function)
 
     def dcc(self, dcctype="chat"):
         """Creates and returns a DCCConnection object.

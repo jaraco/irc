@@ -139,4 +139,4 @@ class TestBot(object):
         for x in range(4):
             bot.reactor.process_once()
             time.sleep(0.01)
-        assert len(bot.reactor.delayed_commands) <= 1
+        assert len(bot.reactor.scheduler.queue) <= 1

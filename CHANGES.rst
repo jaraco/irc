@@ -1,6 +1,19 @@
 Changes
 -------
 
+15.0
+====
+
+* The event scheduling functionality has been decoupled
+  from the client.Reactor object. Now the reactor will
+  construct a Scheduler from the scheduler_class property,
+  which must be an instance of irc.client.IScheduler.
+
+  The ``_on_schedule`` parameter is no longer accepted
+  to the Reactor class. Implementations requiring a
+  signal during scheduling should hook into the ``add``
+  method of the relevant scheduler class.
+
 14.2.2
 ======
 
