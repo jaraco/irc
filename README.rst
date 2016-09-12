@@ -159,12 +159,14 @@ to escape the ``#`` symbol in the channel. For example, use ``\\#test`` or
 Scheduling Events
 =================
 
-The library includes a default event Scheduler as ``irc.client.DefaultScheduler``,
+The library includes a default event Scheduler as
+``irc.schedule.DefaultScheduler``,
 but this scheduler can be replaced with any other scheduler. For example,
-to use the `schedule <https://pypi.org/project/schedule>`_ package, include it
+to use the `schedule <https://pypi.org/project/schedule>`_ package,
+include it
 in your dependencies and install it into the IRC library as so:
 
-    class ScheduleScheduler(irc.client.IScheduler):
+    class ScheduleScheduler(irc.schedule.IScheduler):
         def execute_every(self, period, func):
             schedule.every(period).do(func)
 
