@@ -155,6 +155,31 @@ NOTE: If you're running one of the examples on a unix command line, you need
 to escape the ``#`` symbol in the channel. For example, use ``\\#test`` or
 ``"#test"`` instead of ``#test``.
 
+
+Scheduling Events
+=================
+
+The library includes a default event Scheduler as ``irc.client.DefaultScheduler``,
+but this scheduler can be replaced with any other scheduler. For example,
+to use the `schedule <https://pypi.org/project/schedule>`_ package, include it
+in your dependencies and install it into the IRC library as so:
+
+    class ScheduleScheduler(irc.client.IScheduler):
+        def execute_every(self, period, func):
+            schedule.every(period).do(func)
+
+        def execute_at(self, when, func):
+            schedule.at(when).do(func)
+
+        def execute_after(self, delay, func):
+            raise NotImplementedError("Not supported")
+
+        def run_pending(self):
+            schedule.run_pending()
+
+    irc.client.Reactor.scheduler_class = ScheduleScheduler
+
+
 Decoding Input
 ==============
 
