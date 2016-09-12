@@ -226,7 +226,7 @@ class Reactor(object):
                 command = self.delayed_commands[0]
                 if not command.due():
                     break
-                command.function()
+                command.target()
                 if isinstance(command, schedule.PeriodicCommand):
                     self._schedule_command(command.next())
                 del self.delayed_commands[0]

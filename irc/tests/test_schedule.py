@@ -41,7 +41,7 @@ def test_periodic_command_fixed_delay():
 	fd = schedule.PeriodicCommandFixedDelay.at_time(
 		at = schedule.now(),
 		delay = datetime.timedelta(seconds=2),
-		function = lambda: None,
+		target = lambda: None,
 		)
 	assert fd.due() is True
 	assert fd.next().due() is False
@@ -60,7 +60,7 @@ class TestCommands(object):
 		Create a periodic command that's run at noon every day.
 		"""
 		when = datetime.time(12, 0, tzinfo=pytz.utc)
-		cmd = schedule.PeriodicCommandFixedDelay.daily_at(when, function=None)
+		cmd = schedule.PeriodicCommandFixedDelay.daily_at(when, target=None)
 		assert cmd.due() is False
 		next_cmd = cmd.next()
 		daily = datetime.timedelta(days=1)
@@ -73,11 +73,11 @@ class TestTimezones:
 	def test_alternate_timezone_west(self):
 		target_tz = pytz.timezone('US/Pacific')
 		target = schedule.now().astimezone(target_tz)
-		cmd = schedule.DelayedCommand.at_time(target, function=None)
+		cmd = schedule.DelayedCommand.at_time(target, target=None)
 		assert cmd.due()
 
 	def test_alternate_timezone_east(self):
 		target_tz = pytz.timezone('Europe/Amsterdam')
 		target = schedule.now().astimezone(target_tz)
-		cmd = schedule.DelayedCommand.at_time(target, function=None)
+		cmd = schedule.DelayedCommand.at_time(target, target=None)
 		assert cmd.due()
