@@ -91,7 +91,7 @@ class ExponentialBackoff(ReconnectStrategy):
         # limit the min interval
         intvl = max(intvl, self.min_interval)
 
-        self.bot.connection.execute_delayed(intvl, self.check)
+        self.bot.reactor.scheduler.execute_after(intvl, self.check)
         self._check_scheduled = True
 
     def check(self):
