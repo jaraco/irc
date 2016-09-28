@@ -1,6 +1,11 @@
 Changes
 -------
 
+15.0.2
+======
+
+* #113: Use preferred scheduler in the bot implementation.
+
 15.0.1
 ======
 
