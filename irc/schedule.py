@@ -29,7 +29,7 @@ class DefaultScheduler(schedule.InvokeScheduler, IScheduler):
         self.add(schedule.PeriodicCommand.after(period, func))
 
     def execute_at(self, when, func):
-        self.add(schedule.DelayedCommand.at(when, func))
+        self.add(schedule.DelayedCommand.at_time(when, func))
 
     def execute_after(self, delay, func):
         self.add(schedule.DelayedCommand.after(delay, func))
