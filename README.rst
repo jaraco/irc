@@ -15,6 +15,10 @@ Internet Relay Chat (IRC) protocol client library
 .. image:: https://img.shields.io/travis/jaraco/irc/master.svg
    :target: http://travis-ci.org/jaraco/irc
 
+License is indicated in the project metadata (typically one or more
+of the Trove classifiers). For more details, see `this explanation
+<https://github.com/jaraco/skeleton/issues/1>`_.
+
 The home of irclib is:
 
 * https://github.com/jaraco/irc
