@@ -1,6 +1,12 @@
 Changes
 -------
 
+15.0.3
+======
+
+* #115: Fix AttributeError in ``execute_at`` in scheduling
+  support.
+
 15.0.2
 ======
 
