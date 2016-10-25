@@ -330,7 +330,7 @@ class Reactor(object):
             arguments -- Arguments to give the function.
         """
         warnings.warn(
-            "Call Reactor.scheduler.execute_every directly",
+            "Call Reactor.scheduler.execute_at directly",
             DeprecationWarning,
         )
         function = functools.partial(function, *arguments)
@@ -345,7 +345,7 @@ class Reactor(object):
         arguments -- Arguments to give the function.
         """
         warnings.warn(
-            "Call Reactor.scheduler.execute_every directly",
+            "Call Reactor.scheduler.execute_after directly",
             DeprecationWarning,
         )
         function = functools.partial(function, *arguments)
