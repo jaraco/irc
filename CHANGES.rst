@@ -1,6 +1,11 @@
 Changes
 -------
 
+15.0.4
+======
+
+* #116: Correct invocation of execute_every.
+
 15.0.3
 ======
 
