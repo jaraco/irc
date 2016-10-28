@@ -993,7 +993,7 @@ class ServerConnection(Connection):
         Set a keepalive to occur every ``interval`` on this connection.
         """
         pinger = functools.partial(self.ping, 'keep-alive')
-        self.reactor.scheduler.execute_every(period=interval, function=pinger)
+        self.reactor.scheduler.execute_every(period=interval, func=pinger)
 
 
 class DCCConnectionError(IRCError):
