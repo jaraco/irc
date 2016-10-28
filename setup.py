@@ -46,7 +46,7 @@ setup_params = dict(
     extras_require={
     },
     setup_requires=[
-        'setuptools_scm>=1.9',
+        'setuptools_scm>=1.15.0',
     ] + wheel,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
