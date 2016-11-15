@@ -184,7 +184,10 @@ class IRCClient(socketserver.BaseRequestHandler):
 
     def _send(self, msg):
         log.debug('to %s: %s', self.client_ident(), msg)
-        self.request.send(msg.encode('utf-8') + b'\r\n')
+        try:
+            self.request.send(msg.encode('utf-8') + b'\r\n')
+        except socket.error:
+            raise self.Disconnect()
 
     def handle_nick(self, params):
         """
