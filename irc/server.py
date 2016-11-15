@@ -43,6 +43,7 @@ will ever be connected to by the public.
 from __future__ import print_function, absolute_import
 
 import argparse
+import errno
 import logging
 import socket
 import select
@@ -184,7 +185,13 @@ class IRCClient(socketserver.BaseRequestHandler):
 
     def _send(self, msg):
         log.debug('to %s: %s', self.client_ident(), msg)
-        self.request.send(msg.encode('utf-8') + b'\r\n')
+        try:
+            self.request.send(msg.encode('utf-8') + b'\r\n')
+        except socket.error as e:
+            if e.errno == errno.EPIPE:
+                raise self.Disconnect()
+            else:
+                raise
 
     def handle_nick(self, params):
         """
