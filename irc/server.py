@@ -187,7 +187,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         log.debug('to %s: %s', self.client_ident(), msg)
         try:
             self.request.send(msg.encode('utf-8') + b'\r\n')
-        except socket.error, e:
+        except socket.error as e:
             if e.errno == errno.EPIPE:
                 raise self.Disconnect()
             else:
