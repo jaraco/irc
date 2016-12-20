@@ -1,3 +1,9 @@
+15.0.6
+======
+
+* Now publish `documentation <https://python-irc.readthedocs.io/>`_
+  to Read The Docs.
+
 15.0.5
 ======
 
