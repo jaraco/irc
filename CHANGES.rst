@@ -1,5 +1,6 @@
 15.0.5
 ======
+
 * #119: Handle broken pipe exception in IRCClient _send() (server.py).
 
 15.0.4
