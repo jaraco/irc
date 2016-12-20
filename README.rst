@@ -15,6 +15,11 @@ Internet Relay Chat (IRC) protocol client library
 .. image:: https://img.shields.io/travis/jaraco/irc/master.svg
    :target: http://travis-ci.org/jaraco/irc
 
+Full-featured Python IRC library for Python.
+
+- `Project home <https://pypi.org/project/irc>`_
+- `Docs <https://python-irc.readthedocs.io/>`_
+- `History <https://python-irc.readthedocs.io/en/latest/history.html>`_
 
 License
 =======
@@ -23,31 +28,8 @@ License is indicated in the project metadata (typically one or more
 of the Trove classifiers). For more details, see `this explanation
 <https://github.com/jaraco/skeleton/issues/1>`_.
 
-Docs
-====
-
-There's `no good mechanism for publishing documentation
-<https://github.com/pypa/python-packaging-user-guide/pull/266>`_
-easily. If there's a documentation link above, it's probably
-stale because PyPI-based documentation is deprecated. This
-project may have documentation published at ReadTheDocs, but
-probably not. Good luck finding it.
-
-The home of irclib is:
-
-* https://github.com/jaraco/irc
-
-You can `download project releases from PyPI
-<https://pypi.org/project/irc>`_. The license is also indicated
-there.
-
-Tests are `continually run <https://travis-ci.org/#!/jaraco/irc>`_ using
-Travis-CI.
-
-|BuildStatus|_
-
-.. |BuildStatus| image:: https://secure.travis-ci.org/jaraco/irc.png
-.. _BuildStatus: https://travis-ci.org/jaraco/irc
+Overview
+========
 
 This library provides a low-level implementation of the IRC protocol for
 Python.  It provides an event-driven IRC client framework.  It has
