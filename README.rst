@@ -17,7 +17,7 @@ Internet Relay Chat (IRC) protocol client library
 
 Full-featured Python IRC library for Python.
 
-- `Project home <https://pypi.org/project/irc>`_
+- `Project home <https://github.com/jaraco/irc>`_
 - `Docs <https://python-irc.readthedocs.io/>`_
 - `History <https://python-irc.readthedocs.io/en/latest/history.html>`_
 
