@@ -1,6 +1,3 @@
-Internet Relay Chat (IRC) protocol client library
--------------------------------------------------
-
 .. image:: https://badges.gitter.im/jaraco/irc.svg
    :alt: Join the chat at https://gitter.im/jaraco/irc
    :target: https://gitter.im/jaraco/irc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
