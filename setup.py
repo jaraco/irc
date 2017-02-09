@@ -6,19 +6,6 @@ import io
 
 import setuptools
 
-install_requires=[
-    'six',
-    'jaraco.collections',
-    'jaraco.text',
-    'jaraco.itertools>=1.8',
-    'jaraco.logging',
-    'jaraco.functools>=1.5',
-    'jaraco.stream',
-    'pytz',
-    'more_itertools',
-    'tempora>=1.6',
-]
-
 with io.open('README.rst', encoding='utf-8') as readme:
     long_description = readme.read()
 
@@ -38,7 +25,18 @@ params = dict(
     packages=setuptools.find_packages(),
     include_package_data=True,
     namespace_packages=name.split('.')[:-1],
-    install_requires=install_requires,
+    install_requires=[
+        'six',
+        'jaraco.collections',
+        'jaraco.text',
+        'jaraco.itertools>=1.8',
+        'jaraco.logging',
+        'jaraco.functools>=1.5',
+        'jaraco.stream',
+        'pytz',
+        'more_itertools',
+        'tempora>=1.6',
+    ],
     extras_require={
     },
     setup_requires=[
