@@ -458,7 +458,7 @@ class ServerConnection(Connection):
     # save the method args to allow for easier reconnection.
     @irc_functools.save_method_args
     def connect(self, server, port, nickname, password=None, username=None,
-            ircname=None, connect_factory=connection.Factory()):
+            ircname=None, oauth=False, connect_factory=connection.Factory()):
         """Connect/reconnect to a server.
 
         Arguments:
@@ -469,6 +469,7 @@ class ServerConnection(Connection):
         * password - Password (if any)
         * username - The username
         * ircname - The IRC name ("realname")
+        * oauth - If connection uses oauth authentification
         * server_address - The remote host/port of the server
         * connect_factory - A callable that takes the server address and
           returns a connection (with a socket interface)
@@ -494,6 +495,7 @@ class ServerConnection(Connection):
         self.username = username or nickname
         self.ircname = ircname or nickname
         self.password = password
+        self.oauth = oauth
         self.connect_factory = connect_factory
         try:
             self.socket = self.connect_factory(self.server_address)
@@ -870,7 +872,10 @@ class ServerConnection(Connection):
 
     def pass_(self, password):
         """Send a PASS command."""
-        self.send_raw("PASS " + password)
+        if self.oauth:
+            self.send_raw("PASS oauth:" + password)
+        else:
+            self.send_raw("PASS " + password)
 
     def ping(self, target, target2=""):
         """Send a PING command."""
