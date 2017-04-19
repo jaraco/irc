@@ -1,3 +1,9 @@
+15.1.1
+======
+
+* New ``send_items`` method takes star args for simplicity
+  in the syntax and usage.
+
 15.1
 ====
 

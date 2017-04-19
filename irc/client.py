@@ -700,8 +700,7 @@ class ServerConnection(Connection):
 
     def admin(self, server=""):
         """Send an ADMIN command."""
-        params = 'ADMIN', server
-        self.send_items(params)
+        self.send_items('ADMIN', server)
 
     def cap(self, subcommand, *args):
         """
@@ -739,8 +738,7 @@ class ServerConnection(Connection):
                 return (':' + args[0],) + args[1:]
             return args
 
-        params = ('CAP', subcommand) + tuple(_multi_parameter(args))
-        self.send_items(params)
+        self.send_items('CAP', subcommand, *_multi_parameter(args))
 
     def ctcp(self, ctcptype, target, parameter=""):
         """Send a CTCP command."""
@@ -779,18 +777,15 @@ class ServerConnection(Connection):
 
     def globops(self, text):
         """Send a GLOBOPS command."""
-        params = 'GLOBOPS', ':' + text
-        self.send_items(params)
+        self.send_items('GLOBOPS', ':' + text)
 
     def info(self, server=""):
         """Send an INFO command."""
-        params = 'INFO', server
-        self.send_items(params)
+        self.send_items('INFO', server)
 
     def invite(self, nick, channel):
         """Send an INVITE command."""
-        params = 'INVITE', nick, channel
-        self.send_items(params)
+        self.send_items('INVITE', nick, channel)
 
     def ison(self, nicks):
         """Send an ISON command.
@@ -799,90 +794,73 @@ class ServerConnection(Connection):
 
             nicks -- List of nicks.
         """
-        params = ('ISON',) + tuple(nicks)
-        self.send_items(params)
+        self.send_items('ISON', *tuple(nicks))
 
     def join(self, channel, key=""):
         """Send a JOIN command."""
-        params = 'JOIN', channel, key
-        self.send_items(params)
+        self.send_items('JOIN', channel, key)
 
     def kick(self, channel, nick, comment=""):
         """Send a KICK command."""
-        params = 'KICK', channel, nick, comment and ':' + comment
-        self.send_items(params)
+        self.send_items('KICK', channel, nick, comment and ':' + comment)
 
     def links(self, remote_server="", server_mask=""):
         """Send a LINKS command."""
-        params = 'LINKS', remote_server, server_mask
-        self.send_items(params)
+        self.send_items('LINKS', remote_server, server_mask)
 
     def list(self, channels=None, server=""):
         """Send a LIST command."""
-        params = 'LIST', ','.join(always_iterable(channels)), server
-        self.send_items(params)
+        self.send_items('LIST', ','.join(always_iterable(channels)), server)
 
     def lusers(self, server=""):
         """Send a LUSERS command."""
-        params = 'LUSERS', server
-        self.send_items(params)
+        self.send_items('LUSERS', server)
 
     def mode(self, target, command):
         """Send a MODE command."""
-        params = 'MODE', target, command
-        self.send_items(params)
+        self.send_items('MODE', target, command)
 
     def motd(self, server=""):
         """Send an MOTD command."""
-        params = 'MOTD', server
-        self.send_items(params)
+        self.send_items('MOTD', server)
 
     def names(self, channels=None):
         """Send a NAMES command."""
-        params = 'NAMES', ','.join(always_iterable(channels))
-        self.send_items(params)
+        self.send_items('NAMES', ','.join(always_iterable(channels)))
 
 
     def nick(self, newnick):
         """Send a NICK command."""
-        params = 'NICK', newnick
-        self.send_items(params)
+        self.send_items('NICK', newnick)
 
     def notice(self, target, text):
         """Send a NOTICE command."""
         # Should limit len(text) here!
-        params = 'NOTICE', target, ':' + text
-        self.send_items(params)
+        self.send_items('NOTICE', target, ':' + text)
 
     def oper(self, nick, password):
         """Send an OPER command."""
-        params = 'OPER', nick, password
-        self.send_items(params)
+        self.send_items('OPER', nick, password)
 
     def part(self, channels, message=""):
         """Send a PART command."""
-        params = 'PART', ','.join(always_iterable(channels)), message
-        self.send_items(params)
+        self.send_items('PART', ','.join(always_iterable(channels)), message)
 
     def pass_(self, password):
         """Send a PASS command."""
-        params = 'PASS', password
-        self.send_items(params)
+        self.send_items('PASS', password)
 
     def ping(self, target, target2=""):
         """Send a PING command."""
-        params = 'PING', target, target2
-        self.send_items(params)
+        self.send_items('PING', target, target2)
 
     def pong(self, target, target2=""):
         """Send a PONG command."""
-        params = 'PONG', target, target2
-        self.send_items(params)
+        self.send_items('PONG', target, target2)
 
     def privmsg(self, target, text):
         """Send a PRIVMSG command."""
-        params = 'PRIVMSG', target, ':' + text
-        self.send_items(params)
+        self.send_items('PRIVMSG', target, ':' + text)
 
     def privmsg_many(self, targets, text):
         """Send a PRIVMSG command to multiple targets."""
@@ -893,8 +871,7 @@ class ServerConnection(Connection):
         """Send a QUIT command."""
         # Note that many IRC servers don't use your QUIT message
         # unless you've been connected for at least 5 minutes!
-        params = 'QUIT', message and ':' + message
-        self.send_items(params)
+        self.send_items('QUIT', message and ':' + message)
 
     def _prep_message(self, string):
         # The string should not contain any carriage return other than the
@@ -910,7 +887,7 @@ class ServerConnection(Connection):
             raise MessageTooLong(msg)
         return bytes
 
-    def send_items(self, items):
+    def send_items(self, *items):
         """
         Send all non-empty items, separated by spaces.
         """
@@ -933,28 +910,23 @@ class ServerConnection(Connection):
 
     def squit(self, server, comment=""):
         """Send an SQUIT command."""
-        params = 'SQUIT', server, comment and ':' + comment
-        self.send_items(params)
+        self.send_items('SQUIT', server, comment and ':' + comment)
 
     def stats(self, statstype, server=""):
         """Send a STATS command."""
-        params = 'STATS', statstype, server
-        self.send_items(params)
+        self.send_items('STATS', statstype, server)
 
     def time(self, server=""):
         """Send a TIME command."""
-        params = 'TIME', server
-        self.send_items(params)
+        self.send_items('TIME', server)
 
     def topic(self, channel, new_topic=None):
         """Send a TOPIC command."""
-        params = 'TOPIC', channel, new_topic and ':' + new_topic
-        self.send_items(params)
+        self.send_items('TOPIC', channel, new_topic and ':' + new_topic)
 
     def trace(self, target=""):
         """Send a TRACE command."""
-        params = 'TRACE', target
-        self.send_items(params)
+        self.send_items('TRACE', target)
 
     def user(self, username, realname):
         """Send a USER command."""
@@ -963,38 +935,31 @@ class ServerConnection(Connection):
 
     def userhost(self, nicks):
         """Send a USERHOST command."""
-        params = 'USERHOST', ",".join(nicks)
-        self.send_items(params)
+        self.send_items('USERHOST', ",".join(nicks))
 
     def users(self, server=""):
         """Send a USERS command."""
-        params = 'USERS', server
-        self.send_items(params)
+        self.send_items('USERS', server)
 
     def version(self, server=""):
         """Send a VERSION command."""
-        params = 'VERSION', server
-        self.send_items(params)
+        self.send_items('VERSION', server)
 
     def wallops(self, text):
         """Send a WALLOPS command."""
-        params = 'WALLOPS', ':' + text
-        self.send_items(params)
+        self.send_items('WALLOPS', ':' + text)
 
     def who(self, target="", op=""):
         """Send a WHO command."""
-        params = 'WHO', target, op and 'o'
-        self.send_items(params)
+        self.send_items('WHO', target, op and 'o')
 
     def whois(self, targets):
         """Send a WHOIS command."""
-        params = 'WHOIS', ",".join(always_iterable(targets))
-        self.send_items(params)
+        self.send_items('WHOIS', ",".join(always_iterable(targets)))
 
     def whowas(self, nick, max="", server=""):
         """Send a WHOWAS command."""
-        params = 'WHOWAS', nick, max, server
-        self.send_items(params)
+        self.send_items('WHOWAS', nick, max, server)
 
     def set_rate_limit(self, frequency):
         """
