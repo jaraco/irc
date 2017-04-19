@@ -701,8 +701,7 @@ class ServerConnection(Connection):
     def admin(self, server=""):
         """Send an ADMIN command."""
         params = 'ADMIN', server
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def cap(self, subcommand, *args):
         """
@@ -741,8 +740,7 @@ class ServerConnection(Connection):
             return args
 
         params = ('CAP', subcommand) + tuple(_multi_parameter(args))
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def ctcp(self, ctcptype, target, parameter=""):
         """Send a CTCP command."""
@@ -782,20 +780,17 @@ class ServerConnection(Connection):
     def globops(self, text):
         """Send a GLOBOPS command."""
         params = 'GLOBOPS', ':' + text
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def info(self, server=""):
         """Send an INFO command."""
         params = 'INFO', server
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def invite(self, nick, channel):
         """Send an INVITE command."""
         params = 'INVITE', nick, channel
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def ison(self, nicks):
         """Send an ISON command.
@@ -805,106 +800,89 @@ class ServerConnection(Connection):
             nicks -- List of nicks.
         """
         params = ('ISON',) + tuple(nicks)
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def join(self, channel, key=""):
         """Send a JOIN command."""
         params = 'JOIN', channel, key
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def kick(self, channel, nick, comment=""):
         """Send a KICK command."""
         params = 'KICK', channel, nick, comment and ':' + comment
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def links(self, remote_server="", server_mask=""):
         """Send a LINKS command."""
         params = 'LINKS', remote_server, server_mask
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def list(self, channels=None, server=""):
         """Send a LIST command."""
         params = 'LIST', ','.join(always_iterable(channels)), server
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def lusers(self, server=""):
         """Send a LUSERS command."""
         params = 'LUSERS', server
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def mode(self, target, command):
         """Send a MODE command."""
         params = 'MODE', target, command
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def motd(self, server=""):
         """Send an MOTD command."""
         params = 'MOTD', server
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def names(self, channels=None):
         """Send a NAMES command."""
         params = 'NAMES', ','.join(always_iterable(channels))
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
 
     def nick(self, newnick):
         """Send a NICK command."""
         params = 'NICK', newnick
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def notice(self, target, text):
         """Send a NOTICE command."""
         # Should limit len(text) here!
         params = 'NOTICE', target, ':' + text
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def oper(self, nick, password):
         """Send an OPER command."""
         params = 'OPER', nick, password
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def part(self, channels, message=""):
         """Send a PART command."""
         params = 'PART', ','.join(always_iterable(channels)), message
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def pass_(self, password):
         """Send a PASS command."""
         params = 'PASS', password
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def ping(self, target, target2=""):
         """Send a PING command."""
         params = 'PING', target, target2
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def pong(self, target, target2=""):
         """Send a PONG command."""
         params = 'PONG', target, target2
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def privmsg(self, target, text):
         """Send a PRIVMSG command."""
         params = 'PRIVMSG', target, ':' + text
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def privmsg_many(self, targets, text):
         """Send a PRIVMSG command to multiple targets."""
@@ -916,8 +894,7 @@ class ServerConnection(Connection):
         # Note that many IRC servers don't use your QUIT message
         # unless you've been connected for at least 5 minutes!
         params = 'QUIT', message and ':' + message
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def _prep_message(self, string):
         # The string should not contain any carriage return other than the
@@ -932,6 +909,12 @@ class ServerConnection(Connection):
             msg = "Messages limited to 512 bytes including CR/LF"
             raise MessageTooLong(msg)
         return bytes
+
+    def send_items(self, items):
+        """
+        Send all non-empty items, separated by spaces.
+        """
+        self.send_raw(' '.join(filter(None, items)))
 
     def send_raw(self, string):
         """Send raw string to the server.
@@ -951,32 +934,27 @@ class ServerConnection(Connection):
     def squit(self, server, comment=""):
         """Send an SQUIT command."""
         params = 'SQUIT', server, comment and ':' + comment
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def stats(self, statstype, server=""):
         """Send a STATS command."""
         params = 'STATS', statstype, server
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def time(self, server=""):
         """Send a TIME command."""
         params = 'TIME', server
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def topic(self, channel, new_topic=None):
         """Send a TOPIC command."""
         params = 'TOPIC', channel, new_topic and ':' + new_topic
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def trace(self, target=""):
         """Send a TRACE command."""
         params = 'TRACE', target
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def user(self, username, realname):
         """Send a USER command."""
@@ -986,42 +964,37 @@ class ServerConnection(Connection):
     def userhost(self, nicks):
         """Send a USERHOST command."""
         params = 'USERHOST', ",".join(nicks)
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def users(self, server=""):
         """Send a USERS command."""
         params = 'USERS', server
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def version(self, server=""):
         """Send a VERSION command."""
         params = 'VERSION', server
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def wallops(self, text):
         """Send a WALLOPS command."""
         params = 'WALLOPS', ':' + text
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def who(self, target="", op=""):
         """Send a WHO command."""
         params = 'WHO', target, op and 'o'
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def whois(self, targets):
         """Send a WHOIS command."""
-        self.send_raw("WHOIS " + ",".join(always_iterable(targets)))
+        params = 'WHOIS', ",".join(always_iterable(targets))
+        self.send_items(params)
 
     def whowas(self, nick, max="", server=""):
         """Send a WHOWAS command."""
         params = 'WHOWAS', nick, max, server
-        cmd = ' '.join(filter(None, params))
-        self.send_raw(cmd)
+        self.send_items(params)
 
     def set_rate_limit(self, frequency):
         """
