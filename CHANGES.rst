@@ -1,3 +1,10 @@
+15.1
+====
+
+* Introduce ``ServerConnection.send_items``, consolidating
+  common behavior across many methods previously calling
+  ``send_raw``.
+
 15.0.6
 ======
 
