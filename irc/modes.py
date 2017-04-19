@@ -67,7 +67,7 @@ def _parse_modes(mode_string, unary_modes=""):
     ...         yield random_text(min_len, max_len)
     >>> import itertools
     >>> texts = itertools.islice(random_texts(), 1000)
-    >>> set(type(_parse_modes(text)) for text in texts) == set([list])
+    >>> set(type(_parse_modes(text)) for text in texts) == {list}
     True
     """
 
