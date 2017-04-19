@@ -720,7 +720,7 @@ class ServerConnection(Connection):
             .cap('END')
         """
         cap_subcommands = set('LS LIST REQ ACK NAK CLEAR END'.split())
-        client_subcommands = set(cap_subcommands) - set('NAK')
+        client_subcommands = set(cap_subcommands) - set(['NAK'])
         assert subcommand in client_subcommands, "invalid subcommand"
 
         def _multi_parameter(args):
