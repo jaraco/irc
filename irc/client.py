@@ -320,52 +320,6 @@ class Reactor(object):
                     self.handlers[event].remove(h)
         return 1
 
-    def execute_at(self, at, function, arguments=()):
-        """Execute a function at a specified time.
-
-        Arguments:
-
-            at -- Execute at this time (a standard Unix timestamp).
-            function -- Function to call.
-            arguments -- Arguments to give the function.
-        """
-        warnings.warn(
-            "Call Reactor.scheduler.execute_at directly",
-            DeprecationWarning,
-        )
-        function = functools.partial(function, *arguments)
-        self.scheduler.execute_at(at, function)
-
-    def execute_delayed(self, delay, function, arguments=()):
-        """
-        Execute a function after a specified time.
-
-        delay -- How many seconds to wait.
-        function -- Function to call.
-        arguments -- Arguments to give the function.
-        """
-        warnings.warn(
-            "Call Reactor.scheduler.execute_after directly",
-            DeprecationWarning,
-        )
-        function = functools.partial(function, *arguments)
-        self.scheduler.execute_after(delay, function)
-
-    def execute_every(self, period, function, arguments=()):
-        """
-        Execute a function every 'period' seconds.
-
-        period -- How often to run (always waits this long for first).
-        function -- Function to call.
-        arguments -- Arguments to give the function.
-        """
-        warnings.warn(
-            "Call Reactor.scheduler.execute_every directly",
-            DeprecationWarning,
-        )
-        function = functools.partial(function, *arguments)
-        self.scheduler.execute_every(period, function)
-
     def dcc(self, dcctype="chat"):
         """Creates and returns a DCCConnection object.
 
@@ -418,18 +372,6 @@ class Connection(object):
 
     def __init__(self, reactor):
         self.reactor = reactor
-
-    ##############################
-    ### Convenience wrappers - deprecated; do not use
-
-    def execute_at(self, at, function, arguments=()):
-        self.reactor.execute_at(at, function, arguments)
-
-    def execute_delayed(self, delay, function, arguments=()):
-        self.reactor.execute_delayed(delay, function, arguments)
-
-    def execute_every(self, period, function, arguments=()):
-        self.reactor.execute_every(period, function, arguments)
 
 
 class ServerConnectionError(IRCError):
