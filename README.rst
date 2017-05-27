@@ -84,22 +84,24 @@ it to be.  I think the best way to get started is to read and
 understand the example program ``irccat``, which is included in the
 distribution.
 
-The following files might be of interest:
+The following modules might be of interest:
 
-* ``irc/client.py``
+* ``irc.client``
 
   The library itself.  Read the code along with comments and
   docstrings to get a grip of what it does.  Use it at your own risk
   and read the source, Luke!
 
-* ``irc/bot.py``
+* ``irc.bot``
 
   An IRC bot implementation.
 
-* ``irc/server.py``
+* ``irc.server``
 
   A basic IRC server implementation. Suitable for testing, but not
-  production quality.
+  intended as a production service.
+
+  Invoke the server with ``python -m irc.server``.
 
 Examples
 ========

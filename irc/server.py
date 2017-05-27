@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-irc/server.py
+irc.server
 
 This server has basic support for:
 
