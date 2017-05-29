@@ -62,7 +62,6 @@ import collections
 import functools
 import itertools
 import contextlib
-import warnings
 
 import six
 from jaraco.itertools import always_iterable, infinite_call
