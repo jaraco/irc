@@ -34,7 +34,8 @@ a fairly thorough support for the basic IRC protocol, CTCP, and DCC
 connections.
 
 In order to understand how to make an IRC client, it's best to read up first
-on the `IRC specifications <http://www.irchelp.org/irchelp/rfc/>`_.
+on the `IRC specifications
+<http://web.archive.org/web/20160628193730/http://www.irchelp.org/irchelp/rfc/>`_.
 
 Installation
 ============
