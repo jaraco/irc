@@ -27,7 +27,7 @@ The main features of the IRC client framework are:
     event-loop.
   * Decodes CTCP tagging correctly (hopefully); I haven't seen any
     other IRC client implementation that handles the CTCP
-    specification subtilties.
+    specification subtleties.
   * A kind of simple, single-server, object-oriented IRC client class
     that dispatches events to instance methods is included.
 
