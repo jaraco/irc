@@ -4,6 +4,8 @@
 * Removed deprecated ``execute_*`` methods on ``Connection``
   and ``Reactor`` as introduced in 15.0.
 
+* Fixed link in README.
+
 15.1.1
 ======
 
