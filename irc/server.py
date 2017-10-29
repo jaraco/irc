@@ -27,13 +27,17 @@ will ever be connected to by the public.
 # Very simple hacky ugly IRC server.
 #
 # Todo:
-#   - Encode format for each message and reply with events.codes['needmoreparams']
-#   - starting server when already started doesn't work properly. PID file is not changed, no error messsage is displayed.
+#   - Encode format for each message and reply with
+#     events.codes['needmoreparams']
+#   - starting server when already started doesn't work properly. PID
+#     file is not changed, no error messsage is displayed.
 #   - Delete channel if last user leaves.
-#   - [ERROR] <socket.error instance at 0x7f9f203dfb90> (better error msg required)
+#   - [ERROR] <socket.error instance at 0x7f9f203dfb90>
+#     (better error msg required)
 #   - Empty channels are left behind
 #   - No Op assigned when new channel is created.
-#   - User can /join multiple times (doesn't add more to channel, does say 'joined')
+#   - User can /join multiple times (doesn't add more to channel,
+#     does say 'joined')
 #   - PING timeouts
 #   - Allow all numerical commands.
 #   - Users can send commands to channels they are not in (PART)
@@ -93,11 +97,13 @@ class IRCChannel(object):
 class IRCClient(socketserver.BaseRequestHandler):
     """
     IRC client connect and command handling. Client connection is handled by
-    the ``handle`` method which sets up a two-way communication with the client.
+    the ``handle`` method which sets up a two-way communication
+    with the client.
     It then handles commands sent by the client by dispatching them to the
     ``handle_`` methods.
     """
-    class Disconnect(BaseException): pass
+    class Disconnect(BaseException):
+        pass
 
     def __init__(self, request, client_address, server):
         self.incoming_encoding = 'utf-8'
@@ -110,7 +116,8 @@ class IRCClient(socketserver.BaseRequestHandler):
 
         # On Python 2, use old, clunky syntax to call parent init
         if six.PY2:
-            socketserver.BaseRequestHandler.__init__(self, request,
+            socketserver.BaseRequestHandler.__init__(
+                self, request,
                 client_address, server)
             return
 
@@ -167,7 +174,8 @@ class IRCClient(socketserver.BaseRequestHandler):
             if not handler:
                 _tmpl = 'No handler for command: %s. Full line: %s'
                 log.info(_tmpl % (command, line))
-                raise IRCError.from_name('unknowncommand',
+                raise IRCError.from_name(
+                    'unknowncommand',
                     '%s :Unknown command' % command)
             response = handler(params)
         except AttributeError as e:
@@ -217,7 +225,8 @@ class IRCClient(socketserver.BaseRequestHandler):
             # and MOTD.
             self.nick = nick
             self.server.clients[nick] = self
-            response = ':%s %s %s :%s' % (self.server.servername,
+            response = ':%s %s %s :%s' % (
+                self.server.servername,
                 events.codes['welcome'], self.nick, SRV_WELCOME)
             self.send_queue.append(response)
             response = ':%s 376 %s :End of MOTD command.' % (
@@ -247,7 +256,8 @@ class IRCClient(socketserver.BaseRequestHandler):
         params = params.split(' ', 3)
 
         if len(params) != 4:
-            raise IRCError.from_name('needmoreparams',
+            raise IRCError.from_name(
+                'needmoreparams',
                 'USER :Not enough parameters')
 
         user, mode, unused, realname = params
@@ -268,17 +278,19 @@ class IRCClient(socketserver.BaseRequestHandler):
         Handle the JOINing of a user to a channel. Valid channel names start
         with a # and consist of a-z, A-Z, 0-9 and/or '_'.
         """
-        channel_names = params.split(' ', 1)[0] # Ignore keys
+        channel_names = params.split(' ', 1)[0]  # Ignore keys
         for channel_name in channel_names.split(','):
             r_channel_name = channel_name.strip()
 
             # Valid channel name?
             if not re.match('^#([a-zA-Z0-9_])+$', r_channel_name):
-                raise IRCError.from_name('nosuchchannel',
+                raise IRCError.from_name(
+                    'nosuchchannel',
                     '%s :No such channel' % r_channel_name)
 
             # Add user to the channel (create new channel if not exists)
-            channel = self.server.channels.setdefault(r_channel_name,
+            channel = self.server.channels.setdefault(
+                r_channel_name,
                 IRCChannel(r_channel_name))
             channel.clients.add(self)
 
@@ -286,19 +298,22 @@ class IRCClient(socketserver.BaseRequestHandler):
             self.channels[channel.name] = channel
 
             # Send the topic
-            response_join = ':%s TOPIC %s :%s' % (channel.topic_by,
+            response_join = ':%s TOPIC %s :%s' % (
+                channel.topic_by,
                 channel.name, channel.topic)
             self.send_queue.append(response_join)
 
             # Send join message to everybody in the channel, including yourself
             # and send user list of the channel back to the user.
-            response_join = ':%s JOIN :%s' % (self.client_ident(),
+            response_join = ':%s JOIN :%s' % (
+                self.client_ident(),
                 r_channel_name)
             for client in channel.clients:
                 client.send_queue.append(response_join)
 
             nicks = [client.nick for client in channel.clients]
-            _vals = (self.server.servername, self.nick, channel.name,
+            _vals = (
+                self.server.servername, self.nick, channel.name,
                 ' '.join(nicks))
             response_userlist = ':%s 353 %s = %s :%s' % _vals
             self.send_queue.append(response_userlist)
@@ -313,7 +328,8 @@ class IRCClient(socketserver.BaseRequestHandler):
         """
         target, sep, msg = params.partition(' ')
         if not msg:
-            raise IRCError.from_name('needmoreparams',
+            raise IRCError.from_name(
+                'needmoreparams',
                 'PRIVMSG :Not enough parameters')
 
         message = ':%s PRIVMSG %s %s' % (self.client_ident(), target, msg)
@@ -323,9 +339,10 @@ class IRCClient(socketserver.BaseRequestHandler):
             if not channel:
                 raise IRCError.from_name('nosuchnick', 'PRIVMSG :%s' % target)
 
-            if not channel.name in self.channels:
+            if channel.name not in self.channels:
                 # The user isn't in the channel.
-                raise IRCError.from_name('cannotsendtochan',
+                raise IRCError.from_name(
+                    'cannotsendtochan',
                     '%s :Cannot send to channel' % channel.name)
 
             self._send_to_others(message, channel)
@@ -342,7 +359,8 @@ class IRCClient(socketserver.BaseRequestHandler):
         Send the message to all clients in the specified channel except for
         self.
         """
-        other_clients = [client for client in channel.clients
+        other_clients = [
+            client for client in channel.clients
             if not client == self]
         for client in other_clients:
             client.send_queue.append(message)
@@ -355,16 +373,19 @@ class IRCClient(socketserver.BaseRequestHandler):
 
         channel = self.server.channels.get(channel_name)
         if not channel:
-            raise IRCError.from_name('nosuchnick', 'PRIVMSG :%s' % channel_name)
-        if not channel.name in self.channels:
+            raise IRCError.from_name(
+                'nosuchnick', 'PRIVMSG :%s' % channel_name)
+        if channel.name not in self.channels:
             # The user isn't in the channel.
-            raise IRCError.from_name('cannotsendtochan',
+            raise IRCError.from_name(
+                'cannotsendtochan',
                 '%s :Cannot send to channel' % channel.name)
 
         if topic:
             channel.topic = topic.lstrip(':')
             channel.topic_by = self.nick
-        message = ':%s TOPIC %s :%s' % (self.client_ident(), channel_name,
+        message = ':%s TOPIC %s :%s' % (
+            self.client_ident(), channel_name,
             channel.topic)
         return message
 
@@ -419,7 +440,8 @@ class IRCClient(socketserver.BaseRequestHandler):
         """
         Return the client identifier as included in many command replies.
         """
-        return irc.client.NickMask.from_params(self.nick, self.user,
+        return irc.client.NickMask.from_params(
+            self.nick, self.user,
             self.server.servername)
 
     def finish(self):
@@ -451,7 +473,7 @@ class IRCClient(socketserver.BaseRequestHandler):
             self.user,
             self.host[0],
             self.realname,
-            )
+        )
 
 
 class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -479,9 +501,11 @@ class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-a", "--address", dest="listen_address",
+    parser.add_argument(
+        "-a", "--address", dest="listen_address",
         default='127.0.0.1', help="IP on which to listen")
-    parser.add_argument("-p", "--port", dest="listen_port", default=6667,
+    parser.add_argument(
+        "-p", "--port", dest="listen_port", default=6667,
         type=int, help="Port on which to listen")
     jaraco.logging.add_arguments(parser)
 

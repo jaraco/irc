@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+
 class Tag(object):
     """
     An IRC message tag ircv3.net/specs/core/message-tags-3.2.html

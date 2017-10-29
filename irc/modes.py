@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+
 def parse_nick_modes(mode_string):
     """Parse a nick mode string.
 
@@ -15,6 +16,7 @@ def parse_nick_modes(mode_string):
 
     return _parse_modes(mode_string, "")
 
+
 def parse_channel_modes(mode_string):
     """Parse a channel mode string.
 
@@ -28,6 +30,7 @@ def parse_channel_modes(mode_string):
     [['+', 'a', None], ['+', 'b', 'foo'], ['-', 'c', None]]
     """
     return _parse_modes(mode_string, "bklvohq")
+
 
 def _parse_modes(mode_string, unary_modes=""):
     """

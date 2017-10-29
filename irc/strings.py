@@ -4,6 +4,7 @@ import string
 
 from jaraco.text import FoldedCase
 
+
 class IRCFoldedCase(FoldedCase):
     """
     A version of FoldedCase that honors the IRC specification for lowercased
@@ -29,6 +30,7 @@ class IRCFoldedCase(FoldedCase):
             # bypass translate, which returns self
             else super(IRCFoldedCase, self).lower()
         )
+
 
 def lower(str):
     return IRCFoldedCase(str).lower()
