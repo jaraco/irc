@@ -393,6 +393,7 @@ class ServerConnection(Connection):
 
     def __init__(self, reactor):
         super(ServerConnection, self).__init__(reactor)
+        self.outgoing_encoding = 'utf-8'
         self.connected = False
         self.features = features.FeatureSet()
 
@@ -820,7 +821,7 @@ class ServerConnection(Connection):
         if '\n' in string:
             msg = "Carriage returns not allowed in privmsg(text)"
             raise InvalidCharacters(msg)
-        bytes = string.encode('utf-8') + b'\r\n'
+        bytes = string.encode(self.outgoing_encoding) + b'\r\n'
         # According to the RFC http://tools.ietf.org/html/rfc2812#page-6,
         # clients should not transmit more than 512 bytes.
         if len(bytes) > 512:
@@ -932,6 +933,7 @@ class DCCConnection(Connection):
 
     def __init__(self, reactor, dcctype):
         super(DCCConnection, self).__init__(reactor)
+        self.outgoing_encoding = 'utf-8'
         self.connected = 0
         self.passive = 0
         self.dcctype = dcctype
@@ -1065,7 +1067,7 @@ class DCCConnection(Connection):
         """
         if self.dcctype == 'chat':
             text += '\n'
-        bytes = text.encode('utf-8')
+        bytes = text.encode(self.outgoing_encoding)
         return self.send_bytes(bytes)
 
     def send_bytes(self, bytes):

@@ -100,6 +100,7 @@ class IRCClient(socketserver.BaseRequestHandler):
     class Disconnect(BaseException): pass
 
     def __init__(self, request, client_address, server):
+        self.incoming_encoding = 'utf-8'
         self.user = None
         self.host = client_address  # Client's hostname / ip.
         self.realname = None        # Client's real name
@@ -155,7 +156,7 @@ class IRCClient(socketserver.BaseRequestHandler):
 
         self.buffer.feed(data)
         for line in self.buffer:
-            line = line.decode('utf-8')
+            line = line.decode(self.incoming_encoding)
             self._handle_line(line)
 
     def _handle_line(self, line):
