@@ -96,11 +96,14 @@ except Exception:
 class IRCError(Exception):
     "An IRC exception"
 
+
 class InvalidCharacters(ValueError):
     "Invalid characters were encountered in the message"
 
+
 class MessageTooLong(ValueError):
     "Message is too long"
+
 
 class PrioritizedHandler(
         collections.namedtuple('Base', ('priority', 'callback'))):
@@ -244,7 +247,7 @@ class Reactor(object):
         incoming data, if there are any.  If that seems boring, look
         at the process_forever method.
         """
-        log.log(logging.DEBUG-2, "process_once()")
+        log.log(logging.DEBUG - 2, "process_once()")
         sockets = self.sockets
         if sockets:
             (i, o, e) = select.select(sockets, [], [], timeout)
@@ -312,7 +315,7 @@ class Reactor(object):
         Returns 1 on success, otherwise 0.
         """
         with self.mutex:
-            if not event in self.handlers:
+            if event not in self.handlers:
                 return 0
             for h in self.handlers[event]:
                 if handler == h.callback:
@@ -355,7 +358,11 @@ class Reactor(object):
             self.connections.remove(connection)
             self._on_disconnect(connection.socket)
 
-_cmd_pat = "^(@(?P<tags>[^ ]*) )?(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?"
+
+_cmd_pat = (
+    "^(@(?P<tags>[^ ]*) )?(:(?P<prefix>[^ ]+) +)?"
+    "(?P<command>[^ ]+)( *(?P<argument> .+))?"
+)
 _rfc_1459_command_regexp = re.compile(_cmd_pat)
 
 
@@ -375,6 +382,7 @@ class Connection(object):
 
 class ServerConnectionError(IRCError):
     pass
+
 
 class ServerNotConnectedError(ServerConnectionError):
     pass
@@ -398,7 +406,8 @@ class ServerConnection(Connection):
 
     # save the method args to allow for easier reconnection.
     @irc_functools.save_method_args
-    def connect(self, server, port, nickname, password=None, username=None,
+    def connect(
+            self, server, port, nickname, password=None, username=None,
             ircname=None, connect_factory=connection.Factory()):
         """Connect/reconnect to a server.
 
@@ -418,7 +427,8 @@ class ServerConnection(Connection):
 
         Returns the ServerConnection object.
         """
-        log.debug("connect(server=%r, port=%r, nickname=%r, ...)", server,
+        log.debug(
+            "connect(server=%r, port=%r, nickname=%r, ...)", server,
             port, nickname)
 
         if self.connected:
@@ -517,11 +527,13 @@ class ServerConnection(Connection):
         # process each non-empty line after logging all lines
         for line in self.buffer:
             log.debug("FROM SERVER: %s", line)
-            if not line: continue
+            if not line:
+                continue
             self._process_line(line)
 
     def _process_line(self, line):
-        event = Event("all_raw_messages", self.get_server_name(), None,
+        event = Event(
+            "all_raw_messages", self.get_server_name(), None,
             [line])
         self._handle_event(event)
 
@@ -571,16 +583,20 @@ class ServerConnection(Connection):
                     command = "ctcpreply"
 
                 m = list(m)
-                log.debug("command: %s, source: %s, target: %s, "
-                          "arguments: %s, tags: %s", command, source, target, m, tags)
+                log.debug(
+                    "command: %s, source: %s, target: %s, "
+                    "arguments: %s, tags: %s",
+                    command, source, target, m, tags)
                 event = Event(command, source, target, m, tags)
                 self._handle_event(event)
                 if command == "ctcp" and m[0] == "ACTION":
                     event = Event("action", source, target, m[1:], tags)
                     self._handle_event(event)
             else:
-                log.debug("command: %s, source: %s, target: %s, "
-                          "arguments: %s, tags: %s", command, source, target, [m], tags)
+                log.debug(
+                    "command: %s, source: %s, target: %s, "
+                    "arguments: %s, tags: %s",
+                    command, source, target, [m], tags)
                 event = Event(command, source, target, [m], tags)
                 self._handle_event(event)
 
@@ -596,8 +612,10 @@ class ServerConnection(Connection):
         if command == "mode":
             if not is_channel(target):
                 command = "umode"
-        log.debug("command: %s, source: %s, target: %s, "
-                  "arguments: %s, tags: %s", command, source, target, arguments, tags)
+        log.debug(
+            "command: %s, source: %s, target: %s, "
+            "arguments: %s, tags: %s",
+            command, source, target, arguments, tags)
         event = Event(command, source, target, arguments, tags)
         self._handle_event(event)
 
@@ -768,7 +786,6 @@ class ServerConnection(Connection):
     def names(self, channels=None):
         """Send a NAMES command."""
         self.send_items('NAMES', ','.join(always_iterable(channels)))
-
 
     def nick(self, newnick):
         """Send a NICK command."""
@@ -1014,7 +1031,8 @@ class DCCConnection(Connection):
             self.socket.close()
             self.socket = conn
             self.connected = 1
-            log.debug("DCC connection from %s:%d", self.peeraddress,
+            log.debug(
+                "DCC connection from %s:%d", self.peeraddress,
                 self.peerport)
             self.reactor._handle_event(
                 self,
@@ -1039,7 +1057,8 @@ class DCCConnection(Connection):
 
             if len(self.buffer) > 2 ** 14:
                 # Bad peer! Naughty peer!
-                log.info("Received >16k from a peer without a newline; "
+                log.info(
+                    "Received >16k from a peer without a newline; "
                     "disconnecting.")
                 self.disconnect()
                 return
@@ -1052,7 +1071,8 @@ class DCCConnection(Connection):
         for chunk in chunks:
             log.debug("FROM PEER: %s", chunk)
             arguments = [chunk]
-            log.debug("command: %s, source: %s, target: %s, arguments: %s",
+            log.debug(
+                "command: %s, source: %s, target: %s, arguments: %s",
                 command, prefix, target, arguments)
             event = Event(command, prefix, target, arguments)
             self.reactor._handle_event(self, event)
@@ -1117,7 +1137,8 @@ class SimpleIRCClient(object):
         self.connection = self.reactor.server()
         self.dcc_connections = []
         self.reactor.add_global_handler("all_events", self._dispatcher, -10)
-        self.reactor.add_global_handler("dcc_disconnect",
+        self.reactor.add_global_handler(
+            "dcc_disconnect",
             self._dcc_disconnect, -10)
 
     def _dispatcher(self, connection, event):
@@ -1217,6 +1238,7 @@ def is_channel(string):
     """
     return string and string[0] in "#&+!"
 
+
 def ip_numstr_to_quad(num):
     """
     Convert an IP number as an integer given in ASCII
@@ -1232,6 +1254,7 @@ def ip_numstr_to_quad(num):
     bytes = struct.unpack('BBBB', packed)
     return ".".join(map(str, bytes))
 
+
 def ip_quad_to_numstr(quad):
     """
     Convert an IP address string (e.g. '192.168.0.1') to an IP
@@ -1243,6 +1266,7 @@ def ip_quad_to_numstr(quad):
     bytes = map(int, quad.split("."))
     packed = struct.pack('BBBB', *bytes)
     return str(struct.unpack('>L', packed)[0])
+
 
 class NickMask(six.text_type):
     """

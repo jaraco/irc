@@ -70,7 +70,8 @@ numeric = {
     "323": "listend",
     "324": "channelmodeis",
     "329": "channelcreate",
-    "330": "whoisaccount", # <nick> <accountName> :<info> - Spawned from a /whois
+    # <nick> <accountName> :<info> - Spawned from a /whois
+    "330": "whoisaccount",
     "331": "notopic",
     "332": "currenttopic",
     "333": "topicinfo",
@@ -83,7 +84,8 @@ numeric = {
     "351": "version",
     "352": "whoreply",
     "353": "namreply",
-    "354": "whospcrpl", # Response to a WHOX query
+    # Response to a WHOX query
+    "354": "whospcrpl",
     "361": "killdone",
     "362": "closing",
     "363": "closeend",
@@ -99,7 +101,7 @@ numeric = {
     "374": "endofinfo",
     "375": "motdstart",
     "376": "endofmotd",
-    "377": "motd2",        # 1997-10-16 -- tkil
+    "377": "motd2",
     "381": "youreoper",
     "382": "rehashing",
     "384": "myportis",
@@ -152,7 +154,9 @@ numeric = {
     "476": "badchanmask",
     "477": "nochanmodes",  # "Channel doesn't support modes"
     "478": "banlistfull",
-    "480": "cannotknock", #generated when /knock <chan> is ran on a channel that you are either in or has /knock'ing disabled
+    # generated when /knock <chan> is ran on a channel that you
+    # are either in or has /knock'ing disabled
+    "480": "cannotknock",
     "481": "noprivileges",
     "482": "chanoprivsneeded",
     "483": "cantkillserver",

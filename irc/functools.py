@@ -3,6 +3,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 import functools
 import collections
 
+
 def save_method_args(method):
     """
     Wrap a method such that when it is called, the args and kwargs are
@@ -38,6 +39,7 @@ def save_method_args(method):
     ()
     """
     args_and_kwargs = collections.namedtuple('args_and_kwargs', 'args kwargs')
+
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
         attr_name = '_saved_' + method.__name__

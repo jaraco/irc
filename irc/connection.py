@@ -4,6 +4,7 @@ import socket
 
 identity = lambda x: x
 
+
 class Factory(object):
     """
     A class for creating custom socket connections.

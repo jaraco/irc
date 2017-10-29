@@ -20,6 +20,7 @@ low_level_mapping = {
 
 low_level_regexp = re.compile(LOW_LEVEL_QUOTE + "(.)")
 
+
 def _low_level_replace(match_obj):
     ch = match_obj.group(1)
 

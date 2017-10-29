@@ -16,7 +16,8 @@ __all__ = [
 	'LenientDecodingLineBuffer',
 ]
 
-warnings.warn("irc.buffer module will be removed "
+warnings.warn(
+	"irc.buffer module will be removed "
 	"in a future version. Use jaraco.stream.buffer instead.",
 	DeprecationWarning,
 )

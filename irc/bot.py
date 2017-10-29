@@ -21,6 +21,7 @@ import irc.client
 import irc.modes
 from .dict import IRCDict
 
+
 class ServerSpec(object):
     """
     An IRC server specification.
@@ -134,7 +135,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         **connect_params -- parameters to pass through to the connect
             method.
     """
-    def __init__(self, server_list, nickname, realname,
+    def __init__(
+            self, server_list, nickname, realname,
             reconnection_interval=missing,
             recon=ExponentialBackoff(), **connect_params):
         super(SingleServerIRCBot, self).__init__()
@@ -142,8 +144,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         self.channels = IRCDict()
         self.server_list = [
             ServerSpec(*server)
-                if isinstance(server, (tuple, list))
-                else server
+            if isinstance(server, (tuple, list))
+            else server
             for server in server_list
         ]
         assert all(
@@ -153,7 +155,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         self.recon = recon
         # for compatibility
         if reconnection_interval is not missing:
-            warnings.warn("reconnection_interval is deprecated; "
+            warnings.warn(
+                "reconnection_interval is deprecated; "
                 "pass a ReconnectStrategy object instead")
             self.recon = ExponentialBackoff(min_interval=reconnection_interval)
 
@@ -161,7 +164,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         self._realname = realname
         for i in ["disconnect", "join", "kick", "mode",
                   "namreply", "nick", "part", "quit"]:
-            self.connection.add_global_handler(i, getattr(self, "_on_" + i),
+            self.connection.add_global_handler(
+                i, getattr(self, "_on_" + i),
                 -20)
 
     def _connect(self):
@@ -170,7 +174,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         """
         server = self.server_list[0]
         try:
-            self.connect(server.host, server.port, self._nickname,
+            self.connect(
+                server.host, server.port, self._nickname,
                 server.password, ircname=self._realname,
                 **self.__connect_params)
             self.connection_attempts = 1
@@ -313,7 +318,9 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         elif e.arguments[0] == "PING":
             if len(e.arguments) > 1:
                 c.ctcp_reply(nick, "PING " + e.arguments[1])
-        elif e.arguments[0] == "DCC" and e.arguments[1].split(" ", 1)[0] == "CHAT":
+        elif (
+            e.arguments[0] == "DCC"
+                and e.arguments[1].split(" ", 1)[0] == "CHAT"):
             self.on_dccchat(c, e)
 
     def on_dccchat(self, c, e):

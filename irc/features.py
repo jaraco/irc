@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import collections
 
+
 class FeatureSet(object):
     """
     An implementation of features as loaded from an ISUPPORT server directive.
@@ -44,7 +45,7 @@ class FeatureSet(object):
 
     def load(self, arguments):
         "Load the values from the a ServerConnection arguments"
-        target, features, msg = arguments[:1], arguments[1:-1], arguments[-1:]
+        features = arguments[1:-1]
         list(map(self.load_feature, features))
 
     def load_feature(self, feature):
@@ -84,8 +85,10 @@ class FeatureSet(object):
         >>> res['a']
         3
         """
-        return dict(string_int_pair(target, ':')
-            for target in value.split(','))
+        return dict(
+            string_int_pair(target, ':')
+            for target in value.split(',')
+        )
 
     @staticmethod
     def _parse_CHANLIMIT(value):
@@ -111,6 +114,7 @@ class FeatureSet(object):
         if value.isdigit():
             return int(value)
         return value
+
 
 def string_int_pair(target, sep=':'):
     name, value = target.split(sep)
