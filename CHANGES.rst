@@ -1,3 +1,10 @@
+16.1
+====
+
+* #131: Add ``Connection.encode`` and ``Connection.transmit_encoding``
+  to enable encodings other than UTF-8 to be used when transmitting
+  text.
+
 16.0
 ====
 

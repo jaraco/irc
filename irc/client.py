@@ -372,12 +372,19 @@ class Connection(object):
     Base class for IRC connections.
     """
 
+    transmit_encoding = 'utf-8'
+    "encoding used for transmission"
+
     @abc.abstractproperty
     def socket(self):
         "The socket for this connection"
 
     def __init__(self, reactor):
         self.reactor = reactor
+
+    def encode(self, msg):
+        """Encode a message for transmission."""
+        return msg.encode(self.transmit_encoding)
 
 
 class ServerConnectionError(IRCError):
@@ -837,7 +844,7 @@ class ServerConnection(Connection):
         if '\n' in string:
             msg = "Carriage returns not allowed in privmsg(text)"
             raise InvalidCharacters(msg)
-        bytes = string.encode('utf-8') + b'\r\n'
+        bytes = self.encode(string) + b'\r\n'
         # According to the RFC http://tools.ietf.org/html/rfc2812#page-6,
         # clients should not transmit more than 512 bytes.
         if len(bytes) > 512:
@@ -1085,8 +1092,7 @@ class DCCConnection(Connection):
         """
         if self.dcctype == 'chat':
             text += '\n'
-        bytes = text.encode('utf-8')
-        return self.send_bytes(bytes)
+        return self.send_bytes(self.encode(text))
 
     def send_bytes(self, bytes):
         """
