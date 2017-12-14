@@ -436,23 +436,16 @@ class IRCClient(socketserver.BaseRequestHandler):
                 print("     ", client.nick, client)
 
     def handle_ison(self, params):
+        response = '303: '
+        if len(params) == 0 or params.isspace():
+            response = '461: ISON Not enough parameters'
+            return response    
+        nickOnline = []
         for nick in params.split(" "):
-            if len(params) == 0 or params.isspace():
-                response = '461: ISON Not enough parameters'
-                return response
-
-            first = True
-            response = '303: '
-
-            for c in self.server.clients:
-                if c == nick:
-                    if not first:
-                        response += ' ' + nick
-                    else:
-                        response += nick
-                        first = False
-        return self.send_queue.append(response)
-
+            if nick in self.server.clients:
+                nickOnline.append(nick)
+        response += ' '.join(nickOnline)
+        return response
 
     def client_ident(self):
         """
