@@ -443,7 +443,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         nickOnline = []
         for nick in params.split(" "):
             if nick in self.server.clients:
-                nickOnline.append(nick)/iso
+                nickOnline.append(nick)
         response += ' '.join(nickOnline)
         return response
 
