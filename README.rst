@@ -1,29 +1,23 @@
-.. image:: https://badges.gitter.im/jaraco/irc.svg
-   :alt: Join the chat at https://gitter.im/jaraco/irc
-   :target: https://gitter.im/jaraco/irc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-
 .. image:: https://img.shields.io/pypi/v/irc.svg
    :target: https://pypi.org/project/irc
 
 .. image:: https://img.shields.io/pypi/pyversions/irc.svg
 
-.. image:: https://img.shields.io/pypi/dm/irc.svg
-
 .. image:: https://img.shields.io/travis/jaraco/irc/master.svg
    :target: http://travis-ci.org/jaraco/irc
+
+.. image:: https://readthedocs.org/projects/python-irc/badge/?version=latest
+   :target: http://python-irc.readthedocs.io/en/latest/?badge=latest
+
+.. image:: https://badges.gitter.im/jaraco/irc.svg
+   :alt: Join the chat at https://gitter.im/jaraco/irc
+   :target: https://gitter.im/jaraco/irc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 Full-featured Python IRC library for Python.
 
 - `Project home <https://github.com/jaraco/irc>`_
 - `Docs <https://python-irc.readthedocs.io/>`_
 - `History <https://python-irc.readthedocs.io/en/latest/history.html>`_
-
-License
-=======
-
-License is indicated in the project metadata (typically one or more
-of the Trove classifiers). For more details, see `this explanation
-<https://github.com/jaraco/skeleton/issues/1>`_.
 
 Overview
 ========

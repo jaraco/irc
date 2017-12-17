@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode',
-    'jaraco.packaging.sphinx',
-    'rst.linker',
+	'sphinx.ext.autodoc',
+	'jaraco.packaging.sphinx',
+	'rst.linker',
+	'sphinx.ext.viewcode',
 ]
 
 master_doc = 'index'
