@@ -52,6 +52,7 @@ params = dict(
             'pytest-sugar',
             'collective.checkdocs',
             'backports.unittest_mock',
+            'pygments',
         ],
         'docs': [
             'sphinx',
