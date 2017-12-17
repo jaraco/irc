@@ -681,9 +681,9 @@ will be maintained for these parameters until the release of irc 4.0.
 
 * Improved Unicode support. Fixes failing tests and errors lowering Unicode
   channel names.
-* Issue #3541414 - The ServerConnection and DCCConnection now encode any
+* Sourceforge 18 - The ServerConnection and DCCConnection now encode any
   strings as UTF-8 before transmitting.
-* Issue #3527371 - Updated strings.FoldedCase to support comparison against
+* Sourceforge 17 - Updated strings.FoldedCase to support comparison against
   objects of other types.
 * Shutdown the sockets before closing.
 
@@ -726,20 +726,20 @@ This release officially deprecates 2.0.1-2.0.3 in favor of 3.0.
 0.9
 ===
 
-* Fix file saving using dccreceive.py on Windows. Fixes #2863199.
+* Fix file saving using dccreceive.py on Windows. Fixes Sourceforge 6.
 * Created NickMask class from nm_to_* functions. Now if a source is
   a NickMask, one can access the .nick, .host, and .user attributes.
-* Use correct attribute for saved connect args. Fixes #3523057.
+* Use correct attribute for saved connect args. Fixes Sourceforge 16.
 
 0.8
 ===
 
-* Added ServerConnection.reconnect method. Fixes #3515580.
+* Added ServerConnection.reconnect method. Fixes Sourceforge 13.
 
 0.7.1
 =====
 
-* Added missing events. Fixes #3515578.
+* Added missing events. Fixes Sourceforge 12.
 
 0.7
 ===
@@ -760,7 +760,7 @@ these changes, you can safely depend on `irc >= 0.7, <2.0dev`.
 
 * Fixed failing test where DelayedCommands weren't being sorted properly.
   DelayedCommand a now subclass of the DateTime object, where the command's
-  due time is the datetime. Fixed issue #3518508.
+  due time is the datetime. Fixed issue Sourceforge 15.
 
 0.6.2
 =====
@@ -773,5 +773,5 @@ these changes, you can safely depend on `irc >= 0.7, <2.0dev`.
 * Minimum Python requirement is now Python 2.6. Python 2.3 and earlier should use 0.5.0
   or earlier.
 * Removed incorrect usage of Connection.execute_delayed. Added Connection.execute_every.
-  Fixed issue 3516241.
+  Fixed Sourceforge 8.
 * Use new-style classes.

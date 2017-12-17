@@ -28,6 +28,10 @@ link_files = {
 				pattern=r'PEP[- ](?P<pep_number>\d+)',
 				url='https://www.python.org/dev/peps/pep-{pep_number:0>4}/',
 			),
+			dict(
+				pattern=r'(Sourceforge )(?P<sf_issue>\d+)',
+				url='https://sourceforge.net/p/python-irclib/bugs/{sf_issue}/',
+			),
 		],
 	),
 }
