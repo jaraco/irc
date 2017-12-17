@@ -435,6 +435,18 @@ class IRCClient(socketserver.BaseRequestHandler):
             for client in channel.clients:
                 print("     ", client.nick, client)
 
+    def handle_ison(self, params):
+        response = ':%s 303 %s :' % (self.server.servername, self.client_ident().nick)
+        if len(params) == 0 or params.isspace():
+            response = ':%s 461 %s ISON :Not enough parameters' % (self.server.servername, self.client_ident().nick)
+            return response    
+        nickOnline = []
+        for nick in params.split(" "):
+            if nick in self.server.clients:
+                nickOnline.append(nick)
+        response += ' '.join(nickOnline)
+        return response
+
     def client_ident(self):
         """
         Return the client identifier as included in many command replies.

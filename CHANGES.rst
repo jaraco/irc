@@ -1,3 +1,8 @@
+16.2
+====
+
+* #133: In ``irc.server``, add support for ISON.
+
 16.1
 ====
 
