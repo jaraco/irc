@@ -4,10 +4,10 @@
 .. image:: https://img.shields.io/pypi/pyversions/irc.svg
 
 .. image:: https://img.shields.io/travis/jaraco/irc/master.svg
-   :target: http://travis-ci.org/jaraco/irc
+   :target: https://travis-ci.org/jaraco/irc
 
 .. image:: https://readthedocs.org/projects/python-irc/badge/?version=latest
-   :target: http://python-irc.readthedocs.io/en/latest/?badge=latest
+   :target: https://python-irc.readthedocs.io/en/latest/?badge=latest
 
 .. image:: https://badges.gitter.im/jaraco/irc.svg
    :alt: Join the chat at https://gitter.im/jaraco/irc
