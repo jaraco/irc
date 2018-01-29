@@ -41,7 +41,8 @@ class ServerSpec(object):
         self.host = host
         self.port = port
         self.password = password
-
+    def __repr__(self):
+        return "<irc.bot.ServerSpec for server %s:%s>" % (self.host, self.port)
 
 @six.add_metaclass(abc.ABCMeta)
 class ReconnectStrategy(object):
@@ -483,3 +484,4 @@ class Channel(object):
 
     def has_key(self):
         return self.has_mode("k")
+   
