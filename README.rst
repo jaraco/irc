@@ -198,7 +198,7 @@ overridden before the connection is established):
 
 .. code:: python
 
-    server = irc.client.IRC().server()
+    server = irc.client.Reactor().server()
     server.buffer_class = buffer.LenientDecodingLineBuffer
     server.connect()
 
