@@ -19,6 +19,7 @@ import jaraco.logging
 
 import irc.client
 
+
 class DCCReceive(irc.client.SimpleIRCClient):
     def __init__(self):
         irc.client.SimpleIRCClient.__init__(self)
@@ -32,7 +33,8 @@ class DCCReceive(irc.client.SimpleIRCClient):
             return
         self.filename = os.path.basename(filename)
         if os.path.exists(self.filename):
-            print("A file named", self.filename,
+            print(
+                "A file named", self.filename,
                 "already exists. Refusing to save it.")
             self.connection.quit()
             return
@@ -56,16 +58,18 @@ class DCCReceive(irc.client.SimpleIRCClient):
     def on_disconnect(self, connection, event):
         sys.exit(0)
 
+
 def get_args():
     parser = argparse.ArgumentParser(
         description="Receive a single file to the current directory via DCC "
-            "and then exit.",
+        "and then exit.",
     )
     parser.add_argument('server')
     parser.add_argument('nickname')
     parser.add_argument('-p', '--port', default=6667, type=int)
     jaraco.logging.add_arguments(parser)
     return parser.parse_args()
+
 
 def main():
     args = get_args()
@@ -78,6 +82,7 @@ def main():
         print(x)
         sys.exit(1)
     c.start()
+
 
 if __name__ == "__main__":
     main()

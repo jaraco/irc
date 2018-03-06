@@ -212,7 +212,7 @@ class Reactor(object):
         See documentation for Reactor.__init__.
         """
         with self.mutex:
-            log.log(logging.DEBUG-2, "process_data()")
+            log.log(logging.DEBUG - 2, "process_data()")
             for s, c in itertools.product(sockets, self.connections):
                 if s == c.socket:
                     c.process_data()
@@ -1153,7 +1153,8 @@ class SimpleIRCClient(object):
         """
         log.debug("_dispatcher: %s", event.type)
 
-        do_nothing = lambda c, e: None
+        def do_nothing(c, e):
+            return None
         method = getattr(self, "on_" + event.type, do_nothing)
         method(connection, event)
 

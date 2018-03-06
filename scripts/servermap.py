@@ -48,14 +48,17 @@ import jaraco.logging
 
 import irc.client
 
+
 def on_connect(connection, event):
     sys.stdout.write("\nGetting links...")
     sys.stdout.flush()
     connection.links()
 
+
 def on_passwdmismatch(connection, event):
     print("Password required.")
     sys.exit(1)
+
 
 def on_links(connection, event):
     global links
@@ -63,6 +66,7 @@ def on_links(connection, event):
     links.append((event.arguments[0],
                   event.arguments[1],
                   event.arguments[2]))
+
 
 def on_endoflinks(connection, event):
     global links
@@ -82,19 +86,22 @@ def on_endoflinks(connection, event):
     else:
         hubs = 0
 
-    print("%d servers (%d leaves and %d hubs)\n" % (len(links), len(links)-hubs, hubs))
+    print("%d servers (%d leaves and %d hubs)\n" % (
+        len(links), len(links) - hubs, hubs))
 
     print_tree(0, [], connection.get_server_name(), m)
     connection.quit("Using irc.client.py")
 
+
 def on_disconnect(connection, event):
     sys.exit(0)
+
 
 def indent_string(level, active_levels, last):
     if level == 0:
         return ""
     s = ""
-    for i in range(level-1):
+    for i in range(level - 1):
         if i in active_levels:
             s = s + "| "
         else:
@@ -105,14 +112,16 @@ def indent_string(level, active_levels, last):
         s = s + "|-"
     return s
 
+
 def print_tree(level, active_levels, root, map, last=0):
     sys.stdout.write(indent_string(level, active_levels, last)
                      + root + "\n")
     if root in map:
         list = map[root]
         for r in list[:-1]:
-            print_tree(level+1, active_levels[:]+[level], r, map)
-        print_tree(level+1, active_levels[:], list[-1], map, 1)
+            print_tree(level + 1, active_levels[:] + [level], r, map)
+        print_tree(level + 1, active_levels[:], list[-1], map, 1)
+
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -121,6 +130,7 @@ def get_args():
     parser.add_argument('-p', '--port', default=6667, type=int)
     jaraco.logging.add_arguments(parser)
     return parser.parse_args()
+
 
 def main():
     global links
@@ -146,6 +156,7 @@ def main():
     c.add_global_handler("disconnect", on_disconnect)
 
     reactor.process_forever()
+
 
 if __name__ == '__main__':
     main()

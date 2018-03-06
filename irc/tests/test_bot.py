@@ -10,6 +10,7 @@ import irc.bot
 import irc.server
 from irc.bot import ServerSpec
 
+
 class TestServerSpec(object):
 
     def test_with_host(self):
@@ -31,10 +32,12 @@ class TestServerSpec(object):
         assert server_spec.password == 'heres johnny!'
 
     def test_with_host_and_port_and_password(self):
-        server_spec = ServerSpec('irc.example.gov', port=6668, password='there-is-only-zuul')
+        server_spec = ServerSpec(
+            'irc.example.gov', port=6668, password='there-is-only-zuul')
         assert server_spec.host == 'irc.example.gov'
         assert server_spec.port == 6668
         assert server_spec.password == 'there-is-only-zuul'
+
 
 class TestChannel(object):
 
@@ -101,9 +104,9 @@ def disconnecting_server():
 class TestBot(object):
     def test_construct_bot(self):
         bot = irc.bot.SingleServerIRCBot(
-            server_list = [('localhost', '9999')],
-            realname = 'irclibbot',
-            nickname = 'irclibbot',
+            server_list=[('localhost', '9999')],
+            realname='irclibbot',
+            nickname='irclibbot',
         )
         assert len(bot.server_list) == 1
         svr = bot.server_list[0]
@@ -117,7 +120,8 @@ class TestBot(object):
 
         Regression test for #22
         """
-        event = irc.client.Event(type=None, source=None, target=None,
+        event = irc.client.Event(
+            type=None, source=None, target=None,
             arguments=['*', '*', 'nick'])
         _on_namreply = six.get_unbound_function(
             irc.bot.SingleServerIRCBot._on_namreply)

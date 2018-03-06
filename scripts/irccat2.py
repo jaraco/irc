@@ -10,6 +10,7 @@
 import irc.client
 import sys
 
+
 class IRCCat(irc.client.SimpleIRCClient):
     def __init__(self, target):
         irc.client.SimpleIRCClient.__init__(self)
@@ -34,6 +35,7 @@ class IRCCat(irc.client.SimpleIRCClient):
                 break
             self.connection.privmsg(self.target, line)
         self.connection.quit("Using irc.client.py")
+
 
 def main():
     if len(sys.argv) != 4:
@@ -61,6 +63,7 @@ def main():
         print(x)
         sys.exit(1)
     c.start()
+
 
 if __name__ == "__main__":
     main()

@@ -44,7 +44,9 @@ class ServerSpec(object):
 
     def __repr__(self):
         return "<irc.bot.ServerSpec for server %s:%s %s>" % (
-            self.host, self.port, "with password" if self.password else "without password")
+            self.host, self.port,
+            "with password" if self.password else "without password",
+        )
 
 
 @six.add_metaclass(abc.ABCMeta)
