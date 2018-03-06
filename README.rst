@@ -6,6 +6,9 @@
 .. image:: https://img.shields.io/travis/jaraco/irc/master.svg
    :target: https://travis-ci.org/jaraco/irc
 
+.. .. image:: https://img.shields.io/appveyor/ci/jaraco/skeleton/master.svg
+..    :target: https://ci.appveyor.com/project/jaraco/skeleton/branch/master
+
 .. image:: https://readthedocs.org/projects/python-irc/badge/?version=latest
    :target: https://python-irc.readthedocs.io/en/latest/?badge=latest
 
