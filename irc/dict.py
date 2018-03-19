@@ -5,6 +5,7 @@ from jaraco.collections import KeyTransformingDict
 
 from . import strings
 
+
 class IRCDict(KeyTransformingDict):
     """
     A dictionary of names whose keys are case-insensitive according to the

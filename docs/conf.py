@@ -1,20 +1,37 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import setuptools_scm
-
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode',
+	'sphinx.ext.autodoc',
+	'jaraco.packaging.sphinx',
+	'rst.linker',
+	'sphinx.ext.viewcode',
 ]
 
-# General information about the project.
-project = 'irc'
-copyright = '2014-2015 Jason R. Coombs'
-
-# The short X.Y version.
-version = setuptools_scm.get_version(root='..')
-# The full version, including alpha/beta/rc tags.
-release = version
-
 master_doc = 'index'
+
+link_files = {
+	'../CHANGES.rst': dict(
+		using=dict(
+			GH='https://github.com',
+		),
+		replace=[
+			dict(
+				pattern=r'(Issue )?#(?P<issue>\d+)',
+				url='{package_url}/issues/{issue}',
+			),
+			dict(
+				pattern=r'^(?m)((?P<scm_version>v?\d+(\.\d+){1,2}))\n[-=]+\n',
+				with_scm='{text}\n{rev[timestamp]:%d %b %Y}\n',
+			),
+			dict(
+				pattern=r'PEP[- ](?P<pep_number>\d+)',
+				url='https://www.python.org/dev/peps/pep-{pep_number:0>4}/',
+			),
+			dict(
+				pattern=r'(Sourceforge )(?P<sf_issue>\d+)',
+				url='https://sourceforge.net/p/python-irclib/bugs/{sf_issue}/',
+			),
+		],
+	),
+}

@@ -1,3 +1,8 @@
+"""
+Handle Client-to-Client protocol per the `best available
+spec <http://www.irchelp.org/irchelp/rfc/ctcpspec.html>`_.
+"""
+
 from __future__ import absolute_import
 
 import re
@@ -14,6 +19,7 @@ low_level_mapping = {
 }
 
 low_level_regexp = re.compile(LOW_LEVEL_QUOTE + "(.)")
+
 
 def _low_level_replace(match_obj):
     ch = match_obj.group(1)

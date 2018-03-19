@@ -1,5 +1,174 @@
-Changes
--------
+16.2.1
+======
+
+* Package refresh and cleanup.
+
+16.2
+====
+
+* #133: In ``irc.server``, add support for ISON.
+
+16.1
+====
+
+* #131: Add ``Connection.encode`` and ``Connection.transmit_encoding``
+  to enable encodings other than UTF-8 to be used when transmitting
+  text.
+
+16.0
+====
+
+* Removed deprecated ``execute_*`` methods on ``Connection``
+  and ``Reactor`` as introduced in 15.0.
+
+* Fixed link in README.
+
+15.1.1
+======
+
+* New ``send_items`` method takes star args for simplicity
+  in the syntax and usage.
+
+15.1
+====
+
+* Introduce ``ServerConnection.send_items``, consolidating
+  common behavior across many methods previously calling
+  ``send_raw``.
+
+15.0.6
+======
+
+* Now publish `documentation <https://python-irc.readthedocs.io/>`_
+  to Read The Docs.
+
+15.0.5
+======
+
+* #119: Handle broken pipe exception in IRCClient _send() (server.py).
+
+15.0.4
+======
+
+* #116: Correct invocation of execute_every.
+
+15.0.3
+======
+
+* #115: Fix AttributeError in ``execute_at`` in scheduling
+  support.
+
+15.0.2
+======
+
+* #113: Use preferred scheduler in the bot implementation.
+
+15.0.1
+======
+
+* Deprecated calls to Connection.execute_*
+  and Reactor.execute_*. Instead, call the
+  equivalently-named methods on the reactor's
+  scheduler.
+
+15.0
+====
+
+* The event scheduling functionality has been decoupled
+  from the client.Reactor object. Now the reactor will
+  construct a Scheduler from the scheduler_class property,
+  which must be an instance of irc.schedule.IScheduler.
+
+  The ``_on_schedule`` parameter is no longer accepted
+  to the Reactor class. Implementations requiring a
+  signal during scheduling should hook into the ``add``
+  method of the relevant scheduler class.
+
+* Moved the underlying scheduler implementation to
+  `tempora <https://pypi.org/project/tempora>`_, allowing
+  it to be re-used for other purposes.
+
+14.2.2
+======
+
+* Issue #98: Add an ugly hack to force ``build_sphinx``
+  command to have the requisite libraries to build
+  module documentation.
+
+14.2.1
+======
+
+* Issue #97: Restore ``irc.buffer`` module for
+  compatibility.
+* Issue #95: Update docs to remove missing or
+  deprecated modules.
+* Issue #96: Declare Gitter support as a badge in the
+  docs.
+
+14.2
+====
+
+* Moved buffer module to `jaraco.stream
+  <https://pypi.python.org/pypi/jaraco.stream>`_ for
+  use in other packages.
+
+14.1
+====
+
+* ``SingleServerIRCBot`` now accepts a ``recon``
+  parameter implementing a ReconnectStrategy. The new
+  default strategy is ExponentialBackoff, implementing an
+  exponential backoff with jitter.
+  The ``reconnection_interval`` parameter is now deprecated
+  but retained for compatibility. To customize the minimum
+  time before reconnect, create a custom ExponentialBackoff
+  instance or create another ReconnectStrategy object and
+  pass that as the ``recon`` parameter. The
+  ``reconnection_interval`` parameter will be removed in
+  future versions.
+* Issue #82: The ``ExponentialBackoff`` implementation
+  now protects from multiple scheduled reconnects, avoiding
+  the issue where reconnect attempts accumulate
+  exponentially when the bot is immediately disconnected
+  by the server.
+
+14.0
+====
+
+* Dropped deprecated constructor
+  ``connection.Factory.from_legacy_params``. Use the
+  natural constructor instead.
+* Issue #83: ``connection.Factory`` no longer attempts
+  to bind before connect unless a bind address is specified.
+
+13.3.1
+======
+
+* Now remove mode for owners, halfops, and admins when the user
+  is removed from a channel.
+* Refactored the Channel class implementation for cleaner, less
+  repetitive code.
+* Expanded tests coverage for Channel class.
+
+13.3
+====
+
+* Issue #75: In ``irc.bot``, add support for tracking admin
+  status (mode 'a') in channels. Use ``channel.is_admin``
+  or ``channel.admins`` to identify admin users for a channel.
+
+* Removed deprecated irc.logging module.
+
+13.2
+====
+
+* Moved hosting to github.
+
+13.1.1
+======
+
+* Issue #67: Fix infinite recursion for ``irc.strings.IRCFoldedCase``
+  and ``irc.strings.lower``.
 
 13.1
 ====
@@ -517,9 +686,9 @@ will be maintained for these parameters until the release of irc 4.0.
 
 * Improved Unicode support. Fixes failing tests and errors lowering Unicode
   channel names.
-* Issue #3541414 - The ServerConnection and DCCConnection now encode any
+* Sourceforge 18 - The ServerConnection and DCCConnection now encode any
   strings as UTF-8 before transmitting.
-* Issue #3527371 - Updated strings.FoldedCase to support comparison against
+* Sourceforge 17 - Updated strings.FoldedCase to support comparison against
   objects of other types.
 * Shutdown the sockets before closing.
 
@@ -562,20 +731,20 @@ This release officially deprecates 2.0.1-2.0.3 in favor of 3.0.
 0.9
 ===
 
-* Fix file saving using dccreceive.py on Windows. Fixes #2863199.
+* Fix file saving using dccreceive.py on Windows. Fixes Sourceforge 6.
 * Created NickMask class from nm_to_* functions. Now if a source is
   a NickMask, one can access the .nick, .host, and .user attributes.
-* Use correct attribute for saved connect args. Fixes #3523057.
+* Use correct attribute for saved connect args. Fixes Sourceforge 16.
 
 0.8
 ===
 
-* Added ServerConnection.reconnect method. Fixes #3515580.
+* Added ServerConnection.reconnect method. Fixes Sourceforge 13.
 
 0.7.1
 =====
 
-* Added missing events. Fixes #3515578.
+* Added missing events. Fixes Sourceforge 12.
 
 0.7
 ===
@@ -596,7 +765,7 @@ these changes, you can safely depend on `irc >= 0.7, <2.0dev`.
 
 * Fixed failing test where DelayedCommands weren't being sorted properly.
   DelayedCommand a now subclass of the DateTime object, where the command's
-  due time is the datetime. Fixed issue #3518508.
+  due time is the datetime. Fixed issue Sourceforge 15.
 
 0.6.2
 =====
@@ -609,5 +778,5 @@ these changes, you can safely depend on `irc >= 0.7, <2.0dev`.
 * Minimum Python requirement is now Python 2.6. Python 2.3 and earlier should use 0.5.0
   or earlier.
 * Removed incorrect usage of Connection.execute_delayed. Added Connection.execute_every.
-  Fixed issue 3516241.
+  Fixed Sourceforge 8.
 * Use new-style classes.

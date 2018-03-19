@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+
 def parse_nick_modes(mode_string):
     """Parse a nick mode string.
 
@@ -15,6 +16,7 @@ def parse_nick_modes(mode_string):
 
     return _parse_modes(mode_string, "")
 
+
 def parse_channel_modes(mode_string):
     """Parse a channel mode string.
 
@@ -28,6 +30,7 @@ def parse_channel_modes(mode_string):
     [['+', 'a', None], ['+', 'b', 'foo'], ['-', 'c', None]]
     """
     return _parse_modes(mode_string, "bklvohq")
+
 
 def _parse_modes(mode_string, unary_modes=""):
     """
@@ -57,10 +60,9 @@ def _parse_modes(mode_string, unary_modes=""):
 
     >>> import random
     >>> import six
-    >>> unichr = chr if six.PY3 else unichr
     >>> def random_text(min_len = 3, max_len = 80):
     ...     len = random.randint(min_len, max_len)
-    ...     chars_to_choose = [unichr(x) for x in range(0,1024)]
+    ...     chars_to_choose = [six.unichr(x) for x in range(0,1024)]
     ...     chars = (random.choice(chars_to_choose) for x in range(len))
     ...     return ''.join(chars)
     >>> def random_texts(min_len = 3, max_len = 80):
@@ -68,7 +70,7 @@ def _parse_modes(mode_string, unary_modes=""):
     ...         yield random_text(min_len, max_len)
     >>> import itertools
     >>> texts = itertools.islice(random_texts(), 1000)
-    >>> set(type(_parse_modes(text)) for text in texts) == set([list])
+    >>> set(type(_parse_modes(text)) for text in texts) == {list}
     True
     """
 

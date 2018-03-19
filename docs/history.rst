@@ -5,4 +5,4 @@
 History
 *******
 
-.. include:: ../CHANGES.txt
+.. include:: ../CHANGES (links).rst

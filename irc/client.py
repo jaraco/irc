@@ -27,7 +27,7 @@ The main features of the IRC client framework are:
     event-loop.
   * Decodes CTCP tagging correctly (hopefully); I haven't seen any
     other IRC client implementation that handles the CTCP
-    specification subtilties.
+    specification subtleties.
   * A kind of simple, single-server, object-oriented IRC client class
     that dispatches events to instance methods is included.
 
@@ -65,9 +65,11 @@ import contextlib
 import asyncio
 
 import six
-from jaraco.itertools import always_iterable
+from jaraco.itertools import always_iterable, infinite_call
 from jaraco.functools import Throttler
 from jaraco.classes.properties import NonDataProperty
+from jaraco.stream import buffer
+from more_itertools.recipes import consume
 
 try:
     import pkg_resources
@@ -77,11 +79,10 @@ except ImportError:
 from . import connection
 from . import events
 from . import functools as irc_functools
-from . import buffer
-from . import schedule
 from . import features
 from . import ctcp
 from . import message
+from . import schedule
 
 log = logging.getLogger(__name__)
 
@@ -97,319 +98,13 @@ except Exception:
 class IRCError(Exception):
     "An IRC exception"
 
+
 class InvalidCharacters(ValueError):
     "Invalid characters were encountered in the message"
 
+
 class MessageTooLong(ValueError):
     "Message is too long"
-
-class PrioritizedHandler(
-        collections.namedtuple('Base', ('priority', 'callback'))):
-    def __lt__(self, other):
-        "when sorting prioritized handlers, only use the priority"
-        return self.priority < other.priority
-
-class Reactor(object):
-    """
-    Processes events from one or more IRC server connections.
-
-    This class implements a reactor in the style of the `reactor pattern
-    <http://en.wikipedia.org/wiki/Reactor_pattern>`_.
-
-    When a Reactor object has been instantiated, it can be used to create
-    Connection objects that represent the IRC connections.  The
-    responsibility of the reactor object is to provide an event-driven
-    framework for the connections and to keep the connections alive.
-    It runs a select loop to poll each connection's TCP socket and
-    hands over the sockets with incoming data for processing by the
-    corresponding connection.
-
-    The methods of most interest for an IRC client writer are server,
-    add_global_handler, remove_global_handler, execute_at,
-    execute_delayed, execute_every, process_once, and process_forever.
-
-    This is functionally an event-loop which can either use it's own
-    internal polling loop, or tie into an external event-loop, by
-    having the external event-system periodically call `process_once`
-    on the instantiated reactor class. This will allow the reactor
-    to process any queued data and/or events.
-
-    Calling `process_forever` will hand off execution to the reactor's
-    internal event-loop, which will not return for the life of the
-    reactor.
-
-    Here is an example:
-
-        client = irc.client.Reactor()
-        server = client.server()
-        server.connect("irc.some.where", 6667, "my_nickname")
-        server.privmsg("a_nickname", "Hi there!")
-        client.process_forever()
-
-    This will connect to the IRC server irc.some.where on port 6667
-    using the nickname my_nickname and send the message "Hi there!"
-    to the nickname a_nickname.
-
-    The methods of this class are thread-safe; accesses to and modifications
-    of its internal lists of connections, handlers, and delayed commands
-    are guarded by a mutex.
-    """
-
-    def __do_nothing(*args, **kwargs):
-        pass
-
-    def __init__(self, on_connect=__do_nothing, on_disconnect=__do_nothing,
-            on_schedule=__do_nothing):
-        """Constructor for Reactor objects.
-
-        on_connect: optional callback invoked when a new connection
-        is made.
-
-        on_disconnect: optional callback invoked when a socket is
-        disconnected.
-
-        on_schedule: optional callback, usually supplied by an external
-        event loop, to indicate in float seconds that the client needs to
-        process events that many seconds in the future. An external event
-        loop will implement this callback to schedule a call to
-        process_timeout.
-
-        The three arguments mainly exist to be able to use an external
-        main loop (for example Tkinter's or PyGTK's main app loop)
-        instead of calling the process_forever method.
-
-        An alternative is to just call ServerConnection.process_once()
-        once in a while.
-        """
-
-        self._on_connect = on_connect
-        self._on_disconnect = on_disconnect
-        self._on_schedule = on_schedule
-
-        self.connections = []
-        self.handlers = {}
-        self.delayed_commands = []  # list of DelayedCommands
-        # Modifications to these shared lists and dict need to be thread-safe
-        self.mutex = threading.RLock()
-
-        self.add_global_handler("ping", _ping_ponger, -42)
-
-    def server(self):
-        """Creates and returns a ServerConnection object."""
-
-        c = ServerConnection(self)
-        with self.mutex:
-            self.connections.append(c)
-        return c
-
-    def process_data(self, sockets):
-        """Called when there is more data to read on connection sockets.
-
-        Arguments:
-
-            sockets -- A list of socket objects.
-
-        See documentation for Reactor.__init__.
-        """
-        with self.mutex:
-            log.log(logging.DEBUG-2, "process_data()")
-            for s, c in itertools.product(sockets, self.connections):
-                if s == c.socket:
-                    c.process_data()
-
-    def process_timeout(self):
-        """Called when a timeout notification is due.
-
-        See documentation for Reactor.__init__.
-        """
-        with self.mutex:
-            while self.delayed_commands:
-                command = self.delayed_commands[0]
-                if not command.due():
-                    break
-                command.function()
-                if isinstance(command, schedule.PeriodicCommand):
-                    self._schedule_command(command.next())
-                del self.delayed_commands[0]
-
-    @property
-    def sockets(self):
-        with self.mutex:
-            return [
-                conn.socket
-                for conn in self.connections
-                if conn is not None
-                and conn.socket is not None
-            ]
-
-    def process_once(self, timeout=0):
-        """Process data from connections once.
-
-        Arguments:
-
-            timeout -- How long the select() call should wait if no
-                       data is available.
-
-        This method should be called periodically to check and process
-        incoming data, if there are any.  If that seems boring, look
-        at the process_forever method.
-        """
-        log.log(logging.DEBUG-2, "process_once()")
-        sockets = self.sockets
-        if sockets:
-            (i, o, e) = select.select(sockets, [], [], timeout)
-            self.process_data(i)
-        else:
-            time.sleep(timeout)
-        self.process_timeout()
-
-    def process_forever(self, timeout=0.2):
-        """Run an infinite loop, processing data from connections.
-
-        This method repeatedly calls process_once.
-
-        Arguments:
-
-            timeout -- Parameter to pass to process_once.
-        """
-        # This loop should specifically *not* be mutex-locked.
-        # Otherwise no other thread would ever be able to change
-        # the shared state of a Reactor object running this function.
-        log.debug("process_forever(timeout=%s)", timeout)
-        while 1:
-            self.process_once(timeout)
-
-    def disconnect_all(self, message=""):
-        """Disconnects all connections."""
-        with self.mutex:
-            for c in self.connections:
-                c.disconnect(message)
-
-    def add_global_handler(self, event, handler, priority=0):
-        """Adds a global handler function for a specific event type.
-
-        Arguments:
-
-            event -- Event type (a string).  Check the values of
-                     numeric_events for possible event types.
-
-            handler -- Callback function taking 'connection' and 'event'
-                       parameters.
-
-            priority -- A number (the lower number, the higher priority).
-
-        The handler function is called whenever the specified event is
-        triggered in any of the connections.  See documentation for
-        the Event class.
-
-        The handler functions are called in priority order (lowest
-        number is highest priority).  If a handler function returns
-        "NO MORE", no more handlers will be called.
-        """
-        handler = PrioritizedHandler(priority, handler)
-        with self.mutex:
-            event_handlers = self.handlers.setdefault(event, [])
-            bisect.insort(event_handlers, handler)
-
-    def remove_global_handler(self, event, handler):
-        """Removes a global handler function.
-
-        Arguments:
-
-            event -- Event type (a string).
-            handler -- Callback function.
-
-        Returns 1 on success, otherwise 0.
-        """
-        with self.mutex:
-            if not event in self.handlers:
-                return 0
-            for h in self.handlers[event]:
-                if handler == h.callback:
-                    self.handlers[event].remove(h)
-        return 1
-
-    def execute_at(self, at, function, arguments=()):
-        """Execute a function at a specified time.
-
-        Arguments:
-
-            at -- Execute at this time (a standard Unix timestamp).
-            function -- Function to call.
-            arguments -- Arguments to give the function.
-        """
-        function = functools.partial(function, *arguments)
-        command = schedule.DelayedCommand.at_time(at, function)
-        self._schedule_command(command)
-
-    def execute_delayed(self, delay, function, arguments=()):
-        """
-        Execute a function after a specified time.
-
-        delay -- How many seconds to wait.
-        function -- Function to call.
-        arguments -- Arguments to give the function.
-        """
-        function = functools.partial(function, *arguments)
-        command = schedule.DelayedCommand.after(delay, function)
-        self._schedule_command(command)
-
-    def execute_every(self, period, function, arguments=()):
-        """
-        Execute a function every 'period' seconds.
-
-        period -- How often to run (always waits this long for first).
-        function -- Function to call.
-        arguments -- Arguments to give the function.
-        """
-        function = functools.partial(function, *arguments)
-        command = schedule.PeriodicCommand.after(period, function)
-        self._schedule_command(command)
-
-    def _schedule_command(self, command):
-        with self.mutex:
-            bisect.insort(self.delayed_commands, command)
-            self._on_schedule(command.delay.total_seconds())
-
-    def dcc(self, dcctype="chat"):
-        """Creates and returns a DCCConnection object.
-
-        Arguments:
-
-            dcctype -- "chat" for DCC CHAT connections or "raw" for
-                       DCC SEND (or other DCC types). If "chat",
-                       incoming data will be split in newline-separated
-                       chunks. If "raw", incoming data is not touched.
-        """
-        with self.mutex:
-            c = DCCConnection(self, dcctype)
-            self.connections.append(c)
-        return c
-
-    def _handle_event(self, connection, event):
-        """
-        Handle an Event event incoming on ServerConnection connection.
-        """
-        with self.mutex:
-            h = self.handlers
-            matching_handlers = sorted(
-                h.get("all_events", []) +
-                h.get(event.type, [])
-            )
-            for handler in matching_handlers:
-                result = handler.callback(connection, event)
-                if result == "NO MORE":
-                    return
-
-    def _remove_connection(self, connection):
-        """[Internal]"""
-        with self.mutex:
-            self.connections.remove(connection)
-            self._on_disconnect(connection.socket)
-
-
-_cmd_pat = "^(@(?P<tags>[^ ]*) )?(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?"
-_rfc_1459_command_regexp = re.compile(_cmd_pat)
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -418,6 +113,9 @@ class Connection(object):
     Base class for IRC connections.
     """
 
+    transmit_encoding = 'utf-8'
+    "encoding used for transmission"
+
     @abc.abstractproperty
     def socket(self):
         "The socket for this connection"
@@ -425,20 +123,14 @@ class Connection(object):
     def __init__(self, reactor):
         self.reactor = reactor
 
-    ##############################
-    ### Convenience wrappers.
+    def encode(self, msg):
+        """Encode a message for transmission."""
+        return msg.encode(self.transmit_encoding)
 
-    def execute_at(self, at, function, arguments=()):
-        self.reactor.execute_at(at, function, arguments)
-
-    def execute_delayed(self, delay, function, arguments=()):
-        self.reactor.execute_delayed(delay, function, arguments)
-
-    def execute_every(self, period, function, arguments=()):
-        self.reactor.execute_every(period, function, arguments)
 
 class ServerConnectionError(IRCError):
     pass
+
 
 class ServerNotConnectedError(ServerConnectionError):
     pass
@@ -462,7 +154,8 @@ class ServerConnection(Connection):
 
     # save the method args to allow for easier reconnection.
     @irc_functools.save_method_args
-    def connect(self, server, port, nickname, password=None, username=None,
+    def connect(
+            self, server, port, nickname, password=None, username=None,
             ircname=None, connect_factory=connection.Factory()):
         """Connect/reconnect to a server.
 
@@ -482,7 +175,8 @@ class ServerConnection(Connection):
 
         Returns the ServerConnection object.
         """
-        log.debug("connect(server=%r, port=%r, nickname=%r, ...)", server,
+        log.debug(
+            "connect(server=%r, port=%r, nickname=%r, ...)", server,
             port, nickname)
 
         if self.connected:
@@ -581,11 +275,13 @@ class ServerConnection(Connection):
         # process each non-empty line after logging all lines
         for line in self.buffer:
             log.debug("FROM SERVER: %s", line)
-            if not line: continue
+            if not line:
+                continue
             self._process_line(line)
 
     def _process_line(self, line):
-        event = Event("all_raw_messages", self.get_server_name(), None,
+        event = Event(
+            "all_raw_messages", self.get_server_name(), None,
             [line])
         self._handle_event(event)
 
@@ -635,16 +331,20 @@ class ServerConnection(Connection):
                     command = "ctcpreply"
 
                 m = list(m)
-                log.debug("command: %s, source: %s, target: %s, "
-                          "arguments: %s, tags: %s", command, source, target, m, tags)
+                log.debug(
+                    "command: %s, source: %s, target: %s, "
+                    "arguments: %s, tags: %s",
+                    command, source, target, m, tags)
                 event = Event(command, source, target, m, tags)
                 self._handle_event(event)
                 if command == "ctcp" and m[0] == "ACTION":
                     event = Event("action", source, target, m[1:], tags)
                     self._handle_event(event)
             else:
-                log.debug("command: %s, source: %s, target: %s, "
-                          "arguments: %s, tags: %s", command, source, target, [m], tags)
+                log.debug(
+                    "command: %s, source: %s, target: %s, "
+                    "arguments: %s, tags: %s",
+                    command, source, target, [m], tags)
                 event = Event(command, source, target, [m], tags)
                 self._handle_event(event)
 
@@ -660,8 +360,10 @@ class ServerConnection(Connection):
         if command == "mode":
             if not is_channel(target):
                 command = "umode"
-        log.debug("command: %s, source: %s, target: %s, "
-                  "arguments: %s, tags: %s", command, source, target, arguments, tags)
+        log.debug(
+            "command: %s, source: %s, target: %s, "
+            "arguments: %s, tags: %s",
+            command, source, target, arguments, tags)
         event = Event(command, source, target, arguments, tags)
         self._handle_event(event)
 
@@ -705,7 +407,7 @@ class ServerConnection(Connection):
 
     def admin(self, server=""):
         """Send an ADMIN command."""
-        self.send_raw(" ".join(["ADMIN", server]).strip())
+        self.send_items('ADMIN', server)
 
     def cap(self, subcommand, *args):
         """
@@ -724,7 +426,7 @@ class ServerConnection(Connection):
             .cap('END')
         """
         cap_subcommands = set('LS LIST REQ ACK NAK CLEAR END'.split())
-        client_subcommands = set(cap_subcommands) - set('NAK')
+        client_subcommands = set(cap_subcommands) - {'NAK'}
         assert subcommand in client_subcommands, "invalid subcommand"
 
         def _multi_parameter(args):
@@ -743,8 +445,7 @@ class ServerConnection(Connection):
                 return (':' + args[0],) + args[1:]
             return args
 
-        args = _multi_parameter(args)
-        self.send_raw(' '.join(('CAP', subcommand) + args))
+        self.send_items('CAP', subcommand, *_multi_parameter(args))
 
     def ctcp(self, ctcptype, target, parameter=""):
         """Send a CTCP command."""
@@ -783,15 +484,15 @@ class ServerConnection(Connection):
 
     def globops(self, text):
         """Send a GLOBOPS command."""
-        self.send_raw("GLOBOPS :" + text)
+        self.send_items('GLOBOPS', ':' + text)
 
     def info(self, server=""):
         """Send an INFO command."""
-        self.send_raw(" ".join(["INFO", server]).strip())
+        self.send_items('INFO', server)
 
     def invite(self, nick, channel):
         """Send an INVITE command."""
-        self.send_raw(" ".join(["INVITE", nick, channel]).strip())
+        self.send_items('INVITE', nick, channel)
 
     def ison(self, nicks):
         """Send an ISON command.
@@ -800,94 +501,72 @@ class ServerConnection(Connection):
 
             nicks -- List of nicks.
         """
-        self.send_raw("ISON " + " ".join(nicks))
+        self.send_items('ISON', *tuple(nicks))
 
     def join(self, channel, key=""):
         """Send a JOIN command."""
-        self.send_raw("JOIN %s%s" % (channel, (key and (" " + key))))
+        self.send_items('JOIN', channel, key)
 
     def kick(self, channel, nick, comment=""):
         """Send a KICK command."""
-        tmpl = "KICK {channel} {nick}"
-        if comment:
-            tmpl += " :{comment}"
-        self.send_raw(tmpl.format(**vars()))
+        self.send_items('KICK', channel, nick, comment and ':' + comment)
 
     def links(self, remote_server="", server_mask=""):
         """Send a LINKS command."""
-        command = "LINKS"
-        if remote_server:
-            command = command + " " + remote_server
-        if server_mask:
-            command = command + " " + server_mask
-        self.send_raw(command)
+        self.send_items('LINKS', remote_server, server_mask)
 
     def list(self, channels=None, server=""):
         """Send a LIST command."""
-        command = "LIST"
-        channels = ",".join(always_iterable(channels))
-        if channels:
-            command += ' ' + channels
-        if server:
-            command = command + " " + server
-        self.send_raw(command)
+        self.send_items('LIST', ','.join(always_iterable(channels)), server)
 
     def lusers(self, server=""):
         """Send a LUSERS command."""
-        self.send_raw("LUSERS" + (server and (" " + server)))
+        self.send_items('LUSERS', server)
 
     def mode(self, target, command):
         """Send a MODE command."""
-        self.send_raw("MODE %s %s" % (target, command))
+        self.send_items('MODE', target, command)
 
     def motd(self, server=""):
         """Send an MOTD command."""
-        self.send_raw("MOTD" + (server and (" " + server)))
+        self.send_items('MOTD', server)
 
     def names(self, channels=None):
         """Send a NAMES command."""
-        tmpl = "NAMES {channels}" if channels else "NAMES"
-        channels = ','.join(always_iterable(channels))
-        self.send_raw(tmpl.format(channels=channels))
+        self.send_items('NAMES', ','.join(always_iterable(channels)))
 
     def nick(self, newnick):
         """Send a NICK command."""
-        self.send_raw("NICK " + newnick)
+        self.send_items('NICK', newnick)
 
     def notice(self, target, text):
         """Send a NOTICE command."""
         # Should limit len(text) here!
-        self.send_raw("NOTICE %s :%s" % (target, text))
+        self.send_items('NOTICE', target, ':' + text)
 
     def oper(self, nick, password):
         """Send an OPER command."""
-        self.send_raw("OPER %s %s" % (nick, password))
+        self.send_items('OPER', nick, password)
 
     def part(self, channels, message=""):
         """Send a PART command."""
-        channels = always_iterable(channels)
-        cmd_parts = [
-            'PART',
-            ','.join(channels),
-        ]
-        if message: cmd_parts.append(message)
-        self.send_raw(' '.join(cmd_parts))
+        self.send_items('PART', ','.join(always_iterable(channels)), message)
 
     def pass_(self, password):
         """Send a PASS command."""
-        self.send_raw("PASS " + password)
+        self.send_items('PASS', password)
 
     def ping(self, target, target2=""):
         """Send a PING command."""
-        self.send_raw("PING %s%s" % (target, target2 and (" " + target2)))
+        self.send_items('PING', target, target2)
 
     def pong(self, target, target2=""):
         """Send a PONG command."""
-        self.send_raw("PONG %s%s" % (target, target2 and (" " + target2)))
+        self.send_items('PONG', target, target2)
 
     def privmsg(self, target, text):
         """Send a PRIVMSG command."""
-        self.send_raw("PRIVMSG %s :%s" % (target, text))
+        self.send_items('PRIVMSG', target, ':' + text)
 
     def privmsg_many(self, targets, text):
         """Send a PRIVMSG command to multiple targets."""
@@ -898,7 +577,7 @@ class ServerConnection(Connection):
         """Send a QUIT command."""
         # Note that many IRC servers don't use your QUIT message
         # unless you've been connected for at least 5 minutes!
-        self.send_raw("QUIT" + (message and (" :" + message)))
+        self.send_items('QUIT', message and ':' + message)
 
     def _prep_message(self, string):
         # The string should not contain any carriage return other than the
@@ -906,13 +585,19 @@ class ServerConnection(Connection):
         if '\n' in string:
             msg = "Carriage returns not allowed in privmsg(text)"
             raise InvalidCharacters(msg)
-        bytes = string.encode('utf-8') + b'\r\n'
+        bytes = self.encode(string) + b'\r\n'
         # According to the RFC http://tools.ietf.org/html/rfc2812#page-6,
         # clients should not transmit more than 512 bytes.
         if len(bytes) > 512:
             msg = "Messages limited to 512 bytes including CR/LF"
             raise MessageTooLong(msg)
         return bytes
+
+    def send_items(self, *items):
+        """
+        Send all non-empty items, separated by spaces.
+        """
+        self.send_raw(' '.join(filter(None, items)))
 
     def send_raw(self, string):
         """Send raw string to the server.
@@ -931,60 +616,56 @@ class ServerConnection(Connection):
 
     def squit(self, server, comment=""):
         """Send an SQUIT command."""
-        self.send_raw("SQUIT %s%s" % (server, comment and (" :" + comment)))
+        self.send_items('SQUIT', server, comment and ':' + comment)
 
     def stats(self, statstype, server=""):
         """Send a STATS command."""
-        self.send_raw("STATS %s%s" % (statstype, server and (" " + server)))
+        self.send_items('STATS', statstype, server)
 
     def time(self, server=""):
         """Send a TIME command."""
-        self.send_raw("TIME" + (server and (" " + server)))
+        self.send_items('TIME', server)
 
     def topic(self, channel, new_topic=None):
         """Send a TOPIC command."""
-        if new_topic is None:
-            self.send_raw("TOPIC " + channel)
-        else:
-            self.send_raw("TOPIC %s :%s" % (channel, new_topic))
+        self.send_items('TOPIC', channel, new_topic and ':' + new_topic)
 
     def trace(self, target=""):
         """Send a TRACE command."""
-        self.send_raw("TRACE" + (target and (" " + target)))
+        self.send_items('TRACE', target)
 
     def user(self, username, realname):
         """Send a USER command."""
-        self.send_raw("USER %s 0 * :%s" % (username, realname))
+        cmd = 'USER {username} 0 * :{realname}'.format(**locals())
+        self.send_raw(cmd)
 
     def userhost(self, nicks):
         """Send a USERHOST command."""
-        self.send_raw("USERHOST " + ",".join(nicks))
+        self.send_items('USERHOST', ",".join(nicks))
 
     def users(self, server=""):
         """Send a USERS command."""
-        self.send_raw("USERS" + (server and (" " + server)))
+        self.send_items('USERS', server)
 
     def version(self, server=""):
         """Send a VERSION command."""
-        self.send_raw("VERSION" + (server and (" " + server)))
+        self.send_items('VERSION', server)
 
     def wallops(self, text):
         """Send a WALLOPS command."""
-        self.send_raw("WALLOPS :" + text)
+        self.send_items('WALLOPS', ':' + text)
 
     def who(self, target="", op=""):
         """Send a WHO command."""
-        self.send_raw("WHO%s%s" % (target and (" " + target), op and (" o")))
+        self.send_items('WHO', target, op and 'o')
 
     def whois(self, targets):
         """Send a WHOIS command."""
-        self.send_raw("WHOIS " + ",".join(always_iterable(targets)))
+        self.send_items('WHOIS', ",".join(always_iterable(targets)))
 
     def whowas(self, nick, max="", server=""):
         """Send a WHOWAS command."""
-        self.send_raw("WHOWAS %s%s%s" % (nick,
-                                         max and (" " + max),
-                                         server and (" " + server)))
+        self.send_items('WHOWAS', nick, max, server)
 
     def set_rate_limit(self, frequency):
         """
@@ -998,7 +679,269 @@ class ServerConnection(Connection):
         Set a keepalive to occur every ``interval`` on this connection.
         """
         pinger = functools.partial(self.ping, 'keep-alive')
-        self.reactor.execute_every(period=interval, function=pinger)
+        self.reactor.scheduler.execute_every(period=interval, func=pinger)
+
+
+class PrioritizedHandler(
+        collections.namedtuple('Base', ('priority', 'callback'))):
+    def __lt__(self, other):
+        "when sorting prioritized handlers, only use the priority"
+        return self.priority < other.priority
+
+
+class Reactor(object):
+    """
+    Processes events from one or more IRC server connections.
+
+    This class implements a reactor in the style of the `reactor pattern
+    <http://en.wikipedia.org/wiki/Reactor_pattern>`_.
+
+    When a Reactor object has been instantiated, it can be used to create
+    Connection objects that represent the IRC connections.  The
+    responsibility of the reactor object is to provide an event-driven
+    framework for the connections and to keep the connections alive.
+    It runs a select loop to poll each connection's TCP socket and
+    hands over the sockets with incoming data for processing by the
+    corresponding connection.
+
+    The methods of most interest for an IRC client writer are server,
+    add_global_handler, remove_global_handler,
+    process_once, and process_forever.
+
+    This is functionally an event-loop which can either use it's own
+    internal polling loop, or tie into an external event-loop, by
+    having the external event-system periodically call `process_once`
+    on the instantiated reactor class. This will allow the reactor
+    to process any queued data and/or events.
+
+    Calling `process_forever` will hand off execution to the reactor's
+    internal event-loop, which will not return for the life of the
+    reactor.
+
+    Here is an example:
+
+        client = irc.client.Reactor()
+        server = client.server()
+        server.connect("irc.some.where", 6667, "my_nickname")
+        server.privmsg("a_nickname", "Hi there!")
+        client.process_forever()
+
+    This will connect to the IRC server irc.some.where on port 6667
+    using the nickname my_nickname and send the message "Hi there!"
+    to the nickname a_nickname.
+
+    The methods of this class are thread-safe; accesses to and modifications
+    of its internal lists of connections, handlers, and delayed commands
+    are guarded by a mutex.
+    """
+
+    scheduler_class = schedule.DefaultScheduler
+    connection_class = ServerConnection
+
+    def __do_nothing(*args, **kwargs):
+        pass
+
+    def __init__(self, on_connect=__do_nothing, on_disconnect=__do_nothing):
+        """Constructor for Reactor objects.
+
+        on_connect: optional callback invoked when a new connection
+        is made.
+
+        on_disconnect: optional callback invoked when a socket is
+        disconnected.
+
+        The arguments mainly exist to be able to use an external
+        main loop (for example Tkinter's or PyGTK's main app loop)
+        instead of calling the process_forever method.
+
+        An alternative is to just call ServerConnection.process_once()
+        once in a while.
+        """
+
+        self._on_connect = on_connect
+        self._on_disconnect = on_disconnect
+
+        scheduler = self.scheduler_class()
+        assert isinstance(scheduler, schedule.IScheduler)
+        self.scheduler = scheduler
+
+        self.connections = []
+        self.handlers = {}
+        # Modifications to these shared lists and dict need to be thread-safe
+        self.mutex = threading.RLock()
+
+        self.add_global_handler("ping", _ping_ponger, -42)
+
+    def server(self):
+        """Creates and returns a ServerConnection object."""
+
+        c = self.connection_class(self)
+        with self.mutex:
+            self.connections.append(c)
+        return c
+
+    def process_data(self, sockets):
+        """Called when there is more data to read on connection sockets.
+
+        Arguments:
+
+            sockets -- A list of socket objects.
+
+        See documentation for Reactor.__init__.
+        """
+        with self.mutex:
+            log.log(logging.DEBUG - 2, "process_data()")
+            for s, c in itertools.product(sockets, self.connections):
+                if s == c.socket:
+                    c.process_data()
+
+    def process_timeout(self):
+        """Called when a timeout notification is due.
+
+        See documentation for Reactor.__init__.
+        """
+        with self.mutex:
+            self.scheduler.run_pending()
+
+    @property
+    def sockets(self):
+        with self.mutex:
+            return [
+                conn.socket
+                for conn in self.connections
+                if conn is not None
+                and conn.socket is not None
+            ]
+
+    def process_once(self, timeout=0):
+        """Process data from connections once.
+
+        Arguments:
+
+            timeout -- How long the select() call should wait if no
+                       data is available.
+
+        This method should be called periodically to check and process
+        incoming data, if there are any.  If that seems boring, look
+        at the process_forever method.
+        """
+        log.log(logging.DEBUG - 2, "process_once()")
+        sockets = self.sockets
+        if sockets:
+            (i, o, e) = select.select(sockets, [], [], timeout)
+            self.process_data(i)
+        else:
+            time.sleep(timeout)
+        self.process_timeout()
+
+    def process_forever(self, timeout=0.2):
+        """Run an infinite loop, processing data from connections.
+
+        This method repeatedly calls process_once.
+
+        Arguments:
+
+            timeout -- Parameter to pass to process_once.
+        """
+        # This loop should specifically *not* be mutex-locked.
+        # Otherwise no other thread would ever be able to change
+        # the shared state of a Reactor object running this function.
+        log.debug("process_forever(timeout=%s)", timeout)
+        one = functools.partial(self.process_once, timeout=timeout)
+        consume(infinite_call(one))
+
+    def disconnect_all(self, message=""):
+        """Disconnects all connections."""
+        with self.mutex:
+            for c in self.connections:
+                c.disconnect(message)
+
+    def add_global_handler(self, event, handler, priority=0):
+        """Adds a global handler function for a specific event type.
+
+        Arguments:
+
+            event -- Event type (a string).  Check the values of
+                     numeric_events for possible event types.
+
+            handler -- Callback function taking 'connection' and 'event'
+                       parameters.
+
+            priority -- A number (the lower number, the higher priority).
+
+        The handler function is called whenever the specified event is
+        triggered in any of the connections.  See documentation for
+        the Event class.
+
+        The handler functions are called in priority order (lowest
+        number is highest priority).  If a handler function returns
+        "NO MORE", no more handlers will be called.
+        """
+        handler = PrioritizedHandler(priority, handler)
+        with self.mutex:
+            event_handlers = self.handlers.setdefault(event, [])
+            bisect.insort(event_handlers, handler)
+
+    def remove_global_handler(self, event, handler):
+        """Removes a global handler function.
+
+        Arguments:
+
+            event -- Event type (a string).
+            handler -- Callback function.
+
+        Returns 1 on success, otherwise 0.
+        """
+        with self.mutex:
+            if event not in self.handlers:
+                return 0
+            for h in self.handlers[event]:
+                if handler == h.callback:
+                    self.handlers[event].remove(h)
+        return 1
+
+    def dcc(self, dcctype="chat"):
+        """Creates and returns a DCCConnection object.
+
+        Arguments:
+
+            dcctype -- "chat" for DCC CHAT connections or "raw" for
+                       DCC SEND (or other DCC types). If "chat",
+                       incoming data will be split in newline-separated
+                       chunks. If "raw", incoming data is not touched.
+        """
+        with self.mutex:
+            c = DCCConnection(self, dcctype)
+            self.connections.append(c)
+        return c
+
+    def _handle_event(self, connection, event):
+        """
+        Handle an Event event incoming on ServerConnection connection.
+        """
+        with self.mutex:
+            h = self.handlers
+            matching_handlers = sorted(
+                h.get("all_events", []) +
+                h.get(event.type, [])
+            )
+            for handler in matching_handlers:
+                result = handler.callback(connection, event)
+                if result == "NO MORE":
+                    return
+
+    def _remove_connection(self, connection):
+        """[Internal]"""
+        with self.mutex:
+            self.connections.remove(connection)
+            self._on_disconnect(connection.socket)
+
+
+_cmd_pat = (
+    "^(@(?P<tags>[^ ]*) )?(:(?P<prefix>[^ ]+) +)?"
+    "(?P<command>[^ ]+)( *(?P<argument> .+))?"
+)
+_rfc_1459_command_regexp = re.compile(_cmd_pat)
 
 
 class DCCConnectionError(IRCError):
@@ -1098,7 +1041,8 @@ class DCCConnection(Connection):
             self.socket.close()
             self.socket = conn
             self.connected = 1
-            log.debug("DCC connection from %s:%d", self.peeraddress,
+            log.debug(
+                "DCC connection from %s:%d", self.peeraddress,
                 self.peerport)
             self.reactor._handle_event(
                 self,
@@ -1123,7 +1067,8 @@ class DCCConnection(Connection):
 
             if len(self.buffer) > 2 ** 14:
                 # Bad peer! Naughty peer!
-                log.info("Received >16k from a peer without a newline; "
+                log.info(
+                    "Received >16k from a peer without a newline; "
                     "disconnecting.")
                 self.disconnect()
                 return
@@ -1136,7 +1081,8 @@ class DCCConnection(Connection):
         for chunk in chunks:
             log.debug("FROM PEER: %s", chunk)
             arguments = [chunk]
-            log.debug("command: %s, source: %s, target: %s, arguments: %s",
+            log.debug(
+                "command: %s, source: %s, target: %s, arguments: %s",
                 command, prefix, target, arguments)
             event = Event(command, prefix, target, arguments)
             self.reactor._handle_event(self, event)
@@ -1149,8 +1095,7 @@ class DCCConnection(Connection):
         """
         if self.dcctype == 'chat':
             text += '\n'
-        bytes = text.encode('utf-8')
-        return self.send_bytes(bytes)
+        return self.send_bytes(self.encode(text))
 
     def send_bytes(self, bytes):
         """
@@ -1176,7 +1121,7 @@ class SimpleIRCClient(object):
     handler methods get two arguments: the connection object (same as
     self.connection) and the event object.
 
-    Functionally, any of the event names in `events.py` my be subscribed
+    Functionally, any of the event names in `events.py` may be subscribed
     to by prefixing them with `on_`, and creating a function of that
     name in the child-class of `SimpleIRCClient`. When the event of
     `event_name` is received, the appropriately named method will be
@@ -1201,7 +1146,8 @@ class SimpleIRCClient(object):
         self.connection = self.reactor.server()
         self.dcc_connections = []
         self.reactor.add_global_handler("all_events", self._dispatcher, -10)
-        self.reactor.add_global_handler("dcc_disconnect",
+        self.reactor.add_global_handler(
+            "dcc_disconnect",
             self._dcc_disconnect, -10)
 
     def _dispatcher(self, connection, event):
@@ -1210,7 +1156,8 @@ class SimpleIRCClient(object):
         """
         log.debug("_dispatcher: %s", event.type)
 
-        do_nothing = lambda c, e: None
+        def do_nothing(c, e):
+            return None
         method = getattr(self, "on_" + event.type, do_nothing)
         method(connection, event)
 
@@ -1253,7 +1200,12 @@ class SimpleIRCClient(object):
 
 
 class Event(object):
-    "An IRC event."
+    """
+    An IRC event.
+
+    >>> print(Event('privmsg', '@somebody', '#channel'))
+    type: privmsg, source: @somebody, target: #channel, arguments: [], tags: []
+    """
     def __init__(self, type, source, target, arguments=None, tags=None):
         """
         Initialize an Event.
@@ -1278,12 +1230,24 @@ class Event(object):
             tags = []
         self.tags = tags
 
+    def __str__(self):
+        tmpl = (
+            "type: {type}, "
+            "source: {source}, "
+            "target: {target}, "
+            "arguments: {arguments}, "
+            "tags: {tags}"
+        )
+        return tmpl.format(**vars(self))
+
+
 def is_channel(string):
     """Check if a string is a channel name.
 
     Returns true if the argument is a channel name, otherwise false.
     """
     return string and string[0] in "#&+!"
+
 
 def ip_numstr_to_quad(num):
     """
@@ -1300,6 +1264,7 @@ def ip_numstr_to_quad(num):
     bytes = struct.unpack('BBBB', packed)
     return ".".join(map(str, bytes))
 
+
 def ip_quad_to_numstr(quad):
     """
     Convert an IP address string (e.g. '192.168.0.1') to an IP
@@ -1312,19 +1277,20 @@ def ip_quad_to_numstr(quad):
     packed = struct.pack('BBBB', *bytes)
     return str(struct.unpack('>L', packed)[0])
 
+
 class NickMask(six.text_type):
     """
     A nickmask (the source of an Event)
 
     >>> nm = NickMask('pinky!username@example.com')
-    >>> print(nm.nick)
-    pinky
+    >>> nm.nick
+    'pinky'
 
-    >>> print(nm.host)
-    example.com
+    >>> nm.host
+    'example.com'
 
-    >>> print(nm.user)
-    username
+    >>> nm.user
+    'username'
 
     >>> isinstance(nm, six.text_type)
     True
@@ -1339,8 +1305,8 @@ class NickMask(six.text_type):
     Some messages omit the userhost. In that case, None is returned.
 
     >>> nm = NickMask('irc.server.net')
-    >>> print(nm.nick)
-    irc.server.net
+    >>> nm.nick
+    'irc.server.net'
     >>> nm.userhost
     >>> nm.host
     >>> nm.user
@@ -1379,79 +1345,3 @@ class NickMask(six.text_type):
 def _ping_ponger(connection, event):
     "A global handler for the 'ping' event"
     connection.pong(event.target)
-
-
-class Protocol(asyncio.Protocol, ServerConnection):
-    password = None
-    real_server_name = ""
-
-    def __init__(self, nickname, **kwargs):
-        self.nickname = nickname
-        vars(self).update(kwargs)
-        self.features = features.FeatureSet()
-
-    @NonDataProperty
-    def user_name(self):
-        return self.nickname
-
-    @NonDataProperty
-    def real_name(self):
-        return self.nickname
-
-    @NonDataProperty
-    def real_nickname(self):
-        return self.nickname
-
-    def connection_made(self, transport):
-        self.transport = transport
-        self.buffer = self.buffer_class()
-        # Log on...
-        if self.password:
-            self.pass_(self.password)
-        self.nick(self.nickname)
-        self.user(self.user_name, self.real_name)
-
-    def data_received(self, data):
-        self.buffer.feed(data)
-
-        # process each non-empty line after logging all lines
-        for line in self.buffer:
-            log.debug("FROM SERVER: %s", line)
-            if not line: continue
-            self._process_line(line)
-
-    def _handle_event(self, event):
-        """
-        Dispatch events to on_<event.type> method, if present.
-        """
-        log.debug("handling: %s", event.type)
-
-        do_nothing = lambda event: None
-        method = getattr(self, "on_" + event.type, do_nothing)
-        method(event)
-
-    def send_raw(self, string):
-        """
-        Send raw string to the server.
-
-        The string will be padded with appropriate CR LF.
-        """
-        self.transport.write(self._prep_message(string))
-        log.debug("TO SERVER: %s", string)
-
-
-class AsyncIRCClient:
-
-    def __init__(self):
-        self.reactor = AsyncIOReactor()
-
-    def connect(self, protocol, *args, **kwargs):
-        proto_factory = lambda: protocol
-        self.connection = self.reactor.create_connection(proto_factory, *args, **kwargs)
-        transport, protocol = self.reactor.run_until_complete(self.connection)
-        self.protocol = protocol
-        self.transport = transport
-
-    def start(self):
-        """Start the IRC client."""
-        self.reactor.run_forever()

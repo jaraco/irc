@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+
 class Tag(object):
     """
     An IRC message tag ircv3.net/specs/core/message-tags-3.2.html
@@ -22,10 +23,8 @@ class Tag(object):
         >>> Tag.parse('x=red fox:green eggs')['value']
         'red fox:green eggs'
 
-        >>> print(Tag.parse('x=a\\nb\\nc')['value'])
-        a
-        b
-        c
+        >>> Tag.parse('x=a\\nb\\nc')['value']
+        'a\nb\nc'
         """
         key, sep, value = item.partition('=')
         value = value.replace('\\:', ';')

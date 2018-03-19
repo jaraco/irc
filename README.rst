@@ -1,28 +1,29 @@
-Internet Relay Chat (IRC) protocol client library
--------------------------------------------------
+.. image:: https://img.shields.io/pypi/v/irc.svg
+   :target: https://pypi.org/project/irc
 
-The home of irclib is:
+.. image:: https://img.shields.io/pypi/pyversions/irc.svg
 
-* https://bitbucket.org/jaraco/irc
+.. image:: https://img.shields.io/travis/jaraco/irc/master.svg
+   :target: https://travis-ci.org/jaraco/irc
 
-Documentation is available at:
+.. .. image:: https://img.shields.io/appveyor/ci/jaraco/skeleton/master.svg
+..    :target: https://ci.appveyor.com/project/jaraco/skeleton/branch/master
 
-* https://pythonhosted.org/irc
+.. image:: https://readthedocs.org/projects/python-irc/badge/?version=latest
+   :target: https://python-irc.readthedocs.io/en/latest/?badge=latest
 
-Change history is available at:
+.. image:: https://badges.gitter.im/jaraco/irc.svg
+   :alt: Join the chat at https://gitter.im/jaraco/irc
+   :target: https://gitter.im/jaraco/irc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
-* https://pythonhosted.org/irc/history.html
+Full-featured Python IRC library for Python.
 
-You can `download project releases from PyPI
-<https://pypi.python.org/pypi/irc>`_.
+- `Project home <https://github.com/jaraco/irc>`_
+- `Docs <https://python-irc.readthedocs.io/>`_
+- `History <https://python-irc.readthedocs.io/en/latest/history.html>`_
 
-Tests are `continually run <https://travis-ci.org/#!/jaraco/irc>`_ using
-Travis-CI.
-
-|BuildStatus|_
-
-.. |BuildStatus| image:: https://secure.travis-ci.org/jaraco/irc.png
-.. _BuildStatus: https://travis-ci.org/jaraco/irc
+Overview
+========
 
 This library provides a low-level implementation of the IRC protocol for
 Python.  It provides an event-driven IRC client framework.  It has
@@ -30,9 +31,8 @@ a fairly thorough support for the basic IRC protocol, CTCP, and DCC
 connections.
 
 In order to understand how to make an IRC client, it's best to read up first
-on the IRC specifications, available here:
-
-* http://www.irchelp.org/irchelp/rfc/
+on the `IRC specifications
+<http://web.archive.org/web/20160628193730/http://www.irchelp.org/irchelp/rfc/>`_.
 
 Installation
 ============
@@ -82,22 +82,24 @@ it to be.  I think the best way to get started is to read and
 understand the example program ``irccat``, which is included in the
 distribution.
 
-The following files might be of interest:
+The following modules might be of interest:
 
-* ``irc/client.py``
+* ``irc.client``
 
   The library itself.  Read the code along with comments and
   docstrings to get a grip of what it does.  Use it at your own risk
   and read the source, Luke!
 
-* ``irc/bot.py``
+* ``irc.bot``
 
   An IRC bot implementation.
 
-* ``irc/server.py``
+* ``irc.server``
 
   A basic IRC server implementation. Suitable for testing, but not
-  production quality.
+  intended as a production service.
+
+  Invoke the server with ``python -m irc.server``.
 
 Examples
 ========
@@ -140,6 +142,33 @@ NOTE: If you're running one of the examples on a unix command line, you need
 to escape the ``#`` symbol in the channel. For example, use ``\\#test`` or
 ``"#test"`` instead of ``#test``.
 
+
+Scheduling Events
+=================
+
+The library includes a default event Scheduler as
+``irc.schedule.DefaultScheduler``,
+but this scheduler can be replaced with any other scheduler. For example,
+to use the `schedule <https://pypi.org/project/schedule>`_ package,
+include it
+in your dependencies and install it into the IRC library as so:
+
+    class ScheduleScheduler(irc.schedule.IScheduler):
+        def execute_every(self, period, func):
+            schedule.every(period).do(func)
+
+        def execute_at(self, when, func):
+            schedule.at(when).do(func)
+
+        def execute_after(self, delay, func):
+            raise NotImplementedError("Not supported")
+
+        def run_pending(self):
+            schedule.run_pending()
+
+    irc.client.Reactor.scheduler_class = ScheduleScheduler
+
+
 Decoding Input
 ==============
 
@@ -149,7 +178,9 @@ expected. Since assuming UTF-8 is not reasonable in the general case, the IRC
 library provides options to customize decoding of input by customizing the
 ``ServerConnection`` class. The ``buffer_class`` attribute on the
 ``ServerConnection`` determines which class is used for buffering lines from the
-input stream. By default it is ``buffer.DecodingLineBuffer``, but may be
+input stream, using the ``buffer`` module in `jaraco.stream
+<https://pypi.python.org/pypi/jaraco.stream>`_. By default it is
+``buffer.DecodingLineBuffer``, but may be
 re-assigned with another class, following the interface of ``buffer.LineBuffer``.
 The ``buffer_class`` attribute may be assigned for all instances of
 ``ServerConnection`` by overriding the class attribute.
@@ -158,7 +189,8 @@ For example:
 
 .. code:: python
 
-    irc.client.ServerConnection.buffer_class = irc.buffer.LenientDecodingLineBuffer
+    from jaraco.stream import buffer
+    irc.client.ServerConnection.buffer_class = buffer.LenientDecodingLineBuffer
 
 The ``LenientDecodingLineBuffer`` attempts UTF-8 but falls back to latin-1, which
 will avoid ``UnicodeDecodeError`` in all cases (but may produce unexpected
@@ -169,8 +201,8 @@ overridden before the connection is established):
 
 .. code:: python
 
-    server = irc.client.IRC().server()
-    server.buffer_class = irc.buffer.LenientDecodingLineBuffer
+    server = irc.client.Reactor().server()
+    server.buffer_class = buffer.LenientDecodingLineBuffer
     server.connect()
 
 Alternatively, some clients may still want to decode the input using a
@@ -192,7 +224,7 @@ Or, to simply ignore all input that cannot be decoded:
 
 .. code:: python
 
-    class IgnoreErrorsBuffer(irc.buffer.DecodingLineBuffer):
+    class IgnoreErrorsBuffer(buffer.DecodingLineBuffer):
         def handle_exception(self):
             pass
     irc.client.ServerConnection.buffer_class = IgnoreErrorsBuffer
@@ -215,5 +247,5 @@ Original Author:
 Joel Rosdahl <joel@rosdahl.net>
 
 Copyright © 1999-2002 Joel Rosdahl
-Copyright © 2011-2014 Jason R. Coombs
+Copyright © 2011-2016 Jason R. Coombs
 Copyright © 2009 Ferry Boender

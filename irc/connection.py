@@ -1,9 +1,11 @@
 from __future__ import absolute_import
 
 import socket
-import importlib
 
-identity = lambda x: x
+
+def identity(x):
+    return x
+
 
 class Factory(object):
     """
@@ -35,24 +37,15 @@ class Factory(object):
 
     family = socket.AF_INET
 
-    def __init__(self, bind_address=('', 0), wrapper=identity, ipv6=False):
+    def __init__(self, bind_address=None, wrapper=identity, ipv6=False):
         self.bind_address = bind_address
         self.wrapper = wrapper
         if ipv6:
             self.family = socket.AF_INET6
 
-    def from_legacy_params(self, localaddress='', localport=0, ssl=False,
-            ipv6=False):
-        if localaddress or localport:
-            self.bind_address = (localaddress, localport)
-        if ssl:
-            self.wrapper = importlib.import_module('ssl').wrap_socket
-        if ipv6:
-            self.family = socket.AF_INET6
-
     def connect(self, server_address):
         sock = self.wrapper(socket.socket(self.family, socket.SOCK_STREAM))
-        sock.bind(self.bind_address)
+        self.bind_address and sock.bind(self.bind_address)
         sock.connect(server_address)
         return sock
     __call__ = connect
