@@ -4,8 +4,6 @@
 #
 # This program is free without restrictions; do anything you like with
 # it.
-#
-# Joel Rosdahl <joel@rosdahl.net>
 import sys
 import asyncio
 import argparse
@@ -24,10 +22,14 @@ class AioIRCCat(irc.aio_client.AioSimpleIRCClient):
         if irc.client.is_channel(self.target):
             connection.join(self.target)
         else:
-            self.future = asyncio.ensure_future(self.send_it(), loop=connection.reactor.loop)
+            self.future = asyncio.ensure_future(
+                self.send_it(), loop=connection.reactor.loop
+            )
 
     def on_join(self, connection, event):
-        self.future = asyncio.ensure_future(self.send_it(), loop=connection.reactor.loop)
+        self.future = asyncio.ensure_future(
+            self.send_it(), loop=connection.reactor.loop
+        )
 
     def on_disconnect(self, connection, event):
         self.future.cancel()
@@ -39,6 +41,8 @@ class AioIRCCat(irc.aio_client.AioSimpleIRCClient):
             if not line:
                 break
             self.connection.privmsg(self.target, line)
+
+            # Allow pause in the stdin loop to not block asyncio loop
             asyncio.sleep(0)
         self.connection.quit("Using irc.client.py")
 
@@ -62,7 +66,9 @@ def main():
     c = AioIRCCat(target)
 
     try:
-        c.connect(args.server, args.port, args.nickname, password=args.password)
+        c.connect(
+            args.server, args.port, args.nickname, password=args.password
+        )
     except irc.client.ServerConnectionError as x:
         print(x)
         sys.exit(1)

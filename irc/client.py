@@ -62,12 +62,10 @@ import collections
 import functools
 import itertools
 import contextlib
-import asyncio
 
 import six
 from jaraco.itertools import always_iterable, infinite_call
 from jaraco.functools import Throttler
-from jaraco.classes.properties import NonDataProperty
 from jaraco.stream import buffer
 from more_itertools.recipes import consume
 

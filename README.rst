@@ -58,9 +58,9 @@ The main features of the IRC client framework are:
   connection object.
 * Messages from an IRC server triggers events, which can be caught
   by event handlers.
-* Reading from and writing to IRC server sockets is normally done
-  by an internal ``select()`` loop, but the ``select()`` may be done
-  by an external main loop.
+* Multiple opations for reading from and writing to an IRC server: 
+  you can use sockets in an internal ``select()`` loop OR use
+  python3's asyncio event loop
 * Functions can be registered to execute at specified times by the
   event-loop.
 * Decodes CTCP tagging correctly (hopefully); I haven't seen any
@@ -76,6 +76,7 @@ Current limitations:
 * Data is not written asynchronously to the server (and DCC peers),
   i.e. the ``write()`` may block if the TCP buffers are stuffed.
 * Like most projects, documentation is lacking ...
+* DCC is not currently implemented in the asyncio-based versin
 
 Unfortunately, this library isn't as well-documented as I would like
 it to be.  I think the best way to get started is to read and
@@ -89,6 +90,13 @@ The following modules might be of interest:
   The library itself.  Read the code along with comments and
   docstrings to get a grip of what it does.  Use it at your own risk
   and read the source, Luke!
+
+* ``irc.aio_client``
+    
+  All the functionality of the above library, but utilizing 
+  Python 3's native asyncio library for the core event loop.  
+  Interface/API is otherwise functionally identical to the classes
+  in ``irc.client``
 
 * ``irc.bot``
 
@@ -115,6 +123,17 @@ Example scripts in the scripts directory:
 * ``irccat2``
 
   The same as above, but using the ``SimpleIRCClient`` class.
+
+* ``aio_irccat``
+
+  Same as above, but uses the asyncio-based event loop in
+  ``AioReactor`` instead of the ``select()`` based ``Reactor``.
+
+
+* ``aio_irccat2``
+
+  Same as above, but using the ``AioSimpleIRCClient`` class
+
 
 * ``servermap``
 

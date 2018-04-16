@@ -4,13 +4,10 @@
 #
 # This program is free without restrictions; do anything you like with
 # it.
-#
-# Joel Rosdahl <joel@rosdahl.net>
 
 import sys
 import argparse
 import itertools
-import functools
 import asyncio
 
 import irc.aio_client
@@ -27,7 +24,9 @@ def on_connect(connection, event):
 
 
 def on_join(connection, event):
-    connection.read_loop = asyncio.ensure_future(main_loop(connection), loop=connection.reactor.loop)
+    connection.read_loop = asyncio.ensure_future(
+        main_loop(connection), loop=connection.reactor.loop
+    )
 
 
 def get_lines():
@@ -39,6 +38,8 @@ async def main_loop(connection):
     for line in itertools.takewhile(bool, get_lines()):
         print(line)
         connection.privmsg(target, line)
+
+        # Allow pause in the stdin loop to not block the asyncio event loop
         asyncio.sleep(0)
     connection.quit("Using irc.client.py")
 
@@ -69,7 +70,9 @@ def main():
     reactor = irc.aio_client.AioReactor(loop=loop)
 
     try:
-        c = reactor.server().connect(args.server, args.port, args.nickname, password=args.password)
+        c = reactor.server().connect(
+            args.server, args.port, args.nickname, password=args.password
+        )
     except irc.client.ServerConnectionError:
         print(sys.exc_info()[1])
         raise SystemExit(1)
@@ -84,7 +87,7 @@ def main():
 
     try:
         reactor.process_forever()
-    finally: 
+    finally:
         loop.close()
 
 
