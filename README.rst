@@ -91,7 +91,7 @@ The following modules might be of interest:
   docstrings to get a grip of what it does.  Use it at your own risk
   and read the source, Luke!
 
-* ``irc.aio_client``
+* ``irc.client_aio``
     
   All the functionality of the above library, but utilizing 
   Python 3's native asyncio library for the core event loop.  

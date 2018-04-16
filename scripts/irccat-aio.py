@@ -10,7 +10,7 @@ import argparse
 import itertools
 import asyncio
 
-import irc.aio_client
+import irc.client_aio
 import irc.client
 import jaraco.logging
 
@@ -41,7 +41,7 @@ async def main_loop(connection):
 
         # Allow pause in the stdin loop to not block the asyncio event loop
         asyncio.sleep(0)
-    connection.quit("Using irc.client.py")
+    connection.quit("Using irc.client_aio.py")
 
 
 def on_disconnect(connection, event):
@@ -67,7 +67,7 @@ def main():
     target = args.target
 
     loop = asyncio.get_event_loop()
-    reactor = irc.aio_client.AioReactor(loop=loop)
+    reactor = irc.client_aio.AioReactor(loop=loop)
 
     try:
         c = reactor.server().connect(

@@ -9,11 +9,11 @@ import asyncio
 import argparse
 
 import irc.client
-import irc.aio_client
+import irc.client_aio
 import jaraco.logging
 
 
-class AioIRCCat(irc.aio_client.AioSimpleIRCClient):
+class AioIRCCat(irc.client_aio.AioSimpleIRCClient):
     def __init__(self, target):
         irc.client.SimpleIRCClient.__init__(self)
         self.target = target

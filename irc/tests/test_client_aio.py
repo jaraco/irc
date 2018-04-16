@@ -1,7 +1,7 @@
 from unittest.mock import patch, MagicMock
 import asyncio
 
-from irc import aio_client
+from irc import client_aio
 
 
 @patch('asyncio.base_events.BaseEventLoop.create_connection')
@@ -17,7 +17,7 @@ def test_privmsg_sends_msg(create_connection_mock):
 
     # connect to dummy server
     loop = asyncio.get_event_loop()
-    server = aio_client.AioReactor(loop=loop).server()
+    server = client_aio.AioReactor(loop=loop).server()
     server.connect('foo', 6667, 'my_irc_nick')
     server.privmsg('#best-channel', 'You are great')
 
