@@ -3,13 +3,15 @@ from __future__ import absolute_import, print_function, unicode_literals
 import functools
 import collections
 
+__metaclass__ = type
+
 
 def save_method_args(method):
     """
     Wrap a method such that when it is called, the args and kwargs are
     saved on the method.
 
-    >>> class MyClass(object):
+    >>> class MyClass:
     ...     @save_method_args
     ...     def method(self, a, b):
     ...         print(a, b)

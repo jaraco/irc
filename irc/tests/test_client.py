@@ -7,6 +7,8 @@ import six
 
 import irc.client
 
+__metaclass__ = type
+
 
 def test_version():
 	assert 'VERSION' in vars(irc.client)
@@ -36,7 +38,7 @@ def test_privmsg_fails_on_embedded_carriage_returns(socket_mod):
 		server.privmsg('#best-channel', 'You are great\nSo are you')
 
 
-class TestHandlers(object):
+class TestHandlers:
 	def test_handlers_same_priority(self):
 		"""
 		Two handlers of the same priority should still compare.

@@ -82,6 +82,8 @@ from . import ctcp
 from . import message
 from . import schedule
 
+__metaclass__ = type
+
 log = logging.getLogger(__name__)
 
 # set the version tuple
@@ -112,7 +114,7 @@ class PrioritizedHandler(
         return self.priority < other.priority
 
 
-class Reactor(object):
+class Reactor:
     """
     Processes events from one or more IRC server connections.
 
@@ -367,7 +369,7 @@ _rfc_1459_command_regexp = re.compile(_cmd_pat)
 
 
 @six.add_metaclass(abc.ABCMeta)
-class Connection(object):
+class Connection:
     """
     Base class for IRC connections.
     """
@@ -1105,7 +1107,7 @@ class DCCConnection(Connection):
             self.disconnect("Connection reset by peer.")
 
 
-class SimpleIRCClient(object):
+class SimpleIRCClient:
     """A simple single-server IRC client class.
 
     This is an example of an object-oriented wrapper of the IRC
@@ -1196,7 +1198,7 @@ class SimpleIRCClient(object):
         self.reactor.process_forever()
 
 
-class Event(object):
+class Event:
     """
     An IRC event.
 

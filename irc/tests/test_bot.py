@@ -10,8 +10,10 @@ import irc.bot
 import irc.server
 from irc.bot import ServerSpec
 
+__metaclass__ = type
 
-class TestServerSpec(object):
+
+class TestServerSpec:
 
     def test_with_host(self):
         server_spec = ServerSpec('irc.example.com')
@@ -39,7 +41,7 @@ class TestServerSpec(object):
         assert server_spec.password == 'there-is-only-zuul'
 
 
-class TestChannel(object):
+class TestChannel:
 
     def test_add_remove_nick(self):
         channel = irc.bot.Channel()
@@ -101,7 +103,7 @@ def disconnecting_server():
         srv.server_close()
 
 
-class TestBot(object):
+class TestBot:
     def test_construct_bot(self):
         bot = irc.bot.SingleServerIRCBot(
             server_list=[('localhost', '9999')],

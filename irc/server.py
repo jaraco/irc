@@ -61,6 +61,8 @@ from jaraco.stream import buffer
 import irc.client
 from . import events
 
+__metaclass__ = type
+
 SRV_WELCOME = "Welcome to {__name__} v{irc.client.VERSION}.".format(**locals())
 
 log = logging.getLogger(__name__)
@@ -83,7 +85,7 @@ class IRCError(Exception):
         return cls(events.codes[name], value)
 
 
-class IRCChannel(object):
+class IRCChannel:
     """
     An IRC channel.
     """

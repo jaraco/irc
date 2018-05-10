@@ -2,12 +2,14 @@ from __future__ import absolute_import
 
 import socket
 
+__metaclass__ = type
+
 
 def identity(x):
     return x
 
 
-class Factory(object):
+class Factory:
     """
     A class for creating custom socket connections.
 
