@@ -346,8 +346,8 @@ class Reactor:
         with self.mutex:
             h = self.handlers
             matching_handlers = sorted(
-                h.get("all_events", []) +
-                h.get(event.type, [])
+                h.get("all_events", [])
+                + h.get(event.type, [])
             )
             for handler in matching_handlers:
                 result = handler.callback(connection, event)
