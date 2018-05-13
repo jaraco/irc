@@ -82,12 +82,14 @@ from . import ctcp
 from . import message
 from . import schedule
 
+__metaclass__ = type
+
 log = logging.getLogger(__name__)
 
 # set the version tuple
 try:
     VERSION_STRING = pkg_resources.require('irc')[0].version
-    VERSION = tuple(int(res) for res in re.findall('\d+', VERSION_STRING))
+    VERSION = tuple(int(res) for res in re.findall(r'\d+', VERSION_STRING))
 except Exception:
     VERSION_STRING = 'unknown'
     VERSION = ()
@@ -106,7 +108,7 @@ class MessageTooLong(ValueError):
 
 
 @six.add_metaclass(abc.ABCMeta)
-class Connection(object):
+class Connection:
     """
     Base class for IRC connections.
     """
@@ -687,7 +689,7 @@ class PrioritizedHandler(
         return self.priority < other.priority
 
 
-class Reactor(object):
+class Reactor:
     """
     Processes events from one or more IRC server connections.
 
@@ -1106,7 +1108,7 @@ class DCCConnection(Connection):
             self.disconnect("Connection reset by peer.")
 
 
-class SimpleIRCClient(object):
+class SimpleIRCClient:
     """A simple single-server IRC client class.
 
     This is an example of an object-oriented wrapper of the IRC
@@ -1197,7 +1199,7 @@ class SimpleIRCClient(object):
         self.reactor.process_forever()
 
 
-class Event(object):
+class Event:
     """
     An IRC event.
 

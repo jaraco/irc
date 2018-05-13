@@ -21,8 +21,10 @@ import irc.client
 import irc.modes
 from .dict import IRCDict
 
+__metaclass__ = type
 
-class ServerSpec(object):
+
+class ServerSpec:
     """
     An IRC server specification.
 
@@ -50,7 +52,7 @@ class ServerSpec(object):
 
 
 @six.add_metaclass(abc.ABCMeta)
-class ReconnectStrategy(object):
+class ReconnectStrategy:
     """
     An abstract base class describing the interface used by
     SingleServerIRCBot for handling reconnect following
@@ -338,7 +340,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         super(SingleServerIRCBot, self).start()
 
 
-class Channel(object):
+class Channel:
     """
     A class for keeping information about an IRC channel.
     """
