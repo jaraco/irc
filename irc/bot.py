@@ -190,48 +190,48 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         except irc.client.ServerConnectionError:
             pass
 
-    def _on_disconnect(self, c, e):
+    def _on_disconnect(self, connection, event):
         self.channels = IRCDict()
         self.recon.run(self)
 
-    def _on_join(self, c, e):
-        ch = e.target
-        nick = e.source.nick
-        if nick == c.get_nickname():
+    def _on_join(self, connection, event):
+        ch = event.target
+        nick = event.source.nick
+        if nick == connection.get_nickname():
             self.channels[ch] = Channel()
         self.channels[ch].add_user(nick)
 
-    def _on_kick(self, c, e):
-        nick = e.arguments[0]
-        channel = e.target
+    def _on_kick(self, connection, event):
+        nick = event.arguments[0]
+        channel = event.target
 
-        if nick == c.get_nickname():
+        if nick == connection.get_nickname():
             del self.channels[channel]
         else:
             self.channels[channel].remove_user(nick)
 
-    def _on_mode(self, c, e):
-        t = e.target
+    def _on_mode(self, connection, event):
+        t = event.target
         if not irc.client.is_channel(t):
             # mode on self; disregard
             return
         ch = self.channels[t]
 
-        modes = irc.modes.parse_channel_modes(" ".join(e.arguments))
+        modes = irc.modes.parse_channel_modes(" ".join(event.arguments))
         for sign, mode, argument in modes:
             f = {"+": ch.set_mode, "-": ch.clear_mode}[sign]
             f(mode, argument)
 
-    def _on_namreply(self, c, e):
+    def _on_namreply(self, connection, event):
         """
-        e.arguments[0] == "@" for secret channels,
+        event.arguments[0] == "@" for secret channels,
                           "*" for private channels,
                           "=" for others (public channels)
-        e.arguments[1] == channel
-        e.arguments[2] == nick list
+        event.arguments[1] == channel
+        event.arguments[2] == nick list
         """
 
-        ch_type, channel, nick_list = e.arguments
+        ch_type, channel, nick_list = event.arguments
 
         if channel == '*':
             # User is not in any visible channel
@@ -250,24 +250,24 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
 
             self.channels[channel].add_user(nick)
 
-    def _on_nick(self, c, e):
-        before = e.source.nick
-        after = e.target
+    def _on_nick(self, connection, event):
+        before = event.source.nick
+        after = event.target
         for ch in self.channels.values():
             if ch.has_user(before):
                 ch.change_nick(before, after)
 
-    def _on_part(self, c, e):
-        nick = e.source.nick
-        channel = e.target
+    def _on_part(self, connection, event):
+        nick = event.source.nick
+        channel = event.target
 
-        if nick == c.get_nickname():
+        if nick == connection.get_nickname():
             del self.channels[channel]
         else:
             self.channels[channel].remove_user(nick)
 
-    def _on_quit(self, c, e):
-        nick = e.source.nick
+    def _on_quit(self, connection, event):
+        nick = event.source.nick
         for ch in self.channels.values():
             if ch.has_user(nick):
                 ch.remove_user(nick)
@@ -314,24 +314,24 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         self.server_list.append(self.server_list.pop(0))
         self._connect()
 
-    def on_ctcp(self, c, e):
+    def on_ctcp(self, connection, event):
         """Default handler for ctcp events.
 
         Replies to VERSION and PING requests and relays DCC requests
         to the on_dccchat method.
         """
-        nick = e.source.nick
-        if e.arguments[0] == "VERSION":
-            c.ctcp_reply(nick, "VERSION " + self.get_version())
-        elif e.arguments[0] == "PING":
-            if len(e.arguments) > 1:
-                c.ctcp_reply(nick, "PING " + e.arguments[1])
+        nick = event.source.nick
+        if event.arguments[0] == "VERSION":
+            connection.ctcp_reply(nick, "VERSION " + self.get_version())
+        elif event.arguments[0] == "PING":
+            if len(event.arguments) > 1:
+                connection.ctcp_reply(nick, "PING " + event.arguments[1])
         elif (
-            e.arguments[0] == "DCC"
-                and e.arguments[1].split(" ", 1)[0] == "CHAT"):
-            self.on_dccchat(c, e)
+            event.arguments[0] == "DCC"
+                and event.arguments[1].split(" ", 1)[0] == "CHAT"):
+            self.on_dccchat(connection, event)
 
-    def on_dccchat(self, c, e):
+    def on_dccchat(self, connection, event):
         pass
 
     def start(self):
