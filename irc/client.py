@@ -775,10 +775,10 @@ class Reactor:
     def server(self):
         """Creates and returns a ServerConnection object."""
 
-        c = self.connection_class(self)
+        conn = self.connection_class(self)
         with self.mutex:
-            self.connections.append(c)
-        return c
+            self.connections.append(conn)
+        return conn
 
     def process_data(self, sockets):
         """Called when there is more data to read on connection sockets.
@@ -791,9 +791,9 @@ class Reactor:
         """
         with self.mutex:
             log.log(logging.DEBUG - 2, "process_data()")
-            for s, c in itertools.product(sockets, self.connections):
-                if s == c.socket:
-                    c.process_data()
+            for sock, conn in itertools.product(sockets, self.connections):
+                if sock == conn.socket:
+                    conn.process_data()
 
     def process_timeout(self):
         """Called when a timeout notification is due.
@@ -828,8 +828,8 @@ class Reactor:
         log.log(logging.DEBUG - 2, "process_once()")
         sockets = self.sockets
         if sockets:
-            (i, o, e) = select.select(sockets, [], [], timeout)
-            self.process_data(i)
+            in_, out, err = select.select(sockets, [], [], timeout)
+            self.process_data(in_)
         else:
             time.sleep(timeout)
         self.process_timeout()
@@ -853,8 +853,8 @@ class Reactor:
     def disconnect_all(self, message=""):
         """Disconnects all connections."""
         with self.mutex:
-            for c in self.connections:
-                c.disconnect(message)
+            for conn in self.connections:
+                conn.disconnect(message)
 
     def add_global_handler(self, event, handler, priority=0):
         """Adds a global handler function for a specific event type.
@@ -911,19 +911,18 @@ class Reactor:
                        chunks. If "raw", incoming data is not touched.
         """
         with self.mutex:
-            c = DCCConnection(self, dcctype)
-            self.connections.append(c)
-        return c
+            conn = DCCConnection(self, dcctype)
+            self.connections.append(conn)
+        return conn
 
     def _handle_event(self, connection, event):
         """
         Handle an Event event incoming on ServerConnection connection.
         """
         with self.mutex:
-            h = self.handlers
             matching_handlers = sorted(
-                h.get("all_events", []) +
-                h.get(event.type, [])
+                self.handlers.get("all_events", []) +
+                self.handlers.get(event.type, [])
             )
             for handler in matching_handlers:
                 result = handler.callback(connection, event)
@@ -1156,13 +1155,13 @@ class SimpleIRCClient:
         """
         log.debug("_dispatcher: %s", event.type)
 
-        def do_nothing(c, e):
+        def do_nothing(connection, event):
             return None
         method = getattr(self, "on_" + event.type, do_nothing)
         method(connection, event)
 
-    def _dcc_disconnect(self, c, e):
-        self.dcc_connections.remove(c)
+    def _dcc_disconnect(self, connection, event):
+        self.dcc_connections.remove(connection)
 
     def connect(self, *args, **kwargs):
         """Connect using the underlying connection"""
@@ -1259,8 +1258,7 @@ def ip_numstr_to_quad(num):
     >>> ip_numstr_to_quad(3232235521)
     '192.168.0.1'
     """
-    n = int(num)
-    packed = struct.pack('>L', n)
+    packed = struct.pack('>L', int(num))
     bytes = struct.unpack('BBBB', packed)
     return ".".join(map(str, bytes))
 

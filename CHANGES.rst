@@ -1,3 +1,8 @@
+16.3
+====
+
+* #140: Methods now use 'connection' and 'event' for parameter names.
+
 16.2.1
 ======
 
