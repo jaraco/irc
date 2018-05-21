@@ -107,266 +107,6 @@ class MessageTooLong(ValueError):
     "Message is too long"
 
 
-class PrioritizedHandler(
-        collections.namedtuple('Base', ('priority', 'callback'))):
-    def __lt__(self, other):
-        "when sorting prioritized handlers, only use the priority"
-        return self.priority < other.priority
-
-
-class Reactor:
-    """
-    Processes events from one or more IRC server connections.
-
-    This class implements a reactor in the style of the `reactor pattern
-    <http://en.wikipedia.org/wiki/Reactor_pattern>`_.
-
-    When a Reactor object has been instantiated, it can be used to create
-    Connection objects that represent the IRC connections.  The
-    responsibility of the reactor object is to provide an event-driven
-    framework for the connections and to keep the connections alive.
-    It runs a select loop to poll each connection's TCP socket and
-    hands over the sockets with incoming data for processing by the
-    corresponding connection.
-
-    The methods of most interest for an IRC client writer are server,
-    add_global_handler, remove_global_handler,
-    process_once, and process_forever.
-
-    This is functionally an event-loop which can either use it's own
-    internal polling loop, or tie into an external event-loop, by
-    having the external event-system periodically call `process_once`
-    on the instantiated reactor class. This will allow the reactor
-    to process any queued data and/or events.
-
-    Calling `process_forever` will hand off execution to the reactor's
-    internal event-loop, which will not return for the life of the
-    reactor.
-
-    Here is an example:
-
-        client = irc.client.Reactor()
-        server = client.server()
-        server.connect("irc.some.where", 6667, "my_nickname")
-        server.privmsg("a_nickname", "Hi there!")
-        client.process_forever()
-
-    This will connect to the IRC server irc.some.where on port 6667
-    using the nickname my_nickname and send the message "Hi there!"
-    to the nickname a_nickname.
-
-    The methods of this class are thread-safe; accesses to and modifications
-    of its internal lists of connections, handlers, and delayed commands
-    are guarded by a mutex.
-    """
-
-    scheduler_class = schedule.DefaultScheduler
-
-    def __do_nothing(*args, **kwargs):
-        pass
-
-    def __init__(self, on_connect=__do_nothing, on_disconnect=__do_nothing):
-        """Constructor for Reactor objects.
-
-        on_connect: optional callback invoked when a new connection
-        is made.
-
-        on_disconnect: optional callback invoked when a socket is
-        disconnected.
-
-        The arguments mainly exist to be able to use an external
-        main loop (for example Tkinter's or PyGTK's main app loop)
-        instead of calling the process_forever method.
-
-        An alternative is to just call ServerConnection.process_once()
-        once in a while.
-        """
-
-        self._on_connect = on_connect
-        self._on_disconnect = on_disconnect
-
-        scheduler = self.scheduler_class()
-        assert isinstance(scheduler, schedule.IScheduler)
-        self.scheduler = scheduler
-
-        self.connections = []
-        self.handlers = {}
-        # Modifications to these shared lists and dict need to be thread-safe
-        self.mutex = threading.RLock()
-
-        self.add_global_handler("ping", _ping_ponger, -42)
-
-    def server(self):
-        """Creates and returns a ServerConnection object."""
-
-        conn = ServerConnection(self)
-        with self.mutex:
-            self.connections.append(conn)
-        return conn
-
-    def process_data(self, sockets):
-        """Called when there is more data to read on connection sockets.
-
-        Arguments:
-
-            sockets -- A list of socket objects.
-
-        See documentation for Reactor.__init__.
-        """
-        with self.mutex:
-            log.log(logging.DEBUG - 2, "process_data()")
-            for sock, conn in itertools.product(sockets, self.connections):
-                if sock == conn.socket:
-                    conn.process_data()
-
-    def process_timeout(self):
-        """Called when a timeout notification is due.
-
-        See documentation for Reactor.__init__.
-        """
-        with self.mutex:
-            self.scheduler.run_pending()
-
-    @property
-    def sockets(self):
-        with self.mutex:
-            return [
-                conn.socket
-                for conn in self.connections
-                if conn is not None
-                and conn.socket is not None
-            ]
-
-    def process_once(self, timeout=0):
-        """Process data from connections once.
-
-        Arguments:
-
-            timeout -- How long the select() call should wait if no
-                       data is available.
-
-        This method should be called periodically to check and process
-        incoming data, if there are any.  If that seems boring, look
-        at the process_forever method.
-        """
-        log.log(logging.DEBUG - 2, "process_once()")
-        sockets = self.sockets
-        if sockets:
-            in_, out, err = select.select(sockets, [], [], timeout)
-            self.process_data(in_)
-        else:
-            time.sleep(timeout)
-        self.process_timeout()
-
-    def process_forever(self, timeout=0.2):
-        """Run an infinite loop, processing data from connections.
-
-        This method repeatedly calls process_once.
-
-        Arguments:
-
-            timeout -- Parameter to pass to process_once.
-        """
-        # This loop should specifically *not* be mutex-locked.
-        # Otherwise no other thread would ever be able to change
-        # the shared state of a Reactor object running this function.
-        log.debug("process_forever(timeout=%s)", timeout)
-        one = functools.partial(self.process_once, timeout=timeout)
-        consume(infinite_call(one))
-
-    def disconnect_all(self, message=""):
-        """Disconnects all connections."""
-        with self.mutex:
-            for conn in self.connections:
-                conn.disconnect(message)
-
-    def add_global_handler(self, event, handler, priority=0):
-        """Adds a global handler function for a specific event type.
-
-        Arguments:
-
-            event -- Event type (a string).  Check the values of
-                     numeric_events for possible event types.
-
-            handler -- Callback function taking 'connection' and 'event'
-                       parameters.
-
-            priority -- A number (the lower number, the higher priority).
-
-        The handler function is called whenever the specified event is
-        triggered in any of the connections.  See documentation for
-        the Event class.
-
-        The handler functions are called in priority order (lowest
-        number is highest priority).  If a handler function returns
-        "NO MORE", no more handlers will be called.
-        """
-        handler = PrioritizedHandler(priority, handler)
-        with self.mutex:
-            event_handlers = self.handlers.setdefault(event, [])
-            bisect.insort(event_handlers, handler)
-
-    def remove_global_handler(self, event, handler):
-        """Removes a global handler function.
-
-        Arguments:
-
-            event -- Event type (a string).
-            handler -- Callback function.
-
-        Returns 1 on success, otherwise 0.
-        """
-        with self.mutex:
-            if event not in self.handlers:
-                return 0
-            for h in self.handlers[event]:
-                if handler == h.callback:
-                    self.handlers[event].remove(h)
-        return 1
-
-    def dcc(self, dcctype="chat"):
-        """Creates and returns a DCCConnection object.
-
-        Arguments:
-
-            dcctype -- "chat" for DCC CHAT connections or "raw" for
-                       DCC SEND (or other DCC types). If "chat",
-                       incoming data will be split in newline-separated
-                       chunks. If "raw", incoming data is not touched.
-        """
-        with self.mutex:
-            conn = DCCConnection(self, dcctype)
-            self.connections.append(conn)
-        return conn
-
-    def _handle_event(self, connection, event):
-        """
-        Handle an Event event incoming on ServerConnection connection.
-        """
-        with self.mutex:
-            matching_handlers = sorted(
-                self.handlers.get("all_events", [])
-                + self.handlers.get(event.type, [])
-            )
-            for handler in matching_handlers:
-                result = handler.callback(connection, event)
-                if result == "NO MORE":
-                    return
-
-    def _remove_connection(self, connection):
-        """[Internal]"""
-        with self.mutex:
-            self.connections.remove(connection)
-            self._on_disconnect(connection.socket)
-
-
-_cmd_pat = (
-    "^(@(?P<tags>[^ ]*) )?(:(?P<prefix>[^ ]+) +)?"
-    "(?P<command>[^ ]+)( *(?P<argument> .+))?"
-)
-_rfc_1459_command_regexp = re.compile(_cmd_pat)
-
-
 @six.add_metaclass(abc.ABCMeta)
 class Connection:
     """
@@ -940,6 +680,267 @@ class ServerConnection(Connection):
         """
         pinger = functools.partial(self.ping, 'keep-alive')
         self.reactor.scheduler.execute_every(period=interval, func=pinger)
+
+
+class PrioritizedHandler(
+        collections.namedtuple('Base', ('priority', 'callback'))):
+    def __lt__(self, other):
+        "when sorting prioritized handlers, only use the priority"
+        return self.priority < other.priority
+
+
+class Reactor:
+    """
+    Processes events from one or more IRC server connections.
+
+    This class implements a reactor in the style of the `reactor pattern
+    <http://en.wikipedia.org/wiki/Reactor_pattern>`_.
+
+    When a Reactor object has been instantiated, it can be used to create
+    Connection objects that represent the IRC connections.  The
+    responsibility of the reactor object is to provide an event-driven
+    framework for the connections and to keep the connections alive.
+    It runs a select loop to poll each connection's TCP socket and
+    hands over the sockets with incoming data for processing by the
+    corresponding connection.
+
+    The methods of most interest for an IRC client writer are server,
+    add_global_handler, remove_global_handler,
+    process_once, and process_forever.
+
+    This is functionally an event-loop which can either use it's own
+    internal polling loop, or tie into an external event-loop, by
+    having the external event-system periodically call `process_once`
+    on the instantiated reactor class. This will allow the reactor
+    to process any queued data and/or events.
+
+    Calling `process_forever` will hand off execution to the reactor's
+    internal event-loop, which will not return for the life of the
+    reactor.
+
+    Here is an example:
+
+        client = irc.client.Reactor()
+        server = client.server()
+        server.connect("irc.some.where", 6667, "my_nickname")
+        server.privmsg("a_nickname", "Hi there!")
+        client.process_forever()
+
+    This will connect to the IRC server irc.some.where on port 6667
+    using the nickname my_nickname and send the message "Hi there!"
+    to the nickname a_nickname.
+
+    The methods of this class are thread-safe; accesses to and modifications
+    of its internal lists of connections, handlers, and delayed commands
+    are guarded by a mutex.
+    """
+
+    scheduler_class = schedule.DefaultScheduler
+    connection_class = ServerConnection
+
+    def __do_nothing(*args, **kwargs):
+        pass
+
+    def __init__(self, on_connect=__do_nothing, on_disconnect=__do_nothing):
+        """Constructor for Reactor objects.
+
+        on_connect: optional callback invoked when a new connection
+        is made.
+
+        on_disconnect: optional callback invoked when a socket is
+        disconnected.
+
+        The arguments mainly exist to be able to use an external
+        main loop (for example Tkinter's or PyGTK's main app loop)
+        instead of calling the process_forever method.
+
+        An alternative is to just call ServerConnection.process_once()
+        once in a while.
+        """
+
+        self._on_connect = on_connect
+        self._on_disconnect = on_disconnect
+
+        scheduler = self.scheduler_class()
+        assert isinstance(scheduler, schedule.IScheduler)
+        self.scheduler = scheduler
+
+        self.connections = []
+        self.handlers = {}
+        # Modifications to these shared lists and dict need to be thread-safe
+        self.mutex = threading.RLock()
+
+        self.add_global_handler("ping", _ping_ponger, -42)
+
+    def server(self):
+        """Creates and returns a ServerConnection object."""
+
+        conn = self.connection_class(self)
+        with self.mutex:
+            self.connections.append(conn)
+        return conn
+
+    def process_data(self, sockets):
+        """Called when there is more data to read on connection sockets.
+
+        Arguments:
+
+            sockets -- A list of socket objects.
+
+        See documentation for Reactor.__init__.
+        """
+        with self.mutex:
+            log.log(logging.DEBUG - 2, "process_data()")
+            for sock, conn in itertools.product(sockets, self.connections):
+                if sock == conn.socket:
+                    conn.process_data()
+
+    def process_timeout(self):
+        """Called when a timeout notification is due.
+
+        See documentation for Reactor.__init__.
+        """
+        with self.mutex:
+            self.scheduler.run_pending()
+
+    @property
+    def sockets(self):
+        with self.mutex:
+            return [
+                conn.socket
+                for conn in self.connections
+                if conn is not None
+                and conn.socket is not None
+            ]
+
+    def process_once(self, timeout=0):
+        """Process data from connections once.
+
+        Arguments:
+
+            timeout -- How long the select() call should wait if no
+                       data is available.
+
+        This method should be called periodically to check and process
+        incoming data, if there are any.  If that seems boring, look
+        at the process_forever method.
+        """
+        log.log(logging.DEBUG - 2, "process_once()")
+        sockets = self.sockets
+        if sockets:
+            in_, out, err = select.select(sockets, [], [], timeout)
+            self.process_data(in_)
+        else:
+            time.sleep(timeout)
+        self.process_timeout()
+
+    def process_forever(self, timeout=0.2):
+        """Run an infinite loop, processing data from connections.
+
+        This method repeatedly calls process_once.
+
+        Arguments:
+
+            timeout -- Parameter to pass to process_once.
+        """
+        # This loop should specifically *not* be mutex-locked.
+        # Otherwise no other thread would ever be able to change
+        # the shared state of a Reactor object running this function.
+        log.debug("process_forever(timeout=%s)", timeout)
+        one = functools.partial(self.process_once, timeout=timeout)
+        consume(infinite_call(one))
+
+    def disconnect_all(self, message=""):
+        """Disconnects all connections."""
+        with self.mutex:
+            for conn in self.connections:
+                conn.disconnect(message)
+
+    def add_global_handler(self, event, handler, priority=0):
+        """Adds a global handler function for a specific event type.
+
+        Arguments:
+
+            event -- Event type (a string).  Check the values of
+                     numeric_events for possible event types.
+
+            handler -- Callback function taking 'connection' and 'event'
+                       parameters.
+
+            priority -- A number (the lower number, the higher priority).
+
+        The handler function is called whenever the specified event is
+        triggered in any of the connections.  See documentation for
+        the Event class.
+
+        The handler functions are called in priority order (lowest
+        number is highest priority).  If a handler function returns
+        "NO MORE", no more handlers will be called.
+        """
+        handler = PrioritizedHandler(priority, handler)
+        with self.mutex:
+            event_handlers = self.handlers.setdefault(event, [])
+            bisect.insort(event_handlers, handler)
+
+    def remove_global_handler(self, event, handler):
+        """Removes a global handler function.
+
+        Arguments:
+
+            event -- Event type (a string).
+            handler -- Callback function.
+
+        Returns 1 on success, otherwise 0.
+        """
+        with self.mutex:
+            if event not in self.handlers:
+                return 0
+            for h in self.handlers[event]:
+                if handler == h.callback:
+                    self.handlers[event].remove(h)
+        return 1
+
+    def dcc(self, dcctype="chat"):
+        """Creates and returns a DCCConnection object.
+
+        Arguments:
+
+            dcctype -- "chat" for DCC CHAT connections or "raw" for
+                       DCC SEND (or other DCC types). If "chat",
+                       incoming data will be split in newline-separated
+                       chunks. If "raw", incoming data is not touched.
+        """
+        with self.mutex:
+            conn = DCCConnection(self, dcctype)
+            self.connections.append(conn)
+        return conn
+
+    def _handle_event(self, connection, event):
+        """
+        Handle an Event event incoming on ServerConnection connection.
+        """
+        with self.mutex:
+            matching_handlers = sorted(
+                self.handlers.get("all_events", []) +
+                self.handlers.get(event.type, [])
+            )
+            for handler in matching_handlers:
+                result = handler.callback(connection, event)
+                if result == "NO MORE":
+                    return
+
+    def _remove_connection(self, connection):
+        """[Internal]"""
+        with self.mutex:
+            self.connections.remove(connection)
+            self._on_disconnect(connection.socket)
+
+
+_cmd_pat = (
+    "^(@(?P<tags>[^ ]*) )?(:(?P<prefix>[^ ]+) +)?"
+    "(?P<command>[^ ]+)( *(?P<argument> .+))?"
+)
+_rfc_1459_command_regexp = re.compile(_cmd_pat)
 
 
 class DCCConnectionError(IRCError):
