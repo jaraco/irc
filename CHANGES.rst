@@ -2,6 +2,7 @@
 ====
 
 * #140: Methods now use 'connection' and 'event' for parameter names.
+# #135 via #144: Added AsyncIO implementation.
 
 16.2.1
 ======
