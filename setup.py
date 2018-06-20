@@ -78,6 +78,9 @@ params = dict(
         "Programming Language :: Python :: 3",
     ],
     entry_points={
+        'pytest11': [
+            'irc = irc.fixtures',
+        ],
     },
 )
 if __name__ == '__main__':
