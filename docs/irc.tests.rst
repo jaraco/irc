@@ -20,14 +20,6 @@ irc.tests.test_client module
     :undoc-members:
     :show-inheritance:
 
-irc.tests.test_schedule module
-------------------------------
-
-.. automodule:: irc.tests.test_schedule
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------
