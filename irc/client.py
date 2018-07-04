@@ -64,6 +64,7 @@ import itertools
 import contextlib
 
 import six
+import jaraco.functools
 from jaraco.itertools import always_iterable, infinite_call
 from jaraco.functools import Throttler
 from jaraco.stream import buffer
@@ -76,7 +77,6 @@ except ImportError:
 
 from . import connection
 from . import events
-from . import functools as irc_functools
 from . import features
 from . import ctcp
 from . import message
@@ -153,7 +153,7 @@ class ServerConnection(Connection):
         self.features = features.FeatureSet()
 
     # save the method args to allow for easier reconnection.
-    @irc_functools.save_method_args
+    @jaraco.functools.save_method_args
     def connect(
             self, server, port, nickname, password=None, username=None,
             ircname=None, connect_factory=connection.Factory()):

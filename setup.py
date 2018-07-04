@@ -40,7 +40,7 @@ params = dict(
         'jaraco.text',
         'jaraco.itertools>=1.8',
         'jaraco.logging',
-        'jaraco.functools>=1.5',
+        'jaraco.functools>=1.20',
         'jaraco.stream',
         'pytz',
         'more_itertools',

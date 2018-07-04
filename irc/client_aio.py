@@ -45,7 +45,7 @@ import logging
 
 from .client import ServerConnection, ServerNotConnectedError, Reactor,\
     SimpleIRCClient, Event, _ping_ponger
-from . import functools as irc_functools
+import jaraco.functools
 
 log = logging.getLogger(__name__)
 
@@ -95,7 +95,7 @@ class AioConnection(ServerConnection):
     """
     protocol_class = IrcProtocol
 
-    @irc_functools.save_method_args
+    @jaraco.functools.save_method_args
     def connect(
         self, server, port, nickname,
         password=None, username=None, ircname=None
