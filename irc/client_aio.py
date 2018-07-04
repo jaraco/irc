@@ -187,10 +187,10 @@ class AioConnection(ServerConnection):
         Arguments:
             message -- Quit message.
         """
-        if not self.connected:
+        try:
+            del self.connected
+        except AttributeError:
             return
-
-        self.connected = 0
 
         self.quit(message)
 
