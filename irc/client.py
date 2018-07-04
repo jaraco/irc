@@ -116,10 +116,6 @@ class Connection:
     transmit_encoding = 'utf-8'
     "encoding used for transmission"
 
-    @abc.abstractproperty
-    def socket(self):
-        "The socket for this connection"
-
     def __init__(self, reactor):
         self.reactor = reactor
 
@@ -145,8 +141,6 @@ class ServerConnection(Connection):
     """
 
     buffer_class = buffer.DecodingLineBuffer
-    socket = None
-    connected = False
 
     def __init__(self, reactor):
         super(ServerConnection, self).__init__(reactor)
@@ -198,7 +192,6 @@ class ServerConnection(Connection):
             self.socket = self.connect_factory(self.server_address)
         except socket.error as ex:
             raise ServerConnectionError("Couldn't connect to socket: %s" % ex)
-        self.connected = True
         self.reactor._on_connect(self.socket)
 
         # Log on...
@@ -385,7 +378,9 @@ class ServerConnection(Connection):
 
         Returns true if connected, otherwise false.
         """
-        return self.connected
+        return hasattr(self, 'socket')
+
+    connected = property(is_connected)
 
     def add_global_handler(self, *args):
         """Add global handler.
@@ -468,18 +463,16 @@ class ServerConnection(Connection):
             message -- Quit message.
         """
         try:
-            del self.connected
-        except AttributeError:
+            self.quit(message)
+            conn = vars(self).pop('socket')
+        except (ServerNotConnectedError, KeyError):
             return
 
-        self.quit(message)
-
         try:
-            self.socket.shutdown(socket.SHUT_WR)
-            self.socket.close()
+            conn.shutdown(socket.SHUT_WR)
+            conn.close()
         except socket.error:
             pass
-        del self.socket
         self._handle_event(Event("disconnect", self.server, "", [message]))
 
     def globops(self, text):
@@ -604,7 +597,7 @@ class ServerConnection(Connection):
 
         The string will be padded with appropriate CR LF.
         """
-        if self.socket is None:
+        if not hasattr(self, 'socket'):
             raise ServerNotConnectedError("Not connected.")
         sender = getattr(self.socket, 'write', self.socket.send)
         try:
@@ -954,15 +947,16 @@ class DCCConnection(Connection):
     DCCConnection objects are instantiated by calling the dcc
     method on a Reactor object.
     """
-    socket = None
-    connected = False
-    passive = False
     peeraddress = None
     peerport = None
 
     def __init__(self, reactor, dcctype):
         super(DCCConnection, self).__init__(reactor)
         self.dcctype = dcctype
+
+    @property
+    def passive(self):
+        return hasattr(self, 'listener')
 
     def connect(self, address, port):
         """Connect/reconnect to a DCC peer.
@@ -982,8 +976,8 @@ class DCCConnection(Connection):
         try:
             self.socket.connect((self.peeraddress, self.peerport))
         except socket.error as x:
+            del self.socket
             raise DCCConnectionError("Couldn't connect to socket: %s" % x)
-        self.connected = True
         self.reactor._on_connect(self.socket)
         return self
 
@@ -999,13 +993,14 @@ class DCCConnection(Connection):
         """
         self.buffer = buffer.LineBuffer()
         self.handlers = {}
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.passive = True
+        self.listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        addr = socket.gethostbyname(socket.gethostname()), 0
         try:
-            self.socket.bind((socket.gethostbyname(socket.gethostname()), 0))
-            self.localaddress, self.localport = self.socket.getsockname()
-            self.socket.listen(10)
+            self.listener.bind(addr)
+            self.localaddress, self.localport = self.listener.getsockname()
+            self.listener.listen(10)
         except socket.error as x:
+            del self.listener
             raise DCCConnectionError("Couldn't bind socket: %s" % x)
         return self
 
@@ -1017,16 +1012,15 @@ class DCCConnection(Connection):
             message -- Quit message.
         """
         try:
-            del self.connected
-        except AttributeError:
+            conn = vars(self).pop('socket')
+        except KeyError:
             return
 
         try:
-            self.socket.shutdown(socket.SHUT_WR)
-            self.socket.close()
+            conn.shutdown(socket.SHUT_WR)
+            conn.close()
         except socket.error:
             pass
-        del self.socket
         self.reactor._handle_event(
             self,
             Event("dcc_disconnect", self.peeraddress, "", [message]))
@@ -1036,10 +1030,9 @@ class DCCConnection(Connection):
         """[Internal]"""
 
         if self.passive and not self.connected:
-            conn, (self.peeraddress, self.peerport) = self.socket.accept()
-            self.socket.close()
+            conn, (self.peeraddress, self.peerport) = self.listener.accept()
+            self.listener.close()
             self.socket = conn
-            self.connected = True
             log.debug(
                 "DCC connection from %s:%d", self.peeraddress,
                 self.peerport)

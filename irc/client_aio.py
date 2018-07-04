@@ -144,7 +144,6 @@ class AioConnection(ServerConnection):
         self.transport = transport
         self.protocol = protocol
 
-        self.connected = True
         self.reactor._on_connect(self.protocol, self.transport)
 
         # Log on...
@@ -153,6 +152,11 @@ class AioConnection(ServerConnection):
         self.nick(self.nickname)
         self.user(self.username, self.ircname)
         return self
+
+    def is_connected(self):
+        return hasattr(self, 'transport')
+
+    connected = property(is_connected)
 
     def process_data(self, new_data):
         """
@@ -187,14 +191,15 @@ class AioConnection(ServerConnection):
         Arguments:
             message -- Quit message.
         """
-        if not self.connected:
+        try:
+            transport = vars(self).pop('transport')
+            del self.protocol
+        except KeyError:
             return
-
-        self.connected = 0
 
         self.quit(message)
 
-        self.transport.close()
+        transport.close()
 
         self._handle_event(Event("disconnect", self.server, "", [message]))
 
