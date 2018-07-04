@@ -146,10 +146,10 @@ class ServerConnection(Connection):
 
     buffer_class = buffer.DecodingLineBuffer
     socket = None
+    connected = False
 
     def __init__(self, reactor):
         super(ServerConnection, self).__init__(reactor)
-        self.connected = False
         self.features = features.FeatureSet()
 
     # save the method args to allow for easier reconnection.
@@ -467,10 +467,10 @@ class ServerConnection(Connection):
 
             message -- Quit message.
         """
-        if not self.connected:
+        try:
+            del self.connected
+        except AttributeError:
             return
-
-        self.connected = 0
 
         self.quit(message)
 
@@ -955,14 +955,14 @@ class DCCConnection(Connection):
     method on a Reactor object.
     """
     socket = None
+    connected = False
+    passive = False
+    peeraddress = None
+    peerport = None
 
     def __init__(self, reactor, dcctype):
         super(DCCConnection, self).__init__(reactor)
-        self.connected = 0
-        self.passive = 0
         self.dcctype = dcctype
-        self.peeraddress = None
-        self.peerport = None
 
     def connect(self, address, port):
         """Connect/reconnect to a DCC peer.
@@ -979,12 +979,11 @@ class DCCConnection(Connection):
         self.buffer = buffer.LineBuffer()
         self.handlers = {}
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.passive = 0
         try:
             self.socket.connect((self.peeraddress, self.peerport))
         except socket.error as x:
             raise DCCConnectionError("Couldn't connect to socket: %s" % x)
-        self.connected = 1
+        self.connected = True
         self.reactor._on_connect(self.socket)
         return self
 
@@ -1001,7 +1000,7 @@ class DCCConnection(Connection):
         self.buffer = buffer.LineBuffer()
         self.handlers = {}
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.passive = 1
+        self.passive = True
         try:
             self.socket.bind((socket.gethostbyname(socket.gethostname()), 0))
             self.localaddress, self.localport = self.socket.getsockname()
@@ -1017,10 +1016,11 @@ class DCCConnection(Connection):
 
             message -- Quit message.
         """
-        if not self.connected:
+        try:
+            del self.connected
+        except AttributeError:
             return
 
-        self.connected = 0
         try:
             self.socket.shutdown(socket.SHUT_WR)
             self.socket.close()
@@ -1039,7 +1039,7 @@ class DCCConnection(Connection):
             conn, (self.peeraddress, self.peerport) = self.socket.accept()
             self.socket.close()
             self.socket = conn
-            self.connected = 1
+            self.connected = True
             log.debug(
                 "DCC connection from %s:%d", self.peeraddress,
                 self.peerport)
