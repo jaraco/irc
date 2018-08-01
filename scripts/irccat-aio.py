@@ -36,7 +36,6 @@ def get_lines():
 
 async def main_loop(connection):
     for line in itertools.takewhile(bool, get_lines()):
-        print(line)
         connection.privmsg(target, line)
 
         # Allow pause in the stdin loop to not block the asyncio event loop
@@ -70,9 +69,9 @@ def main():
     reactor = irc.client_aio.AioReactor(loop=loop)
 
     try:
-        c = reactor.server().connect(
+        c = loop.run_until_complete(reactor.server().connect(
             args.server, args.port, args.nickname, password=args.password
-        )
+        ))
     except irc.client.ServerConnectionError:
         print(sys.exc_info()[1])
         raise SystemExit(1)

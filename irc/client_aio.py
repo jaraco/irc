@@ -45,7 +45,6 @@ import logging
 
 from .client import ServerConnection, ServerNotConnectedError, Reactor,\
     SimpleIRCClient, Event, _ping_ponger
-import jaraco.functools
 
 log = logging.getLogger(__name__)
 
@@ -69,6 +68,10 @@ class IrcProtocol(asyncio.Protocol):
 
     def data_received(self, data):
         self.connection.process_data(data)
+
+    def connection_lost(self, exc):
+        log.debug("connection lost: {}".format(exc))
+        self.connection.disconnect()
 
 
 class AioConnection(ServerConnection):
@@ -95,8 +98,7 @@ class AioConnection(ServerConnection):
     """
     protocol_class = IrcProtocol
 
-    @jaraco.functools.save_method_args
-    def connect(
+    async def connect(
         self, server, port, nickname,
         password=None, username=None, ircname=None
     ):
@@ -137,9 +139,7 @@ class AioConnection(ServerConnection):
             self.server,
             self.port,
         )
-        print('HELLO')
-        print(connection)
-        transport, protocol = self.reactor.loop.run_until_complete(connection)
+        transport, protocol = await connection
 
         self.transport = transport
         self.protocol = protocol
@@ -164,7 +164,6 @@ class AioConnection(ServerConnection):
 
         # process each non-empty line after logging all lines
         for line in self.buffer:
-            print(line)
             log.debug("FROM SERVER: %s", line)
             if not line:
                 continue
@@ -275,3 +274,8 @@ class AioSimpleIRCClient(SimpleIRCClient):
     on irc.client.SimpleIRCClient
     """
     reactor_class = AioReactor
+
+    def connect(self, *args, **kwargs):
+        self.reactor.loop.run_until_complete(
+            self.connection.connect(*args, **kwargs)
+        )

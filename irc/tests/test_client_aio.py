@@ -18,7 +18,7 @@ def test_privmsg_sends_msg(create_connection_mock):
     # connect to dummy server
     loop = asyncio.get_event_loop()
     server = client_aio.AioReactor(loop=loop).server()
-    server.connect('foo', 6667, 'my_irc_nick')
+    loop.run_until_complete(server.connect('foo', 6667, 'my_irc_nick'))
     server.privmsg('#best-channel', 'You are great')
 
     mock_transport.write.assert_called_with(

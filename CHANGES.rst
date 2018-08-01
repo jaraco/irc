@@ -1,8 +1,15 @@
+16.4
+====
+
+* #149: ``AioConnection.connect`` moved to coroutine, added
+  disconnect handling for AsyncIO.
+
 16.3
 ====
 
 * #140: Methods now use 'connection' and 'event' for parameter names.
-# #135 via #144: Added AsyncIO implementation.
+
+* #135 via #144: Added AsyncIO implementation.
 
 16.2.1
 ======
