@@ -1,3 +1,8 @@
+17.0
+====
+
+* Removed ``irc.buffer`` module, deprecated in 14.2.
+
 16.4
 ====
 
