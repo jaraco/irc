@@ -37,18 +37,6 @@ In order to understand how to make an IRC client, it's best to read up first
 on the `IRC specifications
 <http://web.archive.org/web/20160628193730/http://www.irchelp.org/irchelp/rfc/>`_.
 
-Installation
-============
-
-IRC requires Python versions specified in the `download pages
-<https://pypi.python.org/pypi/irc>`_ and definitely supports Python 3.
-
-You have several options to install the IRC project.
-
-* Use ``easy_install irc`` or ``pip install irc`` to grab the latest
-  version from the cheeseshop (recommended).
-* Run ``python setup.py install`` (from the source distribution).
-
 Client Features
 ===============
 
