@@ -38,6 +38,7 @@ params = dict(
         'pytz',
         'more_itertools',
         'tempora>=1.6',
+        'importlib_metadata',
     ],
     extras_require={
         'testing': [

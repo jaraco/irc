@@ -1,3 +1,11 @@
+17.1
+====
+
+* Rely on
+  `importlib_metadata <https://pypi.org/project/importlib_metadata/>`_
+  for loading version from metadata. Removes implicit dependency on
+  setuptools and pkg_resources.
+
 17.0
 ====
 
