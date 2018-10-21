@@ -2,10 +2,12 @@
 ====
 
 * Removed ``irc.buffer`` module, deprecated in 14.2.
+* #153: Drop support for Python 3.3 and 2.7.
 
 16.4
 ====
 
+* Long Term Service release for Python 2.7.
 * #149: ``AioConnection.connect`` moved to coroutine, added
   disconnect handling for AsyncIO.
 
