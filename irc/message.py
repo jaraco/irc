@@ -1,8 +1,3 @@
-from __future__ import print_function
-
-__metaclass__ = type
-
-
 class Tag:
     """
     An IRC message tag ircv3.net/specs/core/message-tags-3.2.html

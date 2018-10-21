@@ -1,8 +1,4 @@
-from __future__ import absolute_import
-
 import collections
-
-__metaclass__ = type
 
 
 class FeatureSet:

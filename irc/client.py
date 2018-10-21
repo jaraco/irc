@@ -47,8 +47,6 @@ Notes:
 .. [IRC specifications] http://www.irchelp.org/irchelp/rfc/
 """
 
-from __future__ import absolute_import, division
-
 import bisect
 import re
 import select
@@ -63,7 +61,6 @@ import functools
 import itertools
 import contextlib
 
-import six
 import jaraco.functools
 from jaraco.itertools import always_iterable, infinite_call
 from jaraco.functools import Throttler
@@ -81,8 +78,6 @@ from . import features
 from . import ctcp
 from . import message
 from . import schedule
-
-__metaclass__ = type
 
 log = logging.getLogger(__name__)
 
@@ -107,8 +102,7 @@ class MessageTooLong(ValueError):
     "Message is too long"
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Connection:
+class Connection(metaclass=abc.ABCMeta):
     """
     Base class for IRC connections.
     """
@@ -1276,7 +1270,7 @@ def ip_quad_to_numstr(quad):
     return str(struct.unpack('>L', packed)[0])
 
 
-class NickMask(six.text_type):
+class NickMask(str):
     """
     A nickmask (the source of an Event)
 
@@ -1290,14 +1284,12 @@ class NickMask(six.text_type):
     >>> nm.user
     'username'
 
-    >>> isinstance(nm, six.text_type)
+    >>> isinstance(nm, str)
     True
 
-    >>> nm = 'красный!red@yahoo.ru'
-    >>> if not six.PY3: nm = nm.decode('utf-8')
-    >>> nm = NickMask(nm)
+    >>> nm = NickMask('красный!red@yahoo.ru')
 
-    >>> isinstance(nm.nick, six.text_type)
+    >>> isinstance(nm.nick, str)
     True
 
     Some messages omit the userhost. In that case, None is returned.

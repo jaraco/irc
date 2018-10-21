@@ -29,7 +29,6 @@ params = dict(
     ),
     python_requires='>=3.4',
     install_requires=[
-        'six',
         'jaraco.collections',
         'jaraco.text',
         'jaraco.itertools>=1.8',

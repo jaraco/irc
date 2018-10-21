@@ -1,13 +1,8 @@
-from __future__ import print_function
-
 from unittest import mock
 
 import pytest
-import six
 
 import irc.client
-
-__metaclass__ = type
 
 
 def test_version():
@@ -15,7 +10,7 @@ def test_version():
 	assert 'VERSION_STRING' in vars(irc.client)
 	assert isinstance(irc.client.VERSION, tuple)
 	assert irc.client.VERSION, "No VERSION detected."
-	assert isinstance(irc.client.VERSION_STRING, six.string_types)
+	assert isinstance(irc.client.VERSION_STRING, str)
 
 
 @mock.patch('irc.connection.socket')

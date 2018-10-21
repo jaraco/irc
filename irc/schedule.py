@@ -1,14 +1,9 @@
 import abc
 
-import six
-
 from tempora import schedule
 
-__metaclass__ = type
 
-
-@six.add_metaclass(abc.ABCMeta)
-class IScheduler:
+class IScheduler(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def execute_every(self, period, func):
         "execute func every period"

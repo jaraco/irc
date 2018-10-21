@@ -7,8 +7,6 @@ This module contains a single-server IRC bot class that can be used to
 write simpler bots.
 """
 
-from __future__ import absolute_import
-
 import sys
 import collections
 import warnings
@@ -16,12 +14,9 @@ import abc
 import itertools
 import random
 
-import six
 import irc.client
 import irc.modes
 from .dict import IRCDict
-
-__metaclass__ = type
 
 
 class ServerSpec:
@@ -51,8 +46,7 @@ class ServerSpec:
         )
 
 
-@six.add_metaclass(abc.ABCMeta)
-class ReconnectStrategy:
+class ReconnectStrategy(metaclass=abc.ABCMeta):
     """
     An abstract base class describing the interface used by
     SingleServerIRCBot for handling reconnect following

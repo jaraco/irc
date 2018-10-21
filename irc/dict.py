@@ -1,6 +1,5 @@
 from __future__ import unicode_literals, absolute_import
 
-import six
 from jaraco.collections import KeyTransformingDict
 
 from . import strings
@@ -42,6 +41,6 @@ class IRCDict(KeyTransformingDict):
     """
     @staticmethod
     def transform_key(key):
-        if isinstance(key, six.string_types):
+        if isinstance(key, str):
             key = strings.IRCFoldedCase(key)
         return key

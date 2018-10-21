@@ -1,8 +1,6 @@
 import time
 import threading
 
-import six
-
 import pytest
 
 import irc.client
@@ -125,9 +123,7 @@ class TestBot:
         event = irc.client.Event(
             type=None, source=None, target=None,
             arguments=['*', '*', 'nick'])
-        _on_namreply = six.get_unbound_function(
-            irc.bot.SingleServerIRCBot._on_namreply)
-        _on_namreply(None, None, event)
+        irc.bot.SingleServerIRCBot._on_namreply(None, None, event)
 
     def test_reconnects_are_stable(self, disconnecting_server):
         """

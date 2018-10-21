@@ -44,24 +44,19 @@ will ever be connected to by the public.
 # Not Todo (Won't be supported)
 #   - Server linking.
 
-from __future__ import print_function, absolute_import
-
 import argparse
 import errno
 import logging
 import socket
 import select
 import re
+import socketserver
 
-import six
-from six.moves import socketserver
 import jaraco.logging
 from jaraco.stream import buffer
 
 import irc.client
 from . import events
-
-__metaclass__ = type
 
 SRV_WELCOME = "Welcome to {__name__} v{irc.client.VERSION}.".format(**locals())
 
@@ -114,13 +109,6 @@ class IRCClient(socketserver.BaseRequestHandler):
         self.nick = None            # Client's currently registered nickname
         self.send_queue = []        # Messages to send to client (strings)
         self.channels = {}          # Channels the client is in
-
-        # On Python 2, use old, clunky syntax to call parent init
-        if six.PY2:
-            socketserver.BaseRequestHandler.__init__(
-                self, request,
-                client_address, server)
-            return
 
         super().__init__(request, client_address, server)
 
@@ -180,7 +168,7 @@ class IRCClient(socketserver.BaseRequestHandler):
                     '%s :Unknown command' % command)
             response = handler(params)
         except AttributeError as e:
-            log.error(six.text_type(e))
+            log.error(str(e))
             raise
         except IRCError as e:
             response = ':%s %s %s' % (self.server.servername, e.code, e.value)
@@ -505,10 +493,6 @@ class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
         self.servername = 'localhost'
         self.channels = {}
         self.clients = {}
-
-        if six.PY2:
-            socketserver.TCPServer.__init__(self, *args, **kwargs)
-            return
 
         super().__init__(*args, **kwargs)
 

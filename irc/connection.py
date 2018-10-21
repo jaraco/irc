@@ -2,8 +2,6 @@ from __future__ import absolute_import
 
 import socket
 
-__metaclass__ = type
-
 
 def identity(x):
     return x
