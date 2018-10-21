@@ -16,6 +16,9 @@
    :alt: Join the chat at https://gitter.im/jaraco/irc
    :target: https://gitter.im/jaraco/irc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
+.. image:: https://tidelift.com/badges/github/jaraco/irc
+   :target: https://tidelift.com/subscription/pkg/pypi-irc?utm_source=pypi-irc&utm_medium=referral&utm_campaign=readme
+
 Full-featured Python IRC library for Python.
 
 - `Project home <https://github.com/jaraco/irc>`_
@@ -58,7 +61,7 @@ The main features of the IRC client framework are:
   connection object.
 * Messages from an IRC server triggers events, which can be caught
   by event handlers.
-* Multiple opations for reading from and writing to an IRC server: 
+* Multiple opations for reading from and writing to an IRC server:
   you can use sockets in an internal ``select()`` loop OR use
   python3's asyncio event loop
 * Functions can be registered to execute at specified times by the
@@ -92,9 +95,9 @@ The following modules might be of interest:
   and read the source, Luke!
 
 * ``irc.client_aio``
-    
-  All the functionality of the above library, but utilizing 
-  Python 3's native asyncio library for the core event loop.  
+
+  All the functionality of the above library, but utilizing
+  Python 3's native asyncio library for the core event loop.
   Interface/API is otherwise functionally identical to the classes
   in ``irc.client``
 
