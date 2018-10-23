@@ -977,7 +977,7 @@ class DCCConnection(Connection):
         self.reactor._on_connect(self.socket)
         return self
 
-    def listen(self):
+    def listen(self, ip=None, port=None):
         """Wait for a connection/reconnection from a DCC peer.
 
         Returns the DCCConnection object.
@@ -992,7 +992,11 @@ class DCCConnection(Connection):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.passive = True
         try:
-            self.socket.bind((socket.gethostbyname(socket.gethostname()), 0))
+            if ip is None:
+                ip = socket.gethostbyname(socket.gethostname())
+            if port is None:
+                port = 0
+            self.socket.bind((ip, port))
             self.localaddress, self.localport = self.socket.getsockname()
             self.socket.listen(10)
         except socket.error as x:
@@ -1173,14 +1177,14 @@ class SimpleIRCClient:
         dcc.connect(address, port)
         return dcc
 
-    def dcc_listen(self, dcctype="chat"):
+    def dcc_listen(self, dcctype="chat", ip=None, port=None):
         """Listen for connections from a DCC peer.
 
         Returns a DCCConnection instance.
         """
         dcc = self.reactor.dcc(dcctype)
         self.dcc_connections.append(dcc)
-        dcc.listen()
+        dcc.listen(ip, port)
         return dcc
 
     def start(self):
