@@ -331,6 +331,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
     def start(self):
         """Start the bot."""
         self._connect()
+        self.recon.run(self)
         super(SingleServerIRCBot, self).start()
 
 
