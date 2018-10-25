@@ -69,7 +69,7 @@ def main():
         c.connect(
             args.server, args.port, args.nickname, password=args.password
         )
-    except irc.client.ServerConnectionError as x:
+    except irc.client.ServerConnectionError:
         sys.exit(1)
 
     try:
