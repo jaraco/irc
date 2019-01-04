@@ -180,7 +180,6 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
                 server.host, server.port, self._nickname,
                 server.password, ircname=self._realname,
                 **self.__connect_params)
-            self.connection_attempts = 1
         except irc.client.ServerConnectionError:
             pass
 
