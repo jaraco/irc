@@ -14,6 +14,8 @@ import abc
 import itertools
 import random
 
+import more_itertools
+
 import irc.client
 import irc.modes
 from .dict import IRCDict
@@ -44,6 +46,12 @@ class ServerSpec:
             self.host, self.port,
             "with password" if self.password else "without password",
         )
+
+    @classmethod
+    def ensure(cls, input):
+        spec = cls(*input) if isinstance(input, (list, tuple)) else input
+        assert isinstance(spec, cls)
+        return spec
 
 
 class ReconnectStrategy(metaclass=abc.ABCMeta):
@@ -144,16 +152,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         super(SingleServerIRCBot, self).__init__()
         self.__connect_params = connect_params
         self.channels = IRCDict()
-        self.server_list = [
-            ServerSpec(*server)
-            if isinstance(server, (tuple, list))
-            else server
-            for server in server_list
-        ]
-        assert all(
-            isinstance(server, ServerSpec)
-            for server in self.server_list
-        )
+        specs = map(ServerSpec.ensure, server_list)
+        self.servers = more_itertools.peekable(itertools.cycle(specs))
         self.recon = recon
         # for compatibility
         if reconnection_interval is not missing:
@@ -174,7 +174,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         """
         Establish a connection to the server at the front of the server_list.
         """
-        server = self.server_list[0]
+        server = self.servers.peek()
         try:
             self.connect(
                 server.host, server.port, self._nickname,
@@ -304,7 +304,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         if self.connection.is_connected():
             self.connection.disconnect(msg)
 
-        self.server_list.append(self.server_list.pop(0))
+        next(self.servers)
         self._connect()
 
     def on_ctcp(self, connection, event):

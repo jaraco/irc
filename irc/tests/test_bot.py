@@ -108,8 +108,7 @@ class TestBot:
             realname='irclibbot',
             nickname='irclibbot',
         )
-        assert len(bot.server_list) == 1
-        svr = bot.server_list[0]
+        svr = bot.servers.peek()
         assert svr.host == 'localhost'
         assert svr.port == '9999'
         assert svr.password is None
