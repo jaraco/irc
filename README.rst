@@ -67,7 +67,7 @@ Current limitations:
 * Data is not written asynchronously to the server (and DCC peers),
   i.e. the ``write()`` may block if the TCP buffers are stuffed.
 * Like most projects, documentation is lacking ...
-* DCC is not currently implemented in the asyncio-based versin
+* DCC is not currently implemented in the asyncio-based version
 
 Unfortunately, this library isn't as well-documented as I would like
 it to be.  I think the best way to get started is to read and
