@@ -1158,6 +1158,16 @@ class SimpleIRCClient:
         """Connect using the underlying connection"""
         self.connection.connect(*args, **kwargs)
 
+    def direct(self, type):
+        """Create and associate a new DCCConnection object.
+
+        Use the returned object to listen for or connect to
+        a DCC peer.
+        """
+        dcc = self.reactor.dcc(type)
+        self.dcc_connections.append(dcc)
+        return dcc
+
     def dcc_connect(self, address, port, dcctype="chat"):
         """Connect to a DCC peer.
 
@@ -1169,19 +1179,14 @@ class SimpleIRCClient:
 
         Returns a DCCConnection instance.
         """
-        dcc = self.reactor.dcc(dcctype)
-        self.dcc_connections.append(dcc)
-        dcc.connect(address, port)
-        return dcc
+        return self.direct(dcctype).connect(address, port)
 
     def dcc_listen(self, dcctype="chat"):
         """Listen for connections from a DCC peer.
 
         Returns a DCCConnection instance.
         """
-        dcc = self.reactor.dcc(dcctype)
-        self.dcc_connections.append(dcc)
-        return dcc.listen()
+        return self.direct(dcctype).listen()
 
     def start(self):
         """Start the IRC client."""
