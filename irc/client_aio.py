@@ -43,6 +43,7 @@ import asyncio
 import threading
 import logging
 
+from . import connection
 from .client import ServerConnection, ServerNotConnectedError, Reactor,\
     SimpleIRCClient, Event, _ping_ponger
 
@@ -99,8 +100,8 @@ class AioConnection(ServerConnection):
     protocol_class = IrcProtocol
 
     async def connect(
-        self, server, port, nickname,
-        password=None, username=None, ircname=None
+        self, server, port, nickname, password=None, username=None,
+        ircname=None, connect_factory=connection.AioFactory()
     ):
         """Connect/reconnect to a server.
 
@@ -112,6 +113,9 @@ class AioConnection(ServerConnection):
         * password - Password (if any)
         * username - The username
         * ircname - The IRC name ("realname")
+
+        * connect_factory - An async callable that takes the event loop and the
+          server address, and returns a connection (with a socket interface)
 
         This function can be called to reconnect a closed connection.
 
@@ -133,12 +137,11 @@ class AioConnection(ServerConnection):
         self.username = username or nickname
         self.ircname = ircname or nickname
         self.password = password
+        self.connect_factory = connect_factory
 
-        connection = self.reactor.loop.create_connection(
-            lambda: self.protocol_class(self, self.reactor.loop),
-            self.server,
-            self.port,
-        )
+        protocol_instance = self.protocol_class(self, self.reactor.loop)
+        connection = self.connect_factory(
+            protocol_instance, self.server_address)
         transport, protocol = await connection
 
         self.transport = transport

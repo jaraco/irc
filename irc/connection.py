@@ -49,3 +49,39 @@ class Factory:
         sock.connect(server_address)
         return sock
     __call__ = connect
+
+
+class AioFactory:
+    """
+    A class for creating async custom socket connections.
+
+    To create a simple connection:
+
+        server_address = ('localhost', 80)
+        Factory()(protocol_instance, server_address)
+
+    To create an SSL connection:
+
+        Factory(ssl=True)(protocol_instance, server_address)
+
+    To create an IPv6 connection:
+
+        Factory(ipv6=True)(protocol_instance, server_address)
+
+    Note that Factory doesn't save the state of the socket itself. The
+    caller must do that, as necessary. As a result, the Factory may be
+    re-used to create new connections with the same settings.
+
+    """
+
+    family = socket.AF_INET
+
+    def __init__(self, **kwargs):
+        self.connection_args = kwargs
+
+    def connect(self, protocol_instance, server_address):
+        return protocol_instance.loop.create_connection(
+            lambda: protocol_instance, *server_address,
+            **self.connection_args)
+
+    __call__ = connect
