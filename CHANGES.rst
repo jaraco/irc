@@ -6,6 +6,22 @@
   for loading version from metadata. Removes implicit dependency on
   setuptools and pkg_resources.
 
+* #155: ``SimpleIRCClient`` now has a ``dcc`` method for initiating
+  and associating a DCCConnection object with the client.
+  ``DCCConnection.listen`` now accepts a ``address`` parameter.
+  Deprecated ``SimpleIRCClient.dcc_listen`` and
+  ``SimpleIRCClient.dcc_connect`` in favor of the better separation
+  of concerns. Clients should replace::
+
+    client.dcc_connect(addr, port, type)
+    client.dcc_listen(type)
+
+  with::
+
+    client.dcc(type).connect(addr, port)
+    client.dcc(type).listen()
+
+
 17.0
 ====
 

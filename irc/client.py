@@ -60,6 +60,7 @@ import collections
 import functools
 import itertools
 import contextlib
+import warnings
 
 import jaraco.functools
 from jaraco.itertools import always_iterable, infinite_call
@@ -977,7 +978,7 @@ class DCCConnection(Connection):
         self.reactor._on_connect(self.socket)
         return self
 
-    def listen(self):
+    def listen(self, addr=None):
         """Wait for a connection/reconnection from a DCC peer.
 
         Returns the DCCConnection object.
@@ -991,8 +992,9 @@ class DCCConnection(Connection):
         self.handlers = {}
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.passive = True
+        default_addr = socket.gethostbyname(socket.gethostname()), 0
         try:
-            self.socket.bind((socket.gethostbyname(socket.gethostname()), 0))
+            self.socket.bind(addr or default_addr)
             self.localaddress, self.localport = self.socket.getsockname()
             self.socket.listen(10)
         except socket.error as x:
@@ -1157,6 +1159,16 @@ class SimpleIRCClient:
         """Connect using the underlying connection"""
         self.connection.connect(*args, **kwargs)
 
+    def dcc(self, *args, **kwargs):
+        """Create and associate a new DCCConnection object.
+
+        Use the returned object to listen for or connect to
+        a DCC peer.
+        """
+        dcc = self.reactor.dcc(*args, **kwargs)
+        self.dcc_connections.append(dcc)
+        return dcc
+
     def dcc_connect(self, address, port, dcctype="chat"):
         """Connect to a DCC peer.
 
@@ -1168,20 +1180,16 @@ class SimpleIRCClient:
 
         Returns a DCCConnection instance.
         """
-        dcc = self.reactor.dcc(dcctype)
-        self.dcc_connections.append(dcc)
-        dcc.connect(address, port)
-        return dcc
+        warnings.warn("Use self.dcc(type).connect()", DeprecationWarning)
+        return self.dcc(dcctype).connect(address, port)
 
     def dcc_listen(self, dcctype="chat"):
         """Listen for connections from a DCC peer.
 
         Returns a DCCConnection instance.
         """
-        dcc = self.reactor.dcc(dcctype)
-        self.dcc_connections.append(dcc)
-        dcc.listen()
-        return dcc
+        warnings.warn("Use self.dcc(type).listen()", DeprecationWarning)
+        return self.dcc(dcctype).listen()
 
     def start(self):
         """Start the IRC client."""
