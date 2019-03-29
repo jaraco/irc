@@ -6,6 +6,9 @@
   for loading version from metadata. Removes implicit dependency on
   setuptools and pkg_resources.
 
+* #158: The AsyncIO server now accepts a connection factory to
+  enable features like SSL and IPv6 support.
+
 17.0
 ====
 
