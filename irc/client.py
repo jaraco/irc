@@ -60,6 +60,7 @@ import collections
 import functools
 import itertools
 import contextlib
+import warnings
 
 import jaraco.functools
 from jaraco.itertools import always_iterable, infinite_call
@@ -1179,6 +1180,7 @@ class SimpleIRCClient:
 
         Returns a DCCConnection instance.
         """
+        warnings.warn("Use self.dcc(type).connect()", DeprecationWarning)
         return self.dcc(dcctype).connect(address, port)
 
     def dcc_listen(self, dcctype="chat"):
@@ -1186,6 +1188,7 @@ class SimpleIRCClient:
 
         Returns a DCCConnection instance.
         """
+        warnings.warn("Use self.dcc(type).listen()", DeprecationWarning)
         return self.dcc(dcctype).listen()
 
     def start(self):
