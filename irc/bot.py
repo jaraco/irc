@@ -142,7 +142,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         dcc_connections -- A list of initiated/accepted DCC
             connections.
 
-        **connect_params -- parameters to pass through to the connect
+        \*\*connect_params -- parameters to pass through to the connect
             method.
     """
     def __init__(
