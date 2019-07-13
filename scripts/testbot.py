@@ -32,8 +32,7 @@ from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
 
 class TestBot(irc.bot.SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
-        irc.bot.SingleServerIRCBot.__init__(
-            self, [(server, port)], nickname, nickname)
+        irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
         self.channel = channel
 
     def on_nicknameinuse(self, c, e):
@@ -48,7 +47,8 @@ class TestBot(irc.bot.SingleServerIRCBot):
     def on_pubmsg(self, c, e):
         a = e.arguments[0].split(":", 1)
         if len(a) > 1 and irc.strings.lower(a[0]) == irc.strings.lower(
-                self.connection.get_nickname()):
+            self.connection.get_nickname()
+        ):
             self.do_command(e, a[1].strip())
         return
 
@@ -89,15 +89,19 @@ class TestBot(irc.bot.SingleServerIRCBot):
                 c.notice(nick, "Voiced: " + ", ".join(voiced))
         elif cmd == "dcc":
             dcc = self.dcc_listen()
-            c.ctcp("DCC", nick, "CHAT chat %s %d" % (
-                ip_quad_to_numstr(dcc.localaddress),
-                dcc.localport))
+            c.ctcp(
+                "DCC",
+                nick,
+                "CHAT chat %s %d"
+                % (ip_quad_to_numstr(dcc.localaddress), dcc.localport),
+            )
         else:
             c.notice(nick, "Not understood: " + cmd)
 
 
 def main():
     import sys
+
     if len(sys.argv) != 4:
         print("Usage: testbot <server[:port]> <channel> <nickname>")
         sys.exit(1)

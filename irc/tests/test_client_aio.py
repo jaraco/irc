@@ -21,8 +21,6 @@ def test_privmsg_sends_msg(create_connection_mock):
     loop.run_until_complete(server.connect('foo', 6667, 'my_irc_nick'))
     server.privmsg('#best-channel', 'You are great')
 
-    mock_transport.write.assert_called_with(
-        b'PRIVMSG #best-channel :You are great\r\n'
-    )
+    mock_transport.write.assert_called_with(b'PRIVMSG #best-channel :You are great\r\n')
 
     loop.close()

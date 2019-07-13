@@ -63,9 +63,7 @@ def on_passwdmismatch(connection, event):
 def on_links(connection, event):
     global links
 
-    links.append((event.arguments[0],
-                  event.arguments[1],
-                  event.arguments[2]))
+    links.append((event.arguments[0], event.arguments[1], event.arguments[2]))
 
 
 def on_endoflinks(connection, event):
@@ -86,8 +84,9 @@ def on_endoflinks(connection, event):
     else:
         hubs = 0
 
-    print("%d servers (%d leaves and %d hubs)\n" % (
-        len(links), len(links) - hubs, hubs))
+    print(
+        "%d servers (%d leaves and %d hubs)\n" % (len(links), len(links) - hubs, hubs)
+    )
 
     print_tree(0, [], connection.get_server_name(), m)
     connection.quit("Using irc.client.py")
@@ -114,8 +113,7 @@ def indent_string(level, active_levels, last):
 
 
 def print_tree(level, active_levels, root, map, last=0):
-    sys.stdout.write(indent_string(level, active_levels, last)
-                     + root + "\n")
+    sys.stdout.write(indent_string(level, active_levels, last) + root + "\n")
     if root in map:
         list = map[root]
         for r in list[:-1]:

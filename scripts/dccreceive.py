@@ -33,9 +33,7 @@ class DCCReceive(irc.client.SimpleIRCClient):
             return
         self.filename = os.path.basename(filename)
         if os.path.exists(self.filename):
-            print(
-                "A file named", self.filename,
-                "already exists. Refusing to save it.")
+            print("A file named", self.filename, "already exists. Refusing to save it.")
             self.connection.quit()
             return
         self.file = open(self.filename, "wb")
@@ -51,8 +49,7 @@ class DCCReceive(irc.client.SimpleIRCClient):
 
     def on_dcc_disconnect(self, connection, event):
         self.file.close()
-        print("Received file %s (%d bytes)." % (self.filename,
-                                                self.received_bytes))
+        print("Received file %s (%d bytes)." % (self.filename, self.received_bytes))
         self.connection.quit()
 
     def on_disconnect(self, connection, event):
@@ -62,7 +59,7 @@ class DCCReceive(irc.client.SimpleIRCClient):
 def get_args():
     parser = argparse.ArgumentParser(
         description="Receive a single file to the current directory via DCC "
-        "and then exit.",
+        "and then exit."
     )
     parser.add_argument('server')
     parser.add_argument('nickname')

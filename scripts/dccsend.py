@@ -28,13 +28,16 @@ class DCCSend(irc.client.SimpleIRCClient):
 
     def on_welcome(self, connection, event):
         self.dcc = self.dcc_listen("raw")
-        msg_parts = map(str, (
-            'SEND',
-            os.path.basename(self.filename),
-            irc.client.ip_quad_to_numstr(self.dcc.localaddress),
-            self.dcc.localport,
-            self.filesize,
-        ))
+        msg_parts = map(
+            str,
+            (
+                'SEND',
+                os.path.basename(self.filename),
+                irc.client.ip_quad_to_numstr(self.dcc.localaddress),
+                self.dcc.localport,
+                self.filesize,
+            ),
+        )
         msg = subprocess.list2cmdline(msg_parts)
         self.connection.ctcp("DCC", self.receiver, msg)
 
@@ -71,7 +74,7 @@ class DCCSend(irc.client.SimpleIRCClient):
 
 def get_args():
     parser = argparse.ArgumentParser(
-        description="Send <filename> to <receiver> via DCC and then exit.",
+        description="Send <filename> to <receiver> via DCC and then exit."
     )
     parser.add_argument('server')
     parser.add_argument('nickname')

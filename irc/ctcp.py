@@ -9,12 +9,7 @@ LOW_LEVEL_QUOTE = '\x10'
 LEVEL_QUOTE = "\\"
 DELIMITER = '\x01'
 
-low_level_mapping = {
-    "0": '\x00',
-    "n": "\n",
-    "r": "\r",
-    LEVEL_QUOTE: LEVEL_QUOTE
-}
+low_level_mapping = {"0": '\x00', "n": "\n", "r": "\r", LEVEL_QUOTE: LEVEL_QUOTE}
 
 low_level_regexp = re.compile(LOW_LEVEL_QUOTE + "(.)")
 

@@ -12,7 +12,6 @@ __metaclass__ = type
 
 
 class TestServerSpec:
-
     def test_with_host(self):
         server_spec = ServerSpec('irc.example.com')
         assert server_spec.host == 'irc.example.com'
@@ -33,14 +32,14 @@ class TestServerSpec:
 
     def test_with_host_and_port_and_password(self):
         server_spec = ServerSpec(
-            'irc.example.gov', port=6668, password='there-is-only-zuul')
+            'irc.example.gov', port=6668, password='there-is-only-zuul'
+        )
         assert server_spec.host == 'irc.example.gov'
         assert server_spec.port == 6668
         assert server_spec.password == 'there-is-only-zuul'
 
 
 class TestChannel:
-
     def test_add_remove_nick(self):
         channel = irc.bot.Channel()
         channel.add_user('tester1')
@@ -81,6 +80,7 @@ class DisconnectHandler(irc.server.IRCClient):
     """
     Immediately disconnect the client after connecting
     """
+
     def handle(self):
         self.request.close()
 
@@ -120,8 +120,8 @@ class TestBot:
         Regression test for #22
         """
         event = irc.client.Event(
-            type=None, source=None, target=None,
-            arguments=['*', '*', 'nick'])
+            type=None, source=None, target=None, arguments=['*', '*', 'nick']
+        )
         irc.bot.SingleServerIRCBot._on_namreply(None, None, event)
 
     def test_reconnects_are_stable(self, disconnecting_server):

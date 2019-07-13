@@ -44,8 +44,14 @@ import threading
 import logging
 
 from . import connection
-from .client import ServerConnection, ServerNotConnectedError, Reactor,\
-    SimpleIRCClient, Event, _ping_ponger
+from .client import (
+    ServerConnection,
+    ServerNotConnectedError,
+    Reactor,
+    SimpleIRCClient,
+    Event,
+    _ping_ponger,
+)
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +66,7 @@ class IrcProtocol(asyncio.Protocol):
     is mostly handling by the `AioConnection` object, using the same
     callback methods as on an `irc.ServerConnection` instance.
     """
+
     def __init__(self, connection, loop):
         """
         Constructor for IrcProtocol objects.
@@ -97,11 +104,18 @@ class AioConnection(ServerConnection):
     irc.client.ServerConnection for a full list of convience
     functions available.
     """
+
     protocol_class = IrcProtocol
 
     async def connect(
-        self, server, port, nickname, password=None, username=None,
-        ircname=None, connect_factory=connection.AioFactory()
+        self,
+        server,
+        port,
+        nickname,
+        password=None,
+        username=None,
+        ircname=None,
+        connect_factory=connection.AioFactory(),
     ):
         """Connect/reconnect to a server.
 
@@ -140,8 +154,7 @@ class AioConnection(ServerConnection):
         self.connect_factory = connect_factory
 
         protocol_instance = self.protocol_class(self, self.reactor.loop)
-        connection = self.connect_factory(
-            protocol_instance, self.server_address)
+        connection = self.connect_factory(protocol_instance, self.server_address)
         transport, protocol = await connection
 
         self.transport = transport
@@ -235,14 +248,13 @@ class AioReactor(Reactor):
     The above code will connect to the IRC server my.irc.server
     and echo the 'hello!' message to 'my-irc-channel' every 60 seconds.
     """
+
     connection_class = AioConnection
 
     def __do_nothing(*args, **kwargs):
         pass
 
-    def __init__(
-        self, on_connect=__do_nothing, on_disconnect=__do_nothing, loop=None
-    ):
+    def __init__(self, on_connect=__do_nothing, on_disconnect=__do_nothing, loop=None):
         self._on_connect = on_connect
         self._on_disconnect = on_disconnect
 
@@ -276,9 +288,8 @@ class AioSimpleIRCClient(SimpleIRCClient):
     For more information on AioSimpleIRCClient, see the documentation
     on irc.client.SimpleIRCClient
     """
+
     reactor_class = AioReactor
 
     def connect(self, *args, **kwargs):
-        self.reactor.loop.run_until_complete(
-            self.connection.connect(*args, **kwargs)
-        )
+        self.reactor.loop.run_until_complete(self.connection.connect(*args, **kwargs))

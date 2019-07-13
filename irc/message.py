@@ -2,6 +2,7 @@ class Tag:
     """
     An IRC message tag ircv3.net/specs/core/message-tags-3.2.html
     """
+
     @staticmethod
     def parse(item):
         r"""
@@ -30,10 +31,7 @@ class Tag:
         value = value.replace('\\r', '\r')
         value = value.replace('\\\\', '\\')
         value = value or None
-        return {
-            'key': key,
-            'value': value,
-        }
+        return {'key': key, 'value': value}
 
     @classmethod
     def from_group(cls, group):

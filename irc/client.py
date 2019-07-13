@@ -146,8 +146,15 @@ class ServerConnection(Connection):
     # save the method args to allow for easier reconnection.
     @jaraco.functools.save_method_args
     def connect(
-            self, server, port, nickname, password=None, username=None,
-            ircname=None, connect_factory=connection.Factory()):
+        self,
+        server,
+        port,
+        nickname,
+        password=None,
+        username=None,
+        ircname=None,
+        connect_factory=connection.Factory(),
+    ):
         """Connect/reconnect to a server.
 
         Arguments:
@@ -167,8 +174,8 @@ class ServerConnection(Connection):
         Returns the ServerConnection object.
         """
         log.debug(
-            "connect(server=%r, port=%r, nickname=%r, ...)", server,
-            port, nickname)
+            "connect(server=%r, port=%r, nickname=%r, ...)", server, port, nickname
+        )
 
         if self.connected:
             self.disconnect("Changing servers")
@@ -271,9 +278,7 @@ class ServerConnection(Connection):
             self._process_line(line)
 
     def _process_line(self, line):
-        event = Event(
-            "all_raw_messages", self.get_server_name(), None,
-            [line])
+        event = Event("all_raw_messages", self.get_server_name(), None, [line])
         self._handle_event(event)
 
         grp = _rfc_1459_command_regexp.match(line).group
@@ -323,9 +328,13 @@ class ServerConnection(Connection):
 
                 m = list(m)
                 log.debug(
-                    "command: %s, source: %s, target: %s, "
-                    "arguments: %s, tags: %s",
-                    command, source, target, m, tags)
+                    "command: %s, source: %s, target: %s, " "arguments: %s, tags: %s",
+                    command,
+                    source,
+                    target,
+                    m,
+                    tags,
+                )
                 event = Event(command, source, target, m, tags)
                 self._handle_event(event)
                 if command == "ctcp" and m[0] == "ACTION":
@@ -333,9 +342,13 @@ class ServerConnection(Connection):
                     self._handle_event(event)
             else:
                 log.debug(
-                    "command: %s, source: %s, target: %s, "
-                    "arguments: %s, tags: %s",
-                    command, source, target, [m], tags)
+                    "command: %s, source: %s, target: %s, " "arguments: %s, tags: %s",
+                    command,
+                    source,
+                    target,
+                    [m],
+                    tags,
+                )
                 event = Event(command, source, target, [m], tags)
                 self._handle_event(event)
 
@@ -352,9 +365,13 @@ class ServerConnection(Connection):
             if not is_channel(target):
                 command = "umode"
         log.debug(
-            "command: %s, source: %s, target: %s, "
-            "arguments: %s, tags: %s",
-            command, source, target, arguments, tags)
+            "command: %s, source: %s, target: %s, " "arguments: %s, tags: %s",
+            command,
+            source,
+            target,
+            arguments,
+            tags,
+        )
         event = Event(command, source, target, arguments, tags)
         self._handle_event(event)
 
@@ -441,10 +458,7 @@ class ServerConnection(Connection):
     def ctcp(self, ctcptype, target, parameter=""):
         """Send a CTCP command."""
         ctcptype = ctcptype.upper()
-        tmpl = (
-            "\001{ctcptype} {parameter}\001" if parameter else
-            "\001{ctcptype}\001"
-        )
+        tmpl = "\001{ctcptype} {parameter}\001" if parameter else "\001{ctcptype}\001"
         self.privmsg(target, tmpl.format(**vars()))
 
     def ctcp_reply(self, target, parameter):
@@ -673,8 +687,7 @@ class ServerConnection(Connection):
         self.reactor.scheduler.execute_every(period=interval, func=pinger)
 
 
-class PrioritizedHandler(
-        collections.namedtuple('Base', ('priority', 'callback'))):
+class PrioritizedHandler(collections.namedtuple('Base', ('priority', 'callback'))):
     def __lt__(self, other):
         "when sorting prioritized handlers, only use the priority"
         return self.priority < other.priority
@@ -800,8 +813,7 @@ class Reactor:
             return [
                 conn.socket
                 for conn in self.connections
-                if conn is not None
-                and conn.socket is not None
+                if conn is not None and conn.socket is not None
             ]
 
     def process_once(self, timeout=0):
@@ -912,8 +924,7 @@ class Reactor:
         """
         with self.mutex:
             matching_handlers = sorted(
-                self.handlers.get("all_events", [])
-                + self.handlers.get(event.type, [])
+                self.handlers.get("all_events", []) + self.handlers.get(event.type, [])
             )
             for handler in matching_handlers:
                 result = handler.callback(connection, event)
@@ -945,6 +956,7 @@ class DCCConnection(Connection):
     DCCConnection objects are instantiated by calling the dcc
     method on a Reactor object.
     """
+
     socket = None
     connected = False
     passive = False
@@ -1020,8 +1032,8 @@ class DCCConnection(Connection):
             pass
         del self.socket
         self.reactor._handle_event(
-            self,
-            Event("dcc_disconnect", self.peeraddress, "", [message]))
+            self, Event("dcc_disconnect", self.peeraddress, "", [message])
+        )
         self.reactor._remove_connection(self)
 
     def process_data(self):
@@ -1032,12 +1044,10 @@ class DCCConnection(Connection):
             self.socket.close()
             self.socket = conn
             self.connected = True
-            log.debug(
-                "DCC connection from %s:%d", self.peeraddress,
-                self.peerport)
+            log.debug("DCC connection from %s:%d", self.peeraddress, self.peerport)
             self.reactor._handle_event(
-                self,
-                Event("dcc_connect", self.peeraddress, None, None))
+                self, Event("dcc_connect", self.peeraddress, None, None)
+            )
             return
 
         try:
@@ -1059,8 +1069,8 @@ class DCCConnection(Connection):
             if len(self.buffer) > 2 ** 14:
                 # Bad peer! Naughty peer!
                 log.info(
-                    "Received >16k from a peer without a newline; "
-                    "disconnecting.")
+                    "Received >16k from a peer without a newline; " "disconnecting."
+                )
                 self.disconnect()
                 return
         else:
@@ -1074,7 +1084,11 @@ class DCCConnection(Connection):
             arguments = [chunk]
             log.debug(
                 "command: %s, source: %s, target: %s, arguments: %s",
-                command, prefix, target, arguments)
+                command,
+                prefix,
+                target,
+                arguments,
+            )
             event = Event(command, prefix, target, arguments)
             self.reactor._handle_event(self, event)
 
@@ -1130,6 +1144,7 @@ class SimpleIRCClient:
 
         dcc_connections -- A list of DCCConnection instances.
     """
+
     reactor_class = Reactor
 
     def __init__(self):
@@ -1137,9 +1152,7 @@ class SimpleIRCClient:
         self.connection = self.reactor.server()
         self.dcc_connections = []
         self.reactor.add_global_handler("all_events", self._dispatcher, -10)
-        self.reactor.add_global_handler(
-            "dcc_disconnect",
-            self._dcc_disconnect, -10)
+        self.reactor.add_global_handler("dcc_disconnect", self._dcc_disconnect, -10)
 
     def _dispatcher(self, connection, event):
         """
@@ -1149,6 +1162,7 @@ class SimpleIRCClient:
 
         def do_nothing(connection, event):
             return None
+
         method = getattr(self, "on_" + event.type, do_nothing)
         method(connection, event)
 
@@ -1203,6 +1217,7 @@ class Event:
     >>> print(Event('privmsg', '@somebody', '#channel'))
     type: privmsg, source: @somebody, target: #channel, arguments: [], tags: []
     """
+
     def __init__(self, type, source, target, arguments=None, tags=None):
         """
         Initialize an Event.
@@ -1305,6 +1320,7 @@ class NickMask(str):
     >>> nm.host
     >>> nm.user
     """
+
     @classmethod
     def from_params(cls, nick, user, host):
         return cls('{nick}!{user}@{host}'.format(**vars()))

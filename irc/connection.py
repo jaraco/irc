@@ -48,6 +48,7 @@ class Factory:
         self.bind_address and sock.bind(self.bind_address)
         sock.connect(server_address)
         return sock
+
     __call__ = connect
 
 
@@ -81,7 +82,7 @@ class AioFactory:
 
     def connect(self, protocol_instance, server_address):
         return protocol_instance.loop.create_connection(
-            lambda: protocol_instance, *server_address,
-            **self.connection_args)
+            lambda: protocol_instance, *server_address, **self.connection_args
+        )
 
     __call__ = connect

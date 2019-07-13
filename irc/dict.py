@@ -39,6 +39,7 @@ class IRCDict(KeyTransformingDict):
     >>> len(d)
     0
     """
+
     @staticmethod
     def transform_key(key):
         if isinstance(key, str):

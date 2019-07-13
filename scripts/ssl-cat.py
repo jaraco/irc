@@ -64,10 +64,7 @@ def main():
     reactor = irc.client.Reactor()
     try:
         c = reactor.server().connect(
-            args.server,
-            args.port,
-            args.nickname,
-            connect_factory=ssl_factory,
+            args.server, args.port, args.nickname, connect_factory=ssl_factory
         )
     except irc.client.ServerConnectionError:
         print(sys.exc_info()[1])

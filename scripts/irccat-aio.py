@@ -69,9 +69,11 @@ def main():
     reactor = irc.client_aio.AioReactor(loop=loop)
 
     try:
-        c = loop.run_until_complete(reactor.server().connect(
-            args.server, args.port, args.nickname, password=args.password
-        ))
+        c = loop.run_until_complete(
+            reactor.server().connect(
+                args.server, args.port, args.nickname, password=args.password
+            )
+        )
     except irc.client.ServerConnectionError:
         print(sys.exc_info()[1])
         raise SystemExit(1)

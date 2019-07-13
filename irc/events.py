@@ -160,7 +160,7 @@ numeric = {
     "481": "noprivileges",
     "482": "chanoprivsneeded",
     "483": "cantkillserver",
-    "484": "restricted",   # Connection is restricted
+    "484": "restricted",  # Connection is restricted
     "485": "uniqopprivsneeded",
     "491": "nooperhost",
     "492": "noservicehost",

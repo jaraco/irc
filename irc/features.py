@@ -28,10 +28,7 @@ class FeatureSet:
 
     def _set_rfc1459_prefixes(self):
         "install standard (RFC1459) prefixes"
-        self.set('PREFIX', {
-            '@': 'o',
-            '+': 'v',
-        })
+        self.set('PREFIX', {'@': 'o', '+': 'v'})
 
     def set(self, name, value=True):
         "set a feature value"
@@ -83,10 +80,7 @@ class FeatureSet:
         >>> res['a']
         3
         """
-        return dict(
-            string_int_pair(target, ':')
-            for target in value.split(',')
-        )
+        return dict(string_int_pair(target, ':') for target in value.split(','))
 
     @staticmethod
     def _parse_CHANLIMIT(value):
@@ -101,10 +95,9 @@ class FeatureSet:
         """
         pairs = map(string_int_pair, value.split(','))
         return dict(
-            (target, number)
-            for target_keys, number in pairs
-            for target in target_keys
+            (target, number) for target_keys, number in pairs for target in target_keys
         )
+
     _parse_MAXLIST = _parse_CHANLIMIT
 
     @staticmethod

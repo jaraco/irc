@@ -66,9 +66,7 @@ def main():
     c = AioIRCCat(target)
 
     try:
-        c.connect(
-            args.server, args.port, args.nickname, password=args.password
-        )
+        c.connect(args.server, args.port, args.nickname, password=args.password)
     except irc.client.ServerConnectionError as x:
         print(x)
         sys.exit(1)

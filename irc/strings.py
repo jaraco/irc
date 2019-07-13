@@ -17,14 +17,18 @@ class IRCFoldedCase(FoldedCase):
     >>> IRCFoldedCase().lower()
     ''
     """
-    translation = dict(zip(
-        map(ord, string.ascii_uppercase + r"[]\^"),
-        map(ord, string.ascii_lowercase + r"{}|~"),
-    ))
+
+    translation = dict(
+        zip(
+            map(ord, string.ascii_uppercase + r"[]\^"),
+            map(ord, string.ascii_lowercase + r"{}|~"),
+        )
+    )
 
     def lower(self):
         return (
-            self.translate(self.translation) if self
+            self.translate(self.translation)
+            if self
             # bypass translate, which returns self
             else super(IRCFoldedCase, self).lower()
         )

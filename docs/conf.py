@@ -12,9 +12,7 @@ master_doc = "index"
 
 link_files = {
     '../CHANGES.rst': dict(
-        using=dict(
-            GH='https://github.com',
-        ),
+        using=dict(GH='https://github.com'),
         replace=[
             dict(
                 pattern=r'(Issue #|\B#)(?P<issue>\d+)',
@@ -33,5 +31,5 @@ link_files = {
                 url="https://sourceforge.net/p/python-irclib/bugs/{sf_issue}/",
             ),
         ],
-    ),
+    )
 }

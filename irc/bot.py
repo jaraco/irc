@@ -36,6 +36,7 @@ class ServerSpec:
     >>> spec.password
     'fooP455'
     """
+
     def __init__(self, host, port=6667, password=None):
         self.host = host
         self.port = port
@@ -43,7 +44,8 @@ class ServerSpec:
 
     def __repr__(self):
         return "<irc.bot.ServerSpec for server %s:%s %s>" % (
-            self.host, self.port,
+            self.host,
+            self.port,
             "with password" if self.password else "without password",
         )
 
@@ -60,6 +62,7 @@ class ReconnectStrategy(metaclass=abc.ABCMeta):
     SingleServerIRCBot for handling reconnect following
     disconnect events.
     """
+
     @abc.abstractmethod
     def run(self, bot):
         """
@@ -91,7 +94,7 @@ class ExponentialBackoff(ReconnectStrategy):
             return
 
         # calculate interval in seconds based on connection attempts
-        intvl = 2**next(self.attempt_count) - 1
+        intvl = 2 ** next(self.attempt_count) - 1
 
         # limit the max interval
         intvl = min(intvl, self.max_interval)
@@ -116,7 +119,7 @@ missing = object()
 
 
 class SingleServerIRCBot(irc.client.SimpleIRCClient):
-    """A single-server IRC bot class.
+    r"""A single-server IRC bot class.
 
     The bot tries to reconnect if it is disconnected.
 
@@ -145,10 +148,16 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         \*\*connect_params -- parameters to pass through to the connect
             method.
     """
+
     def __init__(
-            self, server_list, nickname, realname,
-            reconnection_interval=missing,
-            recon=ExponentialBackoff(), **connect_params):
+        self,
+        server_list,
+        nickname,
+        realname,
+        reconnection_interval=missing,
+        recon=ExponentialBackoff(),
+        **connect_params
+    ):
         super(SingleServerIRCBot, self).__init__()
         self.__connect_params = connect_params
         self.channels = IRCDict()
@@ -159,16 +168,23 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         if reconnection_interval is not missing:
             warnings.warn(
                 "reconnection_interval is deprecated; "
-                "pass a ReconnectStrategy object instead")
+                "pass a ReconnectStrategy object instead"
+            )
             self.recon = ExponentialBackoff(min_interval=reconnection_interval)
 
         self._nickname = nickname
         self._realname = realname
-        for i in ["disconnect", "join", "kick", "mode",
-                  "namreply", "nick", "part", "quit"]:
-            self.connection.add_global_handler(
-                i, getattr(self, "_on_" + i),
-                -20)
+        for i in [
+            "disconnect",
+            "join",
+            "kick",
+            "mode",
+            "namreply",
+            "nick",
+            "part",
+            "quit",
+        ]:
+            self.connection.add_global_handler(i, getattr(self, "_on_" + i), -20)
 
     def _connect(self):
         """
@@ -177,9 +193,13 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         server = self.servers.peek()
         try:
             self.connect(
-                server.host, server.port, self._nickname,
-                server.password, ircname=self._realname,
-                **self.__connect_params)
+                server.host,
+                server.port,
+                self._nickname,
+                server.password,
+                ircname=self._realname,
+                **self.__connect_params
+            )
         except irc.client.ServerConnectionError:
             pass
 
@@ -292,8 +312,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
 
         Used when answering a CTCP VERSION request.
         """
-        return "Python irc.bot ({version})".format(
-            version=irc.client.VERSION_STRING)
+        return "Python irc.bot ({version})".format(version=irc.client.VERSION_STRING)
 
     def jump_server(self, msg="Changing servers"):
         """Connect to a new server, possibly disconnecting from the current.
@@ -321,7 +340,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
                 connection.ctcp_reply(nick, "PING " + event.arguments[1])
         elif (
             event.arguments[0] == "DCC"
-                and event.arguments[1].split(" ", 1)[0] == "CHAT"):
+            and event.arguments[1].split(" ", 1)[0] == "CHAT"
+        ):
             self.on_dccchat(connection, event)
 
     def on_dccchat(self, connection, event):
