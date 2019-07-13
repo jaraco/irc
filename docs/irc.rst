@@ -67,14 +67,6 @@ irc.features module
     :undoc-members:
     :show-inheritance:
 
-irc.functools module
---------------------
-
-.. automodule:: irc.functools
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 irc.modes module
 ----------------
 
