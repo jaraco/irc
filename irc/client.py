@@ -683,8 +683,14 @@ class ServerConnection(Connection):
         """
         Set a keepalive to occur every ``interval`` on this connection.
         """
-        pinger = functools.partial(self.ping, 'keep-alive')
-        self.reactor.scheduler.execute_every(period=interval, func=pinger)
+        self.reactor.scheduler.execute_every(period=interval, func=self.keepalive)
+
+    def keepalive(self):
+        """
+        Send a keepalive to the server (only when connected).
+        """
+        if self.connected:
+            self.ping('keep-alive')
 
 
 class PrioritizedHandler(collections.namedtuple('Base', ('priority', 'callback'))):
