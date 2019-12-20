@@ -68,10 +68,10 @@ except ImportError:
     import importlib_metadata as metadata
 
 import jaraco.functools
-from jaraco.itertools import always_iterable, infinite_call
+from jaraco.itertools import infinite_call
 from jaraco.functools import Throttler
 from jaraco.stream import buffer
-from more_itertools.recipes import consume
+from more_itertools import consume, always_iterable
 
 from . import connection
 from . import events
