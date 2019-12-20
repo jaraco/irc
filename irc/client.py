@@ -62,12 +62,16 @@ import itertools
 import contextlib
 import warnings
 
+try:
+    from importlib import metadata
+except ImportError:
+    import importlib_metadata as metadata
+
 import jaraco.functools
 from jaraco.itertools import always_iterable, infinite_call
 from jaraco.functools import Throttler
 from jaraco.stream import buffer
 from more_itertools.recipes import consume
-import importlib_metadata
 
 from . import connection
 from . import events
@@ -80,7 +84,7 @@ log = logging.getLogger(__name__)
 
 # set the version tuple
 try:
-    VERSION_STRING = importlib_metadata.version('irc')
+    VERSION_STRING = metadata.version('irc')
     VERSION = tuple(int(res) for res in re.findall(r'\d+', VERSION_STRING))
 except Exception:
     VERSION_STRING = 'unknown'
