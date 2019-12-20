@@ -1,3 +1,8 @@
+v18.0.0
+=======
+
+* Require Python 3.6 or later.
+
 17.1
 ====
 
