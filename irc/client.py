@@ -68,10 +68,9 @@ except ImportError:
     import importlib_metadata as metadata
 
 import jaraco.functools
-from jaraco.itertools import infinite_call
 from jaraco.functools import Throttler
 from jaraco.stream import buffer
-from more_itertools import consume, always_iterable
+from more_itertools import consume, always_iterable, repeatfunc
 
 from . import connection
 from . import events
@@ -855,7 +854,7 @@ class Reactor:
         # the shared state of a Reactor object running this function.
         log.debug("process_forever(timeout=%s)", timeout)
         one = functools.partial(self.process_once, timeout=timeout)
-        consume(infinite_call(one))
+        consume(repeatfunc(one))
 
     def disconnect_all(self, message=""):
         """Disconnects all connections."""
