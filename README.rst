@@ -3,6 +3,9 @@
 
 .. image:: https://img.shields.io/pypi/pyversions/irc.svg
 
+.. image:: https://dev.azure.com/jaraco/irc/_apis/build/status/jaraco.irc?branchName=master
+   :target: https://dev.azure.com/jaraco/irc/_build/latest?definitionId=1&branchName=master
+
 .. image:: https://img.shields.io/travis/jaraco/irc/master.svg
    :target: https://travis-ci.org/jaraco/irc
 
