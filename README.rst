@@ -1,7 +1,10 @@
 .. image:: https://img.shields.io/pypi/v/irc.svg
-   :target: https://pypi.org/project/irc
+   :target: `PyPI link`_
 
 .. image:: https://img.shields.io/pypi/pyversions/irc.svg
+   :target: `PyPI link`_
+
+.. _PyPI link: https://pypi.org/project/irc
 
 .. image:: https://dev.azure.com/jaraco/irc/_apis/build/status/jaraco.irc?branchName=master
    :target: https://dev.azure.com/jaraco/irc/_build/latest?definitionId=1&branchName=master
@@ -207,6 +210,7 @@ For example:
 .. code:: python
 
     from jaraco.stream import buffer
+
     irc.client.ServerConnection.buffer_class = buffer.LenientDecodingLineBuffer
 
 The ``LenientDecodingLineBuffer`` attempts UTF-8 but falls back to latin-1, which
@@ -228,14 +232,14 @@ use the following:
 
 .. code:: python
 
-    irc.client.ServerConnection.buffer_class.encoding = 'latin-1'
+    irc.client.ServerConnection.buffer_class.encoding = "latin-1"
 
 Or decode to UTF-8, but use a replacement character for unrecognized byte
 sequences:
 
 .. code:: python
 
-    irc.client.ServerConnection.buffer_class.errors = 'replace'
+    irc.client.ServerConnection.buffer_class.errors = "replace"
 
 Or, to simply ignore all input that cannot be decoded:
 
@@ -244,6 +248,8 @@ Or, to simply ignore all input that cannot be decoded:
     class IgnoreErrorsBuffer(buffer.DecodingLineBuffer):
         def handle_exception(self):
             pass
+
+
     irc.client.ServerConnection.buffer_class = IgnoreErrorsBuffer
 
 The library requires text for message
