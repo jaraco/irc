@@ -1,9 +1,12 @@
 from unittest.mock import patch, MagicMock
 import asyncio
 
+import pytest
+
 from irc import client_aio
 
 
+@pytest.mark.xfail('sys.version_info >= (3, 8, 1)')
 @patch('asyncio.base_events.BaseEventLoop.create_connection')
 def test_privmsg_sends_msg(create_connection_mock):
     # create dummy transport, protocol
