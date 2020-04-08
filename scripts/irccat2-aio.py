@@ -43,7 +43,7 @@ class AioIRCCat(irc.client_aio.AioSimpleIRCClient):
             self.connection.privmsg(self.target, line)
 
             # Allow pause in the stdin loop to not block asyncio loop
-            asyncio.sleep(0)
+            await asyncio.sleep(0)
         self.connection.quit("Using irc.client.py")
 
 
