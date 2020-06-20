@@ -684,7 +684,9 @@ class ServerConnection(Connection):
 
     def set_keepalive(self, interval):
         """
-        Set a keepalive to occur every ``interval`` on this connection.
+        Set a keepalive to occur every `interval` on this `ServerConnection`.
+
+        :param interval: `int` in seconds, or `datetime.timedelta`
         """
         pinger = functools.partial(self.ping, 'keep-alive')
         self.reactor.scheduler.execute_every(period=interval, func=pinger)
