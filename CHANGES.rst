@@ -1,3 +1,9 @@
+v19.0.0
+=======
+
+* ``irc.client`` no longer exposes a ``VERSION`` or ``VERSION_STRING``.
+  To get the version, call ``importlib.metadata.version('irc')`` directly.
+
 v18.0.0
 =======
 

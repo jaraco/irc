@@ -62,11 +62,6 @@ import itertools
 import contextlib
 import warnings
 
-try:
-    from importlib import metadata  # type: ignore
-except ImportError:
-    import importlib_metadata as metadata  # type: ignore
-
 import jaraco.functools
 from jaraco.functools import Throttler
 from jaraco.stream import buffer
@@ -80,14 +75,6 @@ from . import message
 from . import schedule
 
 log = logging.getLogger(__name__)
-
-# set the version tuple
-try:
-    VERSION_STRING = metadata.version('irc')
-    VERSION = tuple(int(res) for res in re.findall(r'\d+', VERSION_STRING))
-except Exception:
-    VERSION_STRING = 'unknown'
-    VERSION = ()
 
 
 class IRCError(Exception):
