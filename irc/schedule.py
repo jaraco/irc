@@ -23,6 +23,12 @@ class IScheduler(metaclass=abc.ABCMeta):
 
 class DefaultScheduler(schedule.InvokeScheduler, IScheduler):
     def execute_every(self, period, func):
+        """
+        Executes `func` every `period`.
+
+        :param `func`: function to execute
+        :param `period`: `int` in seconds, or `datetime.timedelta`
+        """
         self.add(schedule.PeriodicCommand.after(period, func))
 
     def execute_at(self, when, func):
