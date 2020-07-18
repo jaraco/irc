@@ -59,14 +59,14 @@ The main features of the IRC client framework are:
   connection object.
 * Messages from an IRC server triggers events, which can be caught
   by event handlers.
-* Multiple opations for reading from and writing to an IRC server:
+* Multiple options for reading from and writing to an IRC server:
   you can use sockets in an internal ``select()`` loop OR use
-  python3's asyncio event loop
+  Python3's asyncio event loop
 * Functions can be registered to execute at specified times by the
   event-loop.
 * Decodes CTCP tagging correctly (hopefully); I haven't seen any
   other IRC client implementation that handles the CTCP
-  specification subtilties.
+  specification subtleties.
 * A kind of simple, single-server, object-oriented IRC client class
   that dispatches events to instance methods is included.
 * DCC connection support.
