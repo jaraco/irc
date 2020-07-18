@@ -75,8 +75,6 @@ class AioFactory:
 
     """
 
-    family = socket.AF_INET
-
     def __init__(self, **kwargs):
         self.connection_args = kwargs
 

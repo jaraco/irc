@@ -1,25 +1,26 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 import asyncio
-
-import pytest
 
 from irc import client_aio
 
 
-@pytest.mark.xfail('sys.version_info >= (3, 8, 1)')
-@patch('asyncio.base_events.BaseEventLoop.create_connection')
-def test_privmsg_sends_msg(create_connection_mock):
-    # create dummy transport, protocol
-    fake_connection = asyncio.Future()
+def make_mocked_create_connection(mock_transport, mock_protocol):
+    async def mock_create_connection(*args, **kwargs):
+        return (mock_transport, mock_protocol)
 
+    return mock_create_connection
+
+
+def test_privmsg_sends_msg():
+    # create dummy transport, protocol
     mock_transport = MagicMock()
     mock_protocol = MagicMock()
 
-    fake_connection.set_result((mock_transport, mock_protocol))
-    create_connection_mock.return_value = fake_connection
-
     # connect to dummy server
     loop = asyncio.get_event_loop()
+    loop.create_connection = make_mocked_create_connection(
+        mock_transport, mock_protocol
+    )
     server = client_aio.AioReactor(loop=loop).server()
     loop.run_until_complete(server.connect('foo', 6667, 'my_irc_nick'))
     server.privmsg('#best-channel', 'You are great')
