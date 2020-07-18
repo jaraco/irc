@@ -51,6 +51,7 @@ import socket
 import select
 import re
 import socketserver
+import typing
 
 import jaraco.logging
 from jaraco.stream import buffer
@@ -486,11 +487,11 @@ class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
     allow_reuse_address = True
 
-    channels = {}
-    "Existing channels (IRCChannel instances) by channel name"
+    channels: typing.Dict[str, IRCChannel] = {}
+    "Existing channels by channel name"
 
-    clients = {}
-    "Connected clients (IRCClient instances) by nick name"
+    clients: typing.Dict[str, IRCClient] = {}
+    "Connected clients by nick name"
 
     def __init__(self, *args, **kwargs):
         self.servername = 'localhost'

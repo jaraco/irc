@@ -63,9 +63,9 @@ import contextlib
 import warnings
 
 try:
-    from importlib import metadata
+    from importlib import metadata  # type: ignore
 except ImportError:
-    import importlib_metadata as metadata
+    import importlib_metadata as metadata  # type: ignore
 
 import jaraco.functools
 from jaraco.functools import Throttler
