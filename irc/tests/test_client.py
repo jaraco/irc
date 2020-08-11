@@ -5,14 +5,6 @@ import pytest
 import irc.client
 
 
-def test_version():
-    assert 'VERSION' in vars(irc.client)
-    assert 'VERSION_STRING' in vars(irc.client)
-    assert isinstance(irc.client.VERSION, tuple)
-    assert irc.client.VERSION, "No VERSION detected."
-    assert isinstance(irc.client.VERSION_STRING, str)
-
-
 @mock.patch('irc.connection.socket')
 def test_privmsg_sends_msg(socket_mod):
     server = irc.client.Reactor().server()

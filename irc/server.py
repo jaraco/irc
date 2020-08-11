@@ -59,7 +59,7 @@ from jaraco.stream import buffer
 import irc.client
 from . import events
 
-SRV_WELCOME = "Welcome to {__name__} v{irc.client.VERSION}.".format(**locals())
+SRV_WELCOME = "Welcome to {__name__}.".format(**locals())
 
 log = logging.getLogger(__name__)
 
