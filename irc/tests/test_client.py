@@ -6,11 +6,7 @@ import irc.client
 
 
 def test_version():
-    assert 'VERSION' in vars(irc.client)
-    assert 'VERSION_STRING' in vars(irc.client)
-    assert isinstance(irc.client.VERSION, tuple)
-    assert irc.client.VERSION, "No VERSION detected."
-    assert isinstance(irc.client.VERSION_STRING, str)
+    assert isinstance(irc._get_version(), str)
 
 
 @mock.patch('irc.connection.socket')

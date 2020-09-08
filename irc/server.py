@@ -59,8 +59,6 @@ from jaraco.stream import buffer
 import irc.client
 from . import events
 
-SRV_WELCOME = "Welcome to {__name__} v{irc.client.VERSION}.".format(**locals())
-
 log = logging.getLogger(__name__)
 
 
@@ -219,11 +217,12 @@ class IRCClient(socketserver.BaseRequestHandler):
             # and MOTD.
             self.nick = nick
             self.server.clients[nick] = self
+            msg = f"Welcome to {__name__} v{irc._get_version()}."
             response = ':%s %s %s :%s' % (
                 self.server.servername,
                 events.codes['welcome'],
                 self.nick,
-                SRV_WELCOME,
+                msg,
             )
             self.send_queue.append(response)
             response = ':%s 376 %s :End of MOTD command.' % (

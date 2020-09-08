@@ -307,12 +307,13 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         """
         self.connection.disconnect(msg)
 
-    def get_version(self):
+    @staticmethod
+    def get_version():
         """Returns the bot version.
 
         Used when answering a CTCP VERSION request.
         """
-        return "Python irc.bot ({version})".format(version=irc.client.VERSION_STRING)
+        return f"Python irc.bot ({irc._get_version()})"
 
     def jump_server(self, msg="Changing servers"):
         """Connect to a new server, possibly disconnecting from the current.

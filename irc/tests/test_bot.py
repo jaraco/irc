@@ -141,3 +141,7 @@ class TestBot:
             bot.reactor.process_once()
             time.sleep(0.01)
         assert len(bot.reactor.scheduler.queue) <= 1
+
+
+def test_version():
+    assert isinstance(irc.bot.SingleServerIRCBot.get_version(), str)
