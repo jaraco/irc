@@ -1,3 +1,9 @@
+v19.0.1
+=======
+
+* #176: Fix issues with version number reporting. Restored version
+  version number reporting in bot and client.
+
 v19.0.0
 =======
 
