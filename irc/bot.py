@@ -156,7 +156,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         realname,
         reconnection_interval=missing,
         recon=ExponentialBackoff(),
-        **connect_params
+        **connect_params,
     ):
         super(SingleServerIRCBot, self).__init__()
         self.__connect_params = connect_params
@@ -198,7 +198,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
                 self._nickname,
                 server.password,
                 ircname=self._realname,
-                **self.__connect_params
+                **self.__connect_params,
             )
         except irc.client.ServerConnectionError:
             pass
