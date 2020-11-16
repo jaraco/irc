@@ -13,21 +13,29 @@ class Factory:
 
     To create a simple connection:
 
-        server_address = ('localhost', 80)
-        Factory()(server_address)
+    .. code-block:: python
+
+       server_address = ('localhost', 80)
+       Factory()(server_address)
 
     To create an SSL connection:
 
-        Factory(wrapper=ssl.wrap_socket)(server_address)
+    .. code-block:: python
+
+       Factory(wrapper=ssl.wrap_socket)(server_address)
 
     To create an SSL connection with parameters to wrap_socket:
 
-        wrapper = functools.partial(ssl.wrap_socket, ssl_cert=get_cert())
-        Factory(wrapper=wrapper)(server_address)
+    .. code-block:: python
+
+       wrapper = functools.partial(ssl.wrap_socket, ssl_cert=get_cert())
+       Factory(wrapper=wrapper)(server_address)
 
     To create an IPv6 connection:
 
-        Factory(ipv6=True)(server_address)
+    .. code-block:: python
+
+       Factory(ipv6=True)(server_address)
 
     Note that Factory doesn't save the state of the socket itself. The
     caller must do that, as necessary. As a result, the Factory may be
@@ -58,16 +66,22 @@ class AioFactory:
 
     To create a simple connection:
 
-        server_address = ('localhost', 80)
-        Factory()(protocol_instance, server_address)
+    .. code-block:: python
+
+       server_address = ('localhost', 80)
+       Factory()(protocol_instance, server_address)
 
     To create an SSL connection:
 
-        Factory(ssl=True)(protocol_instance, server_address)
+    .. code-block:: python
+
+       Factory(ssl=True)(protocol_instance, server_address)
 
     To create an IPv6 connection:
 
-        Factory(ipv6=True)(protocol_instance, server_address)
+    .. code-block:: python
+
+       Factory(ipv6=True)(protocol_instance, server_address)
 
     Note that Factory doesn't save the state of the socket itself. The
     caller must do that, as necessary. As a result, the Factory may be
