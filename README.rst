@@ -6,18 +6,13 @@
 
 .. _PyPI link: https://pypi.org/project/irc
 
-.. image:: https://dev.azure.com/jaraco/irc/_apis/build/status/jaraco.irc?branchName=master
-   :target: https://dev.azure.com/jaraco/irc/_build/latest?definitionId=1&branchName=master
-
-.. image:: https://img.shields.io/travis/jaraco/irc/master.svg
-   :target: https://travis-ci.org/jaraco/irc
+.. image:: https://github.com/jaraco/skeleton/workflows/Automated%20Tests/badge.svg
+   :target: https://github.com/jaraco/skeleton/actions?query=workflow%3A%22Automated+Tests%22
+   :alt: Automated Tests
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
    :alt: Code style: Black
-
-.. .. image:: https://img.shields.io/appveyor/ci/jaraco/skeleton/master.svg
-..    :target: https://ci.appveyor.com/project/jaraco/skeleton/branch/master
 
 .. image:: https://readthedocs.org/projects/python-irc/badge/?version=latest
    :target: https://python-irc.readthedocs.io/en/latest/?badge=latest
