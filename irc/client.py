@@ -918,6 +918,8 @@ class Reactor:
             matching_handlers = sorted(
                 self.handlers.get("all_events", []) + self.handlers.get(event.type, [])
             )
+            if len(matching_handlers) == 0 and event.type != "all_raw_messages" and event.type != "pong":
+                matching_handlers += self.handlers.get("all_unhandled_events", [])
             for handler in matching_handlers:
                 result = handler.callback(connection, event)
                 if result == "NO MORE":
