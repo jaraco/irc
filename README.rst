@@ -17,6 +17,9 @@
 .. image:: https://readthedocs.org/projects/python-irc/badge/?version=latest
    :target: https://python-irc.readthedocs.io/en/latest/?badge=latest
 
+.. image:: https://img.shields.io/badge/skeleton-2021-informational
+   :target: https://blog.jaraco.com/skeleton
+
 .. image:: https://badges.gitter.im/jaraco/irc.svg
    :alt: Join the chat at https://gitter.im/jaraco/irc
    :target: https://gitter.im/jaraco/irc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
