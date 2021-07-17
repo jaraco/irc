@@ -177,7 +177,7 @@ class IRCClient(socketserver.BaseRequestHandler):
             raise
         except IRCError as e:
             response = ':%s %s %s' % (self.server.servername, e.code, e.value)
-            log.warn(response)
+            log.warning(response)
         except Exception as e:
             response = ':%s ERROR %r' % (self.server.servername, e)
             log.error(response)
