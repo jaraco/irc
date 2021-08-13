@@ -130,7 +130,7 @@ class ServerConnection(Connection):
     connected = False
 
     def __init__(self, reactor):
-        super(ServerConnection, self).__init__(reactor)
+        super().__init__(reactor)
         self.features = features.FeatureSet()
 
     # save the method args to allow for easier reconnection.
@@ -956,7 +956,7 @@ class DCCConnection(Connection):
     peerport = None
 
     def __init__(self, reactor, dcctype):
-        super(DCCConnection, self).__init__(reactor)
+        super().__init__(reactor)
         self.dcctype = dcctype
 
     def connect(self, address, port):
