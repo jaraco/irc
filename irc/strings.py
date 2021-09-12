@@ -30,7 +30,7 @@ class IRCFoldedCase(FoldedCase):
             self.translate(self.translation)
             if self
             # bypass translate, which returns self
-            else super(IRCFoldedCase, self).lower()
+            else super().lower()
         )
 
 
