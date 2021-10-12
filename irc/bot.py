@@ -161,7 +161,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         recon=ExponentialBackoff(),
         **connect_params,
     ):
-        super(SingleServerIRCBot, self).__init__()
+        super().__init__()
         self.__connect_params = connect_params
         self.channels = IRCDict()
         specs = map(ServerSpec.ensure, server_list)
@@ -359,7 +359,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
     def start(self):
         """Start the bot."""
         self._connect()
-        super(SingleServerIRCBot, self).start()
+        super().start()
 
 
 class Channel:
