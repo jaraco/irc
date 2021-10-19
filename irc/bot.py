@@ -149,9 +149,6 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
             method.
     """
 
-
-    has_connected = False
-
     def __init__(
         self,
         server_list,
@@ -203,13 +200,8 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
                 ircname=self._realname,
                 **self.__connect_params,
             )
-            self.has_connected = True
         except irc.client.ServerConnectionError as e:
-            if self.has_connected == False:
-                warnings.warn("Unable to connect to server. Check ip/port")
-                raise(e)
-            else:
-                warnings.warn("Failed to connect to server: {}".format(server.host))
+            self.connection._handle_event(irc.client.Event("disconnect", self.connection.server, "", [""]))
 
     def _on_disconnect(self, connection, event):
         self.channels = IRCDict()
