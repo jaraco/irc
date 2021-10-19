@@ -4,6 +4,8 @@ v20.0.0
 * ``SingleServerIRCBot`` no longer accepts ``reconnection_interval``
   as a parameter.
 
+* Added server support for NOTICE commands.
+
 v19.0.1
 =======
 

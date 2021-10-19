@@ -159,6 +159,8 @@ class IRCClient(socketserver.BaseRequestHandler):
             self._handle_line(line)
 
     def _handle_line(self, line):
+        response = None
+
         try:
             log.debug('from %s: %s' % (self.client_ident(), line))
             command, sep, params = line.partition(' ')
@@ -175,7 +177,7 @@ class IRCClient(socketserver.BaseRequestHandler):
             raise
         except IRCError as e:
             response = ':%s %s %s' % (self.server.servername, e.code, e.value)
-            log.error(response)
+            log.warning(response)
         except Exception as e:
             response = ':%s ERROR %r' % (self.server.servername, e)
             log.error(response)
@@ -320,16 +322,28 @@ class IRCClient(socketserver.BaseRequestHandler):
         """
         Handle sending a private message to a user or channel.
         """
+        self._send_msg('PRIVMSG', params)
+
+    def handle_notice(self, params):
+        """
+        Handle sending a notice to a user or channel.
+        """
+        self._send_msg('NOTICE', params)
+
+    def _send_msg(self, cmd, params):
+        """
+        A generic message handler (e.g. PRIVMSG and NOTICE)
+        """
         target, sep, msg = params.partition(' ')
         if not msg:
-            raise IRCError.from_name('needmoreparams', 'PRIVMSG :Not enough parameters')
+            raise IRCError.from_name('needmoreparams', cmd + ' :Not enough parameters')
 
-        message = ':%s PRIVMSG %s %s' % (self.client_ident(), target, msg)
+        message = ':%s %s %s %s' % (self.client_ident(), cmd, target, msg)
         if target.startswith('#') or target.startswith('$'):
             # Message to channel. Check if the channel exists.
             channel = self.server.channels.get(target)
             if not channel:
-                raise IRCError.from_name('nosuchnick', 'PRIVMSG :%s' % target)
+                raise IRCError.from_name('nosuchnick', cmd + ' :%s' % target)
 
             if channel.name not in self.channels:
                 # The user isn't in the channel.
@@ -342,7 +356,7 @@ class IRCClient(socketserver.BaseRequestHandler):
             # Message to user
             client = self.server.clients.get(target, None)
             if not client:
-                raise IRCError.from_name('nosuchnick', 'PRIVMSG :%s' % target)
+                raise IRCError.from_name('nosuchnick', cmd + ' :%s' % target)
 
             client.send_queue.append(message)
 
