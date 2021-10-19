@@ -9,7 +9,6 @@ write simpler bots.
 
 import sys
 import collections
-import warnings
 import abc
 import itertools
 import random
@@ -154,7 +153,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         server_list,
         nickname,
         realname,
-        reconnection_interval=missing,
+        _,
         recon=ExponentialBackoff(),
         **connect_params,
     ):
@@ -164,13 +163,6 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         specs = map(ServerSpec.ensure, server_list)
         self.servers = more_itertools.peekable(itertools.cycle(specs))
         self.recon = recon
-        # for compatibility
-        if reconnection_interval is not missing:
-            warnings.warn(
-                "reconnection_interval is deprecated; "
-                "pass a ReconnectStrategy object instead"
-            )
-            self.recon = ExponentialBackoff(min_interval=reconnection_interval)
 
         self._nickname = nickname
         self._realname = realname

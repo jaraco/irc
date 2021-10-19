@@ -1,3 +1,9 @@
+v20.0.0
+=======
+
+* ``SingleServerIRCBot`` no longer accepts ``reconnection_interval``
+  as a parameter.
+
 v19.0.1
 =======
 
