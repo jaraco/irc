@@ -37,11 +37,21 @@ link_files = {
 # Be strict about any broken references:
 nitpicky = True
 
+nitpick_ignore = [
+    ('py:class', 'irc.client.Base'),  # an inline superclass
+    ('py:class', 'jaraco.stream.buffer.DecodingLineBuffer'),  # undocumented
+]
+
 # Include Python intersphinx mapping to prevent failures
 # jaraco/skeleton#51
 extensions += ['sphinx.ext.intersphinx']
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
 }
+
+for dependency in 'jaraco.text tempora jaraco.collections'.split():
+    rtd_name = dependency.replace('.', '')
+    url = f'https://{rtd_name}.readthedocs.io/en/latest'
+    intersphinx_mapping.update({dependency: (url, None)})
 
 extensions += ['jaraco.tidelift']
