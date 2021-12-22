@@ -7,6 +7,8 @@ Welcome to |project| documentation!
    history
    irc
 
+.. tidelift-referral-banner::
+
 .. include:: ../README.rst
 
 
