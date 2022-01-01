@@ -1,8 +1,3 @@
-v20.1.0
-=======
-
-* Require Python 3.7 or later.
-
 v20.0.0
 =======
 
@@ -10,6 +5,8 @@ v20.0.0
   as a parameter.
 
 * Added server support for NOTICE commands.
+
+* Require Python 3.7 or later.
 
 v19.0.1
 =======
