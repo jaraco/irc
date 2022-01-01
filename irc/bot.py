@@ -153,7 +153,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         server_list,
         nickname,
         realname,
-        _,
+        _=None,
         recon=ExponentialBackoff(),
         **connect_params,
     ):
