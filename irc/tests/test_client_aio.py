@@ -1,3 +1,5 @@
+import warnings
+import contextlib
 from unittest.mock import MagicMock
 import asyncio
 
@@ -11,13 +13,21 @@ def make_mocked_create_connection(mock_transport, mock_protocol):
     return mock_create_connection
 
 
+@contextlib.contextmanager
+def suppress_issue_197():
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', 'There is no current event loop')
+        yield
+
+
 def test_privmsg_sends_msg():
     # create dummy transport, protocol
     mock_transport = MagicMock()
     mock_protocol = MagicMock()
 
     # connect to dummy server
-    loop = asyncio.get_event_loop()
+    with suppress_issue_197():
+        loop = asyncio.get_event_loop()
     loop.create_connection = make_mocked_create_connection(
         mock_transport, mock_protocol
     )
