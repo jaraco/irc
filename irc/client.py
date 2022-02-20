@@ -248,7 +248,7 @@ class ServerConnection(Connection):
 
         try:
             reader = getattr(self.socket, 'read', self.socket.recv)
-            new_data = reader(2 ** 14)
+            new_data = reader(2**14)
         except socket.error:
             # The server hung up.
             self.disconnect("Connection reset by peer")
@@ -1043,7 +1043,7 @@ class DCCConnection(Connection):
             return
 
         try:
-            new_data = self.socket.recv(2 ** 14)
+            new_data = self.socket.recv(2**14)
         except socket.error:
             # The server hung up.
             self.disconnect("Connection reset by peer")
@@ -1058,7 +1058,7 @@ class DCCConnection(Connection):
 
             chunks = list(self.buffer)
 
-            if len(self.buffer) > 2 ** 14:
+            if len(self.buffer) > 2**14:
                 # Bad peer! Naughty peer!
                 log.info(
                     "Received >16k from a peer without a newline; " "disconnecting."
