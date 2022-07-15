@@ -193,7 +193,9 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
                 **self.__connect_params,
             )
         except irc.client.ServerConnectionError:
-            self.connection._handle_event(irc.client.Event("disconnect", self.connection.server, "", [""]))
+            self.connection._handle_event(
+                irc.client.Event("disconnect", self.connection.server, "", [""])
+            )
 
     def _on_disconnect(self, connection, event):
         self.channels = IRCDict()
