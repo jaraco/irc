@@ -1,3 +1,9 @@
+v20.1.0
+=======
+
+* #196: In irc.bot, avoid hanging idle when the first connection
+  attempt fails.
+
 v20.0.0
 =======
 
