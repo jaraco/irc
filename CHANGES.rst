@@ -12,6 +12,8 @@ v20.0.0
 
 * Added server support for NOTICE commands.
 
+* Require Python 3.7 or later.
+
 v19.0.1
 =======
 

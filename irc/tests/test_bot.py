@@ -85,7 +85,7 @@ class DisconnectHandler(irc.server.IRCClient):
         self.request.close()
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def disconnecting_server():
     """
     An IRC server that disconnects the client immediately.
