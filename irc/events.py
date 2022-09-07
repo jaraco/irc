@@ -187,6 +187,7 @@ generated = [
     "disconnect",
     "ctcp",
     "ctcpreply",
+    "login_failed",
 ]
 
 protocol = [

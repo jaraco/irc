@@ -47,6 +47,7 @@ Notes:
 .. [IRC specifications] http://www.irchelp.org/irchelp/rfc/
 """
 
+import base64
 import bisect
 import re
 import select
@@ -144,6 +145,7 @@ class ServerConnection(Connection):
         username=None,
         ircname=None,
         connect_factory=connection.Factory(),
+        sasl_login=None,
     ):
         """Connect/reconnect to a server.
 
@@ -158,6 +160,8 @@ class ServerConnection(Connection):
         * server_address - The remote host/port of the server
         * connect_factory - A callable that takes the server address and
           returns a connection (with a socket interface)
+        * sasl_login - A string used to toggle sasl plain login. Password needs
+        to be set as well, and will be used for SASL, not PASS login.
 
         This function can be called to reconnect a closed connection.
 
@@ -182,6 +186,7 @@ class ServerConnection(Connection):
         self.ircname = ircname or nickname
         self.password = password
         self.connect_factory = connect_factory
+        self.sasl_login = sasl_login
         try:
             self.socket = self.connect_factory(self.server_address)
         except socket.error as ex:
@@ -190,11 +195,75 @@ class ServerConnection(Connection):
         self.reactor._on_connect(self.socket)
 
         # Log on...
+        if self.sasl_login and self.password:
+            self._sasl_step = None
+            for i in ["cap", "authenticate", "saslsuccess", "saslfail"]:
+                self.add_global_handler(i, self._sasl_state_machine, -42)
+            self.cap("LS")
+            self.nick(self.nickname)
+            self.user(self.username, self.ircname)
+            self._sasl_step = self._sasl_cap_ls
+            return self
         if self.password:
             self.pass_(self.password)
         self.nick(self.nickname)
         self.user(self.username, self.ircname)
         return self
+
+    def _sasl_state_machine(self, connection, event):
+        if self._sasl_step:
+            self._sasl_step(event)
+
+    def _sasl_cap_ls(self, event):
+        if (
+            event.type == "cap"
+            and len(event.arguments) > 1
+            and event.arguments[0] == "LS"
+        ):
+            if 'sasl' in event.arguments[1].split():
+                self.cap("REQ", "sasl")
+                self._sasl_step = self._sasl_cap_req
+            else:
+                event = Event(
+                    "login_failed", event.target, ["server does not support sasl"]
+                )
+                self._handle_event(event)
+                self._sasl_end()
+
+    def _sasl_cap_req(self, event):
+        if event.type == "cap" and len(event.arguments) > 1:
+            if event.arguments[0] == "ACK" and 'sasl' in event.arguments:
+                self.send_items('AUTHENTICATE', 'PLAIN')
+                self._sasl_step = self._sasl_auth_plain
+            elif event.arguments[0] == "NAK":
+                event = Event(
+                    "login_failed", event.target, ["server refused sasl protocol"]
+                )
+                self._handle_event(event)
+                self._sasl_end()
+
+    def _sasl_auth_plain(self, event):
+        if event.type == "authenticate" and event.target == "+":
+            auth_string = base64.b64encode(
+                self.encode("\x00%s\x00%s" % (self.sasl_login, self.password))
+            ).decode()
+            self.send_items('AUTHENTICATE', auth_string)
+            self._sasl_step = self._sasl_auth_sent
+
+    def _sasl_auth_sent(self, event):
+        if event.type == "saslsuccess":
+            self._sasl_end()
+        elif event.type == "saslfail":
+            event = Event("login_failed", event.target, event.arguments)
+            self._handle_event(event)
+            self._sasl_end()
+
+    def _sasl_end(self):
+        self._sasl_step = None
+        self.cap("END")
+        # SASL done, de-register handlers
+        for i in ["cap", "authenticate", "saslsuccess", "saslfail"]:
+            self.remove_global_handler(i, self._sasl_state_machine)
 
     def reconnect(self):
         """
