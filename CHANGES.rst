@@ -1,3 +1,8 @@
+v20.1.1
+=======
+
+* #213: Pinned against jaraco.text 3.10 due to change in interface.
+
 v20.1.0
 =======
 
