@@ -71,7 +71,7 @@ def _parse_modes(mode_string, unary_modes=""):
     """
 
     # mode_string must be non-empty and begin with a sign
-    if not mode_string or not mode_string[0] in '+-':
+    if not mode_string or mode_string[0] not in "+-":
         return []
 
     modes = []
