@@ -1,3 +1,12 @@
+v20.2.0
+=======
+
+Features
+--------
+
+- Require Python 3.8 or later.
+
+
 v20.1.1
 =======
 
