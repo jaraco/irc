@@ -1,3 +1,18 @@
+v20.3.0
+=======
+
+Features
+--------
+
+- Added support for SASL login. (#195)
+
+
+Bugfixes
+--------
+
+- Better handling of escape sequences in message tags. (#205)
+
+
 v20.2.0
 =======
 
