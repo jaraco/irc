@@ -160,8 +160,9 @@ class ServerConnection(Connection):
         * server_address - The remote host/port of the server
         * connect_factory - A callable that takes the server address and
           returns a connection (with a socket interface)
-        * sasl_login - A string used to toggle sasl plain login. Password needs
-        to be set as well, and will be used for SASL, not PASS login.
+        * sasl_login - A string used to toggle sasl plain login.
+          Password needs to be set as well, and will be used for SASL,
+          not PASS login.
 
         This function can be called to reconnect a closed connection.
 
