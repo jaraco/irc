@@ -1,0 +1,1 @@
+Better handling of escape sequences in message tags.

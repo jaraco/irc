@@ -1,3 +1,10 @@
+import re
+
+
+_TAG_UNESCAPE_RE = re.compile(r'\\(.)')
+_TAG_UNESCAPE_MAP = {':': ';', 's': ' ', 'n': '\n', 'r': '\r', '\\': '\\'}
+
+
 class Tag:
     """
     An IRC message tag ircv3.net/specs/core/message-tags-3.2.html
@@ -23,13 +30,17 @@ class Tag:
 
         >>> Tag.parse('x=a\\nb\\nc')['value']
         'a\nb\nc'
+
+        >>> Tag.parse(r'x=a\bb\bc')['value']
+        'abbbc'
+
+        >>> Tag.parse(r'x=a\\nb\\nc')['value']
+        'a\\nb\\nc'
         """
         key, sep, value = item.partition('=')
-        value = value.replace('\\:', ';')
-        value = value.replace('\\s', ' ')
-        value = value.replace('\\n', '\n')
-        value = value.replace('\\r', '\r')
-        value = value.replace('\\\\', '\\')
+        value = _TAG_UNESCAPE_RE.sub(
+            lambda char: _TAG_UNESCAPE_MAP.get(char.group(1), char.group(1)), value
+        )
         value = value or None
         return {'key': key, 'value': value}
 
