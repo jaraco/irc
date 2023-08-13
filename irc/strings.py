@@ -1,5 +1,3 @@
-import string
-
 from jaraco.text import FoldedCase
 
 
@@ -14,24 +12,39 @@ class IRCFoldedCase(FoldedCase):
     >>> IRCFoldedCase('[this]') == IRCFoldedCase('{THIS}')
     True
 
+    >>> IRCFoldedCase('[This]').casefold()
+    '{this}'
+
     >>> IRCFoldedCase().lower()
     ''
     """
 
     translation = dict(
         zip(
-            map(ord, string.ascii_uppercase + r"[]\^"),
-            map(ord, string.ascii_lowercase + r"{}|~"),
+            map(ord, r"[]\^"),
+            map(ord, r"{}|~"),
         )
     )
 
     def lower(self):
-        return (
-            self.translate(self.translation)
-            if self
-            # bypass translate, which returns self
-            else super().lower()
-        )
+        return super().lower().translate(self.translation)
+
+    def casefold(self):
+        """
+        Ensure cached superclass value doesn't supersede.
+
+        >>> ob = IRCFoldedCase('[This]')
+        >>> ob.casefold()
+        '{this}'
+        >>> ob.casefold()
+        '{this}'
+        """
+        return super().casefold().translate(self.translation)
+
+    def __setattr__(self, key, val):
+        if key == 'casefold':
+            return
+        return super().__setattr__(key, val)
 
 
 def lower(str):
