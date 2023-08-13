@@ -166,6 +166,16 @@ numeric = {
     "492": "noservicehost",
     "501": "umodeunknownflag",
     "502": "usersdontmatch",
+    # IRCv3.1 SASL https://ircv3.net/specs/extensions/sasl-3.1
+    "900": "loggedin",
+    "901": "loggedout",
+    "902": "nicklocked",
+    "903": "saslsuccess",
+    "904": "saslfail",
+    "905": "sasltoolong",
+    "906": "saslaborted",
+    "907": "saslalready",
+    "908": "saslmechs",
 }
 
 codes = dict((v, k) for k, v in numeric.items())
@@ -177,6 +187,7 @@ generated = [
     "disconnect",
     "ctcp",
     "ctcpreply",
+    "login_failed",
 ]
 
 protocol = [
