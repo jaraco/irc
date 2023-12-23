@@ -11,12 +11,8 @@
     :target: https://github.com/astral-sh/ruff
     :alt: Ruff
 
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-   :target: https://github.com/psf/black
-   :alt: Code style: Black
-
-.. image:: https://readthedocs.org/projects/python-irc/badge/?version=latest
-   :target: https://python-irc.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/irc/badge/?version=latest
+   :target: https://irc.readthedocs.io/en/latest/?badge=latest
 
 .. image:: https://img.shields.io/badge/skeleton-2023-informational
    :target: https://blog.jaraco.com/skeleton
