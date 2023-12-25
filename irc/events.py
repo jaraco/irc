@@ -178,7 +178,7 @@ numeric = {
     "908": "saslmechs",
 }
 
-codes = dict((v, k) for k, v in numeric.items())
+codes = {v: k for k, v in numeric.items()}
 
 generated = [
     "dcc_connect",

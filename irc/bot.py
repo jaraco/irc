@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Simple IRC bot library.
 
@@ -42,7 +40,7 @@ class ServerSpec:
         self.password = password
 
     def __repr__(self):
-        return "<irc.bot.ServerSpec for server %s:%s %s>" % (
+        return "<irc.bot.ServerSpec for server {}:{} {}>".format(
             self.host,
             self.port,
             "with password" if self.password else "without password",
@@ -419,8 +417,7 @@ class Channel:
     @property
     def user_dicts(self):
         yield self._users
-        for d in self.mode_users.values():
-            yield d
+        yield from self.mode_users.values()
 
     def remove_user(self, nick):
         for d in self.user_dicts:

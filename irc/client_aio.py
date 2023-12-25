@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Internet Relay Chat (IRC) asyncio-based protocol client library.
 
@@ -78,7 +76,7 @@ class IrcProtocol(asyncio.Protocol):
         self.connection.process_data(data)
 
     def connection_lost(self, exc):
-        log.debug("connection lost: {}".format(exc))
+        log.debug(f"connection lost: {exc}")
         self.connection.disconnect()
 
 
@@ -190,7 +188,7 @@ class AioConnection(ServerConnection):
 
         The string will be padded with appropriate CR LF.
         """
-        log.debug('RAW: {}'.format(string))
+        log.debug(f'RAW: {string}')
         if self.transport is None:
             raise ServerNotConnectedError("Not connected.")
 

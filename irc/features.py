@@ -94,9 +94,9 @@ class FeatureSet:
         True
         """
         pairs = map(string_int_pair, value.split(','))
-        return dict(
-            (target, number) for target_keys, number in pairs for target in target_keys
-        )
+        return {
+            target: number for target_keys, number in pairs for target in target_keys
+        }
 
     _parse_MAXLIST = _parse_CHANLIMIT
 

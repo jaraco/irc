@@ -8,7 +8,6 @@ import irc.bot
 import irc.server
 from irc.bot import ServerSpec
 
-__metaclass__ = type
 
 
 class TestServerSpec:

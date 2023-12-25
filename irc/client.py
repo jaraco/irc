@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Internet Relay Chat (IRC) protocol client library.
 
@@ -190,7 +188,7 @@ class ServerConnection(Connection):
         self.sasl_login = sasl_login
         try:
             self.socket = self.connect_factory(self.server_address)
-        except socket.error as ex:
+        except OSError as ex:
             raise ServerConnectionError("Couldn't connect to socket: %s" % ex)
         self.connected = True
         self.reactor._on_connect(self.socket)
@@ -246,7 +244,7 @@ class ServerConnection(Connection):
     def _sasl_auth_plain(self, event):
         if event.type == "authenticate" and event.target == "+":
             auth_string = base64.b64encode(
-                self.encode("\x00%s\x00%s" % (self.sasl_login, self.password))
+                self.encode("\x00{}\x00{}".format(self.sasl_login, self.password))
             ).decode()
             self.send_items('AUTHENTICATE', auth_string)
             self._sasl_step = self._sasl_auth_sent
@@ -319,7 +317,7 @@ class ServerConnection(Connection):
         try:
             reader = getattr(self.socket, 'read', self.socket.recv)
             new_data = reader(2**14)
-        except socket.error:
+        except OSError:
             # The server hung up.
             self.disconnect("Connection reset by peer")
             return
@@ -542,7 +540,7 @@ class ServerConnection(Connection):
         try:
             self.socket.shutdown(socket.SHUT_WR)
             self.socket.close()
-        except socket.error:
+        except OSError:
             pass
         del self.socket
         self._handle_event(Event("disconnect", self.server, "", [message]))
@@ -675,7 +673,7 @@ class ServerConnection(Connection):
         try:
             sender(self._prep_message(string))
             log.debug("TO SERVER: %s", string)
-        except socket.error:
+        except OSError:
             # Ouch!
             self.disconnect("Connection reset by peer.")
 
@@ -701,7 +699,7 @@ class ServerConnection(Connection):
 
     def user(self, username, realname):
         """Send a USER command."""
-        cmd = 'USER {username} 0 * :{realname}'.format(**locals())
+        cmd = f'USER {username} 0 * :{realname}'
         self.send_raw(cmd)
 
     def userhost(self, nicks):
@@ -1046,7 +1044,7 @@ class DCCConnection(Connection):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.socket.connect((self.peeraddress, self.peerport))
-        except socket.error as x:
+        except OSError as x:
             raise DCCConnectionError("Couldn't connect to socket: %s" % x)
         self.connected = True
         self.reactor._on_connect(self.socket)
@@ -1071,7 +1069,7 @@ class DCCConnection(Connection):
             self.socket.bind(addr or default_addr)
             self.localaddress, self.localport = self.socket.getsockname()
             self.socket.listen(10)
-        except socket.error as x:
+        except OSError as x:
             raise DCCConnectionError("Couldn't bind socket: %s" % x)
         return self
 
@@ -1090,7 +1088,7 @@ class DCCConnection(Connection):
         try:
             self.socket.shutdown(socket.SHUT_WR)
             self.socket.close()
-        except socket.error:
+        except OSError:
             pass
         del self.socket
         self.reactor._handle_event(
@@ -1114,7 +1112,7 @@ class DCCConnection(Connection):
 
         try:
             new_data = self.socket.recv(2**14)
-        except socket.error:
+        except OSError:
             # The server hung up.
             self.disconnect("Connection reset by peer")
             return
@@ -1171,7 +1169,7 @@ class DCCConnection(Connection):
         try:
             self.socket.send(bytes)
             log.debug("TO PEER: %r\n", bytes)
-        except socket.error:
+        except OSError:
             self.disconnect("Connection reset by peer.")
 
 
