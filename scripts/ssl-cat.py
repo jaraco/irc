@@ -11,6 +11,7 @@ import sys
 import ssl
 import argparse
 import itertools
+import functools
 
 import irc.client
 
@@ -60,7 +61,9 @@ def main():
     args = get_args()
     target = args.target
 
-    ssl_factory = irc.connection.Factory(wrapper=ssl.wrap_socket)
+    context = ssl.create_default_context()
+    wrapper = functools.partial(context.wrap_socket, server_hostname=args.server)
+    ssl_factory = irc.connection.Factory(wrapper=wrapper)
     reactor = irc.client.Reactor()
     try:
         c = reactor.server().connect(
