@@ -84,9 +84,7 @@ def on_endoflinks(connection, event):
     else:
         hubs = 0
 
-    print(
-        "%d servers (%d leaves and %d hubs)\n" % (len(links), len(links) - hubs, hubs)
-    )
+    print(f"{len(links)} servers ({len(links) - hubs} leaves and {hubs} hubs)\n")
 
     print_tree(0, [], connection.get_server_name(), m)
     connection.quit("Using irc.client.py")

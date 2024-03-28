@@ -162,12 +162,11 @@ class IRCClient(socketserver.BaseRequestHandler):
         try:
             log.debug(f'from {self.client_ident()}: {line}')
             command, sep, params = line.partition(' ')
-            handler = getattr(self, 'handle_%s' % command.lower(), None)
+            handler = getattr(self, f'handle_{command.lower()}', None)
             if not handler:
-                _tmpl = 'No handler for command: %s. Full line: %s'
-                log.info(_tmpl % (command, line))
+                log.info(f'No handler for command: {command}. Full line: {line}')
                 raise IRCError.from_name(
-                    'unknowncommand', '%s :Unknown command' % command
+                    'unknowncommand', f'{command} :Unknown command'
                 )
             response = handler(params)
         except AttributeError as e:
@@ -202,7 +201,7 @@ class IRCClient(socketserver.BaseRequestHandler):
 
         # Valid nickname?
         if re.search(r'[^a-zA-Z0-9\-\[\]\'`^{}_]', nick):
-            raise IRCError.from_name('erroneusnickname', ':%s' % nick)
+            raise IRCError.from_name('erroneusnickname', f':{nick}')
 
         if self.server.clients.get(nick, None) == self:
             # Already registered to user
@@ -210,7 +209,7 @@ class IRCClient(socketserver.BaseRequestHandler):
 
         if nick in self.server.clients:
             # Someone else is using the nick
-            raise IRCError.from_name('nicknameinuse', 'NICK :%s' % (nick))
+            raise IRCError.from_name('nicknameinuse', f'NICK :{nick}')
 
         if not self.nick:
             # New connection and nick is available; register and send welcome
@@ -280,7 +279,7 @@ class IRCClient(socketserver.BaseRequestHandler):
             # Valid channel name?
             if not re.match('^#([a-zA-Z0-9_])+$', r_channel_name):
                 raise IRCError.from_name(
-                    'nosuchchannel', '%s :No such channel' % r_channel_name
+                    'nosuchchannel', f'{r_channel_name} :No such channel'
                 )
 
             # Add user to the channel (create new channel if not exists)
@@ -334,12 +333,12 @@ class IRCClient(socketserver.BaseRequestHandler):
             # Message to channel. Check if the channel exists.
             channel = self.server.channels.get(target)
             if not channel:
-                raise IRCError.from_name('nosuchnick', cmd + ' :%s' % target)
+                raise IRCError.from_name('nosuchnick', cmd + f' :{target}')
 
             if channel.name not in self.channels:
                 # The user isn't in the channel.
                 raise IRCError.from_name(
-                    'cannotsendtochan', '%s :Cannot send to channel' % channel.name
+                    'cannotsendtochan', f'{channel.name} :Cannot send to channel'
                 )
 
             self._send_to_others(message, channel)
@@ -347,7 +346,7 @@ class IRCClient(socketserver.BaseRequestHandler):
             # Message to user
             client = self.server.clients.get(target, None)
             if not client:
-                raise IRCError.from_name('nosuchnick', cmd + ' :%s' % target)
+                raise IRCError.from_name('nosuchnick', cmd + f' :{target}')
 
             client.send_queue.append(message)
 
@@ -368,11 +367,11 @@ class IRCClient(socketserver.BaseRequestHandler):
 
         channel = self.server.channels.get(channel_name)
         if not channel:
-            raise IRCError.from_name('nosuchnick', 'PRIVMSG :%s' % channel_name)
+            raise IRCError.from_name('nosuchnick', f'PRIVMSG :{channel_name}')
         if channel.name not in self.channels:
             # The user isn't in the channel.
             raise IRCError.from_name(
-                'cannotsendtochan', '%s :Cannot send to channel' % channel.name
+                'cannotsendtochan', f'{channel.name} :Cannot send to channel'
             )
 
         if topic:
@@ -454,7 +453,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         the client didn't properly close the connection with PART and QUIT.
         """
         log.info('Client disconnected: %s', self.client_ident())
-        response = ':%s QUIT :EOF from client' % self.client_ident()
+        response = f':{self.client_ident()} QUIT :EOF from client'
         for channel in self.channels.values():
             if self in channel.clients:
                 # Client is gone without properly QUITing or PARTing this

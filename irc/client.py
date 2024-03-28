@@ -511,12 +511,14 @@ class ServerConnection(Connection):
     def ctcp(self, ctcptype, target, parameter=""):
         """Send a CTCP command."""
         ctcptype = ctcptype.upper()
-        tmpl = "\001{ctcptype} {parameter}\001" if parameter else "\001{ctcptype}\001"
-        self.privmsg(target, tmpl.format(**vars()))
+        self.privmsg(
+            target,
+            f"\001{ctcptype} {parameter}\001" if parameter else "\001{ctcptype}\001",
+        )
 
     def ctcp_reply(self, target, parameter):
         """Send a CTCP REPLY command."""
-        self.notice(target, "\001%s\001" % parameter)
+        self.notice(target, f"\001{parameter}\001")
 
     def disconnect(self, message=""):
         """Hang up the connection.

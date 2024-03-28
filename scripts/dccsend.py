@@ -49,7 +49,7 @@ class DCCSend(irc.client.SimpleIRCClient):
         self.send_chunk()
 
     def on_dcc_disconnect(self, connection, event):
-        print("Sent file %s (%d bytes)." % (self.filename, self.filesize))
+        print(f"Sent file {self.filename} ({self.filesize} bytes).")
         self.connection.quit()
 
     def on_dccmsg(self, connection, event):

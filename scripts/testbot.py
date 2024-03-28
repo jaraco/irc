@@ -92,8 +92,7 @@ class TestBot(irc.bot.SingleServerIRCBot):
             c.ctcp(
                 "DCC",
                 nick,
-                "CHAT chat %s %d"
-                % (ip_quad_to_numstr(dcc.localaddress), dcc.localport),
+                f"CHAT chat {ip_quad_to_numstr(dcc.localaddress)} {dcc.localport}",
             )
         else:
             c.notice(nick, "Not understood: " + cmd)

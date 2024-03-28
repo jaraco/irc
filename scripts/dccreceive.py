@@ -48,7 +48,7 @@ class DCCReceive(irc.client.SimpleIRCClient):
 
     def on_dcc_disconnect(self, connection, event):
         self.file.close()
-        print("Received file %s (%d bytes)." % (self.filename, self.received_bytes))
+        print(f"Received file {self.filename} ({self.received_bytes} bytes).")
         self.connection.quit()
 
     def on_disconnect(self, connection, event):
