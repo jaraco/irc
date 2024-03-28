@@ -1,3 +1,12 @@
+v20.4.0
+=======
+
+Features
+--------
+
+- Replace deprecated ssl.wrap_socket with SSLContext.wrap_socket and update examples in connection.py docs. (#216)
+
+
 v20.3.1
 =======
 

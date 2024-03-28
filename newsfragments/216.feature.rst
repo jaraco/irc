@@ -1,1 +1,0 @@
-Replace deprecated ssl.wrap_socket with SSLContext.wrap_socket and update examples in connection.py docs.
