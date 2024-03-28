@@ -7,8 +7,9 @@
 #
 # Joel Rosdahl <joel@rosdahl.net>
 
-import irc.client
 import sys
+
+import irc.client
 
 
 class IRCCat(irc.client.SimpleIRCClient):

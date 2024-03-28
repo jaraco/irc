@@ -7,11 +7,11 @@
 #
 # Jason R. Coombs <jaraco@jaraco.com>
 
-import sys
-import ssl
 import argparse
-import itertools
 import functools
+import itertools
+import ssl
+import sys
 
 import irc.client
 

@@ -5,14 +5,15 @@
 # This program is free without restrictions; do anything you like with
 # it.
 
-import sys
 import argparse
-import itertools
 import asyncio
+import itertools
+import sys
 
-import irc.client_aio
-import irc.client
 import jaraco.logging
+
+import irc.client
+import irc.client_aio
 
 target = None
 

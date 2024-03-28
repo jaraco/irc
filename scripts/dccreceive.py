@@ -8,11 +8,11 @@
 # Joel Rosdahl <joel@rosdahl.net>
 
 
+import argparse
 import os
+import shlex
 import struct
 import sys
-import argparse
-import shlex
 
 import jaraco.logging
 

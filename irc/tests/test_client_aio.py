@@ -1,7 +1,7 @@
-import warnings
-import contextlib
-from unittest.mock import MagicMock
 import asyncio
+import contextlib
+import warnings
+from unittest.mock import MagicMock
 
 from irc import client_aio
 

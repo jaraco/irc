@@ -5,16 +5,17 @@ This module contains a single-server IRC bot class that can be used to
 write simpler bots.
 """
 
-import sys
-import collections
 import abc
+import collections
 import itertools
 import random
+import sys
 
 import more_itertools
 
 import irc.client
 import irc.modes
+
 from .dict import IRCDict
 
 

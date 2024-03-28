@@ -1,10 +1,10 @@
-import time
 import threading
+import time
 
 import pytest
 
-import irc.client
 import irc.bot
+import irc.client
 import irc.server
 from irc.bot import ServerSpec
 

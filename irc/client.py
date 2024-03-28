@@ -45,33 +45,28 @@ Notes:
 .. [IRC specifications] http://www.irchelp.org/irchelp/rfc/
 """
 
+import abc
 import base64
 import bisect
+import collections
+import contextlib
+import functools
+import itertools
+import logging
 import re
 import select
 import socket
-import time
 import struct
-import logging
 import threading
-import abc
-import collections
-import functools
-import itertools
-import contextlib
+import time
 import warnings
 
 import jaraco.functools
 from jaraco.functools import Throttler
 from jaraco.stream import buffer
-from more_itertools import consume, always_iterable, repeatfunc
+from more_itertools import always_iterable, consume, repeatfunc
 
-from . import connection
-from . import events
-from . import features
-from . import ctcp
-from . import message
-from . import schedule
+from . import connection, ctcp, events, features, message, schedule
 
 log = logging.getLogger(__name__)
 

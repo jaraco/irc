@@ -7,12 +7,13 @@
 #
 # Joel Rosdahl <joel@rosdahl.net>
 
-import sys
 import argparse
 import itertools
+import sys
+
+import jaraco.logging
 
 import irc.client
-import jaraco.logging
 
 target = None
 "The nick or channel to which to send messages"

@@ -38,16 +38,16 @@ Notes:
 """
 
 import asyncio
-import threading
 import logging
+import threading
 
 from . import connection
 from .client import (
+    Event,
+    Reactor,
     ServerConnection,
     ServerNotConnectedError,
-    Reactor,
     SimpleIRCClient,
-    Event,
     _ping_ponger,
 )
 

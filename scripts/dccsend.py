@@ -7,14 +7,15 @@
 #
 # Joel Rosdahl <joel@rosdahl.net>
 
+import argparse
 import os
 import struct
-import sys
-import argparse
 import subprocess
+import sys
+
+import jaraco.logging
 
 import irc.client
-import jaraco.logging
 
 
 class DCCSend(irc.client.SimpleIRCClient):

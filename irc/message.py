@@ -1,6 +1,5 @@
 import re
 
-
 _TAG_UNESCAPE_RE = re.compile(r'\\(.)')
 _TAG_UNESCAPE_MAP = {':': ';', 's': ' ', 'n': '\n', 'r': '\r', '\\': '\\'}
 

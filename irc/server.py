@@ -45,8 +45,8 @@ will ever be connected to by the public.
 import argparse
 import errno
 import logging
-import select
 import re
+import select
 import socketserver
 import typing
 
@@ -54,6 +54,7 @@ import jaraco.logging
 from jaraco.stream import buffer
 
 import irc.client
+
 from . import events
 
 log = logging.getLogger(__name__)

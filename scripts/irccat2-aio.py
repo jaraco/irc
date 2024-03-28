@@ -4,13 +4,14 @@
 #
 # This program is free without restrictions; do anything you like with
 # it.
-import sys
-import asyncio
 import argparse
+import asyncio
+import sys
+
+import jaraco.logging
 
 import irc.client
 import irc.client_aio
-import jaraco.logging
 
 
 class AioIRCCat(irc.client_aio.AioSimpleIRCClient):
