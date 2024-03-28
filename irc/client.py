@@ -239,7 +239,7 @@ class ServerConnection(Connection):
     def _sasl_auth_plain(self, event):
         if event.type == "authenticate" and event.target == "+":
             auth_string = base64.b64encode(
-                self.encode("\x00{}\x00{}".format(self.sasl_login, self.password))
+                self.encode(f"\x00{self.sasl_login}\x00{self.password}")
             ).decode()
             self.send_items('AUTHENTICATE', auth_string)
             self._sasl_step = self._sasl_auth_sent

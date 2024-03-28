@@ -160,7 +160,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         response = None
 
         try:
-            log.debug('from {}: {}'.format(self.client_ident(), line))
+            log.debug(f'from {self.client_ident()}: {line}')
             command, sep, params = line.partition(' ')
             handler = getattr(self, 'handle_%s' % command.lower(), None)
             if not handler:
@@ -174,10 +174,10 @@ class IRCClient(socketserver.BaseRequestHandler):
             log.error(str(e))
             raise
         except IRCError as e:
-            response = ':{} {} {}'.format(self.server.servername, e.code, e.value)
+            response = f':{self.server.servername} {e.code} {e.value}'
             log.warning(response)
         except Exception as e:
-            response = ':{} ERROR {!r}'.format(self.server.servername, e)
+            response = f':{self.server.servername} ERROR {e!r}'
             log.error(response)
             raise
 
@@ -225,15 +225,14 @@ class IRCClient(socketserver.BaseRequestHandler):
                 msg,
             )
             self.send_queue.append(response)
-            response = ':{} 376 {} :End of MOTD command.'.format(
-                self.server.servername,
-                self.nick,
+            response = (
+                f':{self.server.servername} 376 {self.nick} :End of MOTD command.'
             )
             self.send_queue.append(response)
             return
 
         # Nick is available. Change the nick.
-        message = ':{} NICK :{}'.format(self.client_ident(), nick)
+        message = f':{self.client_ident()} NICK :{nick}'
 
         self.server.clients.pop(self.nick)
         self.nick = nick
@@ -294,26 +293,20 @@ class IRCClient(socketserver.BaseRequestHandler):
             self.channels[channel.name] = channel
 
             # Send the topic
-            response_join = ':{} TOPIC {} :{}'.format(
-                channel.topic_by,
-                channel.name,
-                channel.topic,
-            )
+            response_join = f':{channel.topic_by} TOPIC {channel.name} :{channel.topic}'
             self.send_queue.append(response_join)
 
             # Send join message to everybody in the channel, including yourself
             # and send user list of the channel back to the user.
-            response_join = ':{} JOIN :{}'.format(self.client_ident(), r_channel_name)
+            response_join = f':{self.client_ident()} JOIN :{r_channel_name}'
             for client in channel.clients:
                 client.send_queue.append(response_join)
 
             nicks = [client.nick for client in channel.clients]
-            _vals = (self.server.servername, self.nick, channel.name, ' '.join(nicks))
-            response_userlist = ':%s 353 %s = %s :%s' % _vals
+            response_userlist = f':{self.server.servername} 353 {self.nick} = {channel.name} :{" ".join(nicks)}'
             self.send_queue.append(response_userlist)
 
-            _vals = self.server.servername, self.nick, channel.name
-            response = ':%s 366 %s %s :End of /NAMES list' % _vals
+            response = f':{self.server.servername} 366 {self.nick} {channel.name} :End of /NAMES list'
             self.send_queue.append(response)
 
     def handle_privmsg(self, params):
@@ -336,7 +329,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         if not msg:
             raise IRCError.from_name('needmoreparams', cmd + ' :Not enough parameters')
 
-        message = ':{} {} {} {}'.format(self.client_ident(), cmd, target, msg)
+        message = f':{self.client_ident()} {cmd} {target} {msg}'
         if target.startswith('#') or target.startswith('$'):
             # Message to channel. Check if the channel exists.
             channel = self.server.channels.get(target)
@@ -385,11 +378,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         if topic:
             channel.topic = topic.lstrip(':')
             channel.topic_by = self.nick
-        message = ':{} TOPIC {} :{}'.format(
-            self.client_ident(),
-            channel_name,
-            channel.topic,
-        )
+        message = f':{self.client_ident()} TOPIC {channel_name} :{channel.topic}'
         return message
 
     def handle_part(self, params):
@@ -401,15 +390,14 @@ class IRCClient(socketserver.BaseRequestHandler):
                 # Send message to all clients in all channels user is in, and
                 # remove the user from the channels.
                 channel = self.server.channels.get(pchannel.strip())
-                response = ':{} PART :{}'.format(self.client_ident(), pchannel)
+                response = f':{self.client_ident()} PART :{pchannel}'
                 if channel:
                     for client in channel.clients:
                         client.send_queue.append(response)
                 channel.clients.remove(self)
                 self.channels.pop(pchannel)
             else:
-                _vars = self.server.servername, pchannel, pchannel
-                response = ':%s 403 %s :%s' % _vars
+                response = f':{self.server.servername} 403 {pchannel} :{pchannel}'
                 self.send_queue.append(response)
 
     def handle_quit(self, params):
@@ -440,14 +428,9 @@ class IRCClient(socketserver.BaseRequestHandler):
                 print("     ", client.nick, client)
 
     def handle_ison(self, params):
-        response = ':{} 303 {} :'.format(
-            self.server.servername, self.client_ident().nick
-        )
+        response = f':{self.server.servername} 303 {self.client_ident().nick} :'
         if len(params) == 0 or params.isspace():
-            response = ':{} 461 {} ISON :Not enough parameters'.format(
-                self.server.servername,
-                self.client_ident().nick,
-            )
+            response = f':{self.server.servername} 461 {self.client_ident().nick} ISON :Not enough parameters'
             return response
         nickOnline = []
         for nick in params.split(" "):
@@ -487,13 +470,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         """
         Return a user-readable description of the client
         """
-        return '<{} {}!{}@{} ({})>'.format(
-            self.__class__.__name__,
-            self.nick,
-            self.user,
-            self.host[0],
-            self.realname,
-        )
+        return f'<{self.__class__.__name__} {self.nick}!{self.user}@{self.host[0]} ({self.realname})>'
 
 
 class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
