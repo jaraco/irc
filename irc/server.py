@@ -45,7 +45,6 @@ will ever be connected to by the public.
 import argparse
 import errno
 import logging
-import socket
 import select
 import re
 import socketserver
@@ -440,7 +439,9 @@ class IRCClient(socketserver.BaseRequestHandler):
                 print("     ", client.nick, client)
 
     def handle_ison(self, params):
-        response = ':{} 303 {} :'.format(self.server.servername, self.client_ident().nick)
+        response = ':{} 303 {} :'.format(
+            self.server.servername, self.client_ident().nick
+        )
         if len(params) == 0 or params.isspace():
             response = ':{} 461 {} ISON :Not enough parameters'.format(
                 self.server.servername,

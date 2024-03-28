@@ -9,7 +9,6 @@ import irc.server
 from irc.bot import ServerSpec
 
 
-
 class TestServerSpec:
     def test_with_host(self):
         server_spec = ServerSpec('irc.example.com')
