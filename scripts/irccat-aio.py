@@ -77,11 +77,11 @@ def main():
         )
     except irc.client.ServerConnectionError:
         print(sys.exc_info()[1])
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
     except irc.client.ServerConnectionError:
         print(sys.exc_info()[1])
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
     c.add_global_handler("welcome", on_connect)
     c.add_global_handler("join", on_join)

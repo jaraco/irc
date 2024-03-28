@@ -135,7 +135,7 @@ class TestBot:
             recon=recon,
         )
         bot._connect()
-        for x in range(4):
+        for _ in range(4):
             bot.reactor.process_once()
             time.sleep(0.01)
         assert len(bot.reactor.scheduler.queue) <= 1

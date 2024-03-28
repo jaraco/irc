@@ -184,7 +184,7 @@ class ServerConnection(Connection):
         try:
             self.socket = self.connect_factory(self.server_address)
         except OSError as ex:
-            raise ServerConnectionError("Couldn't connect to socket: %s" % ex)
+            raise ServerConnectionError(f"Couldn't connect to socket: {ex}") from ex
         self.connected = True
         self.reactor._on_connect(self.socket)
 
@@ -1040,7 +1040,7 @@ class DCCConnection(Connection):
         try:
             self.socket.connect((self.peeraddress, self.peerport))
         except OSError as x:
-            raise DCCConnectionError("Couldn't connect to socket: %s" % x)
+            raise DCCConnectionError(f"Couldn't connect to socket: {x}") from x
         self.connected = True
         self.reactor._on_connect(self.socket)
         return self
@@ -1065,7 +1065,7 @@ class DCCConnection(Connection):
             self.localaddress, self.localport = self.socket.getsockname()
             self.socket.listen(10)
         except OSError as x:
-            raise DCCConnectionError("Couldn't bind socket: %s" % x)
+            raise DCCConnectionError(f"Couldn't bind socket: {x}") from x
         return self
 
     def disconnect(self, message=""):
@@ -1249,7 +1249,7 @@ class SimpleIRCClient:
 
         Returns a DCCConnection instance.
         """
-        warnings.warn("Use self.dcc(type).connect()", DeprecationWarning)
+        warnings.warn("Use self.dcc(type).connect()", DeprecationWarning, stacklevel=2)
         return self.dcc(dcctype).connect(address, port)
 
     def dcc_listen(self, dcctype="chat"):
@@ -1257,7 +1257,7 @@ class SimpleIRCClient:
 
         Returns a DCCConnection instance.
         """
-        warnings.warn("Use self.dcc(type).listen()", DeprecationWarning)
+        warnings.warn("Use self.dcc(type).listen()", DeprecationWarning, stacklevel=2)
         return self.dcc(dcctype).listen()
 
     def start(self):

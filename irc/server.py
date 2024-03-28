@@ -145,8 +145,8 @@ class IRCClient(socketserver.BaseRequestHandler):
     def _handle_incoming(self):
         try:
             data = self.request.recv(1024)
-        except Exception:
-            raise self.Disconnect()
+        except Exception as err:
+            raise self.Disconnect() from err
 
         if not data:
             raise self.Disconnect()
@@ -190,7 +190,7 @@ class IRCClient(socketserver.BaseRequestHandler):
             self.request.send(msg.encode('utf-8') + b'\r\n')
         except OSError as e:
             if e.errno == errno.EPIPE:
-                raise self.Disconnect()
+                raise self.Disconnect() from e
             else:
                 raise
 
@@ -528,7 +528,7 @@ def main():
         ircserver.serve_forever()
     except OSError as e:
         log.error(repr(e))
-        raise SystemExit(-2)
+        raise SystemExit(-2) from None
 
 
 if __name__ == "__main__":

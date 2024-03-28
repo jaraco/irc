@@ -19,6 +19,9 @@ ignore = [
 	"COM819",
 	"ISC001",
 	"ISC002",
+
+	# B008 is a nuisance
+	"B008",
 ]
 
 [format]

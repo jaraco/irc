@@ -72,7 +72,7 @@ def on_endoflinks(connection, event):
     print("\n")
 
     m = {}
-    for to_node, from_node, desc in links:
+    for to_node, from_node, _ in links:
         if from_node != to_node:
             m[from_node] = m.get(from_node, []) + [to_node]
 
