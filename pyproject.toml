@@ -59,7 +59,7 @@ docs = [
 
 	# local
 	# workaround for sphinx-doc/sphinx#11543
-	"sphinx < 7.1",
+	"sphinx < 7.4",
 ]
 
 [tool.setuptools.packages.find]
