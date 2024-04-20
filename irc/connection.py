@@ -22,7 +22,7 @@ class Factory:
 
        context = ssl.create_default_context()
        wrapper = functools.partial(context.wrap_socket, server_hostname=server_address)
-       Factory(wrapper=ssl.wrap_socket)(server_address)
+       Factory(wrapper=wrapper)(server_address)
 
     To create an SSL connection with parameters to wrap_socket:
 
