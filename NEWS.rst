@@ -1,3 +1,12 @@
+v20.4.1
+=======
+
+Bugfixes
+--------
+
+- Fix SSL wrapper usage example in ``Factory`` docstring. (#228)
+
+
 v20.4.0
 =======
 

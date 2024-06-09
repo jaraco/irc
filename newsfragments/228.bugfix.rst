@@ -1,1 +1,0 @@
-Fix SSL wrapper usage example in ``Factory`` docstring.
