@@ -56,10 +56,6 @@ doc = [
 
 	# tidelift
 	"jaraco.tidelift >= 1.4",
-
-	# local
-	# workaround for sphinx-doc/sphinx#11543
-	"sphinx < 7.1",
 ]
 
 [tool.setuptools.packages.find]
