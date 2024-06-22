@@ -59,6 +59,6 @@ doc = [
 ]
 
 [tool.setuptools.packages.find]
-exclude = ["scripts*"]
+exclude = ["docs*", "scripts*"]
 
 [tool.setuptools_scm]
