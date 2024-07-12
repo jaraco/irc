@@ -536,9 +536,11 @@ class ServerConnection(Connection):
 
         try:
             self.socket.shutdown(socket.SHUT_WR)
-            self.socket.close()
         except OSError:
             pass
+
+        self.socket.close()
+
         del self.socket
         self._handle_event(Event("disconnect", self.server, "", [message]))
 
@@ -1084,9 +1086,11 @@ class DCCConnection(Connection):
 
         try:
             self.socket.shutdown(socket.SHUT_WR)
-            self.socket.close()
         except OSError:
             pass
+
+        self.socket.close()
+
         del self.socket
         self.reactor._handle_event(
             self, Event("dcc_disconnect", self.peeraddress, "", [message])
