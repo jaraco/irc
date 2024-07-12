@@ -90,7 +90,7 @@ def disconnecting_server():
     An IRC server that disconnects the client immediately.
     """
     # bind to localhost on an ephemeral port
-    bind_address = '127.0.0.1', 0
+    bind_address = 'localhost', 0
     try:
         srv = irc.server.IRCServer(bind_address, DisconnectHandler)
         threading.Thread(target=srv.serve_forever).start()
