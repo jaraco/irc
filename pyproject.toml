@@ -58,7 +58,4 @@ doc = [
 	"jaraco.tidelift >= 1.4",
 ]
 
-[tool.setuptools.packages.find]
-exclude = ["scripts*"]
-
 [tool.setuptools_scm]
