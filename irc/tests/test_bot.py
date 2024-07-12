@@ -1,3 +1,4 @@
+import socketserver
 import threading
 import time
 
@@ -74,7 +75,7 @@ class TestChannel:
         assert not channel.is_voiced('tester1')
 
 
-class DisconnectHandler(irc.server.IRCClient):
+class DisconnectHandler(socketserver.BaseRequestHandler):
     """
     Immediately disconnect the client after connecting
     """
