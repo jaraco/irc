@@ -1,3 +1,12 @@
+v20.4.2
+=======
+
+Bugfixes
+--------
+
+- Stop excluding scripts. Prevents docs and scripts from being installed. (#231)
+
+
 v20.4.1
 =======
 
