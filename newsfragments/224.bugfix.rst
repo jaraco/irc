@@ -1,1 +1,0 @@
-Unconditionally close the socket, even if shutdown fails.

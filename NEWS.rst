@@ -1,3 +1,12 @@
+v20.4.3
+=======
+
+Bugfixes
+--------
+
+- Unconditionally close the socket, even if shutdown fails. (#224)
+
+
 v20.4.2
 =======
 
