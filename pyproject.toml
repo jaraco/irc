@@ -19,7 +19,7 @@ classifiers = [
 requires-python = ">=3.8"
 dependencies = [
 	"jaraco.collections",
-	"jaraco.text >= 3.10",
+	"jaraco.text >= 3.14",
 	"jaraco.logging",
 	"jaraco.functools>=1.20",
 	"jaraco.stream",
