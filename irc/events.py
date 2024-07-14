@@ -1,7 +1,8 @@
 import itertools
-from importlib.resources import files
 
 from jaraco.text import clean, drop_comment, lines_from
+
+from .compat.py311.importlib.resources import files
 
 
 class Code(str):

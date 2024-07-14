@@ -27,6 +27,7 @@ dependencies = [
 	"more_itertools",
 	"tempora>=1.6",
 	'importlib_metadata; python_version < "3.8"',
+	'importlib_resources; python_version < "3.12"',
 ]
 dynamic = ["version"]
 
