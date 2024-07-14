@@ -1,3 +1,12 @@
+v20.5.0
+=======
+
+Features
+--------
+
+- Refactored commands processing so now every command has a numeric and a name. Programs reliant on numeric values not yet defined can do so without breaking once they are defined. (#214)
+
+
 v20.4.3
 =======
 
