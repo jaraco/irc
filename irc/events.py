@@ -1,8 +1,12 @@
 import itertools
+import sys
 
 from jaraco.text import clean, drop_comment, lines_from
 
-from .compat.py311.importlib.resources import files
+if sys.version_info >= (3, 12):
+    from importlib.resources import files
+else:
+    from importlib_resources import files
 
 
 class Code(str):
