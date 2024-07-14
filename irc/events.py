@@ -9,7 +9,7 @@ else:
     from importlib_resources import files
 
 
-class Code(str):
+class Command(str):
     def __new__(cls, code, name):
         return super().__new__(cls, name)
 
@@ -20,24 +20,24 @@ class Code(str):
         return int(self.code)
 
     @staticmethod
-    def lookup(command) -> 'Code':
+    def lookup(raw) -> 'Command':
         """
         Lookup a command by numeric or by name.
 
-        >>> Code.lookup('002')
+        >>> Command.lookup('002')
         'yourhost'
-        >>> Code.lookup('002').code
+        >>> Command.lookup('002').code
         '002'
-        >>> int(Code.lookup('002'))
+        >>> int(Command.lookup('002'))
         2
-        >>> int(Code.lookup('yourhost'))
+        >>> int(Command.lookup('yourhost'))
         2
-        >>> Code.lookup('yourhost').code
+        >>> Command.lookup('yourhost').code
         '002'
 
         If a command is supplied that's an unrecognized name or code,
-        a Code object is still returned.
-        >>> fallback = Code.lookup('Unknown-command')
+        a Command object is still returned.
+        >>> fallback = Command.lookup('Unknown-command')
         >>> fallback
         'unknown-command'
         >>> fallback.code
@@ -46,18 +46,18 @@ class Code(str):
         Traceback (most recent call last):
         ...
         ValueError: invalid literal for int() with base 10: 'unknown-command'
-        >>> fallback = Code.lookup('999')
+        >>> fallback = Command.lookup('999')
         >>> fallback
         '999'
         >>> int(fallback)
         999
         """
-        fallback = Code(command.lower(), command.lower())
-        return numeric.get(command, _by_name.get(command.lower(), fallback))
+        fallback = Command(raw.lower(), raw.lower())
+        return numeric.get(raw, _by_name.get(raw.lower(), fallback))
 
 
 _codes = itertools.starmap(
-    Code,
+    Command,
     map(
         str.split,
         map(drop_comment, clean(lines_from(files().joinpath('codes.txt')))),

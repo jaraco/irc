@@ -340,7 +340,7 @@ class ServerConnection(Connection):
         grp = _rfc_1459_command_regexp.match(line).group
 
         source = NickMask.from_group(grp("prefix"))
-        command = events.Code.lookup(grp("command"))
+        command = events.Command.lookup(grp("command"))
         arguments = message.Arguments.from_group(grp('argument'))
         tags = message.Tag.from_group(grp('tags'))
 
