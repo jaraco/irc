@@ -45,6 +45,8 @@ Notes:
 .. [IRC specifications] http://www.irchelp.org/irchelp/rfc/
 """
 
+from __future__ import annotations
+
 import abc
 import base64
 import bisect
@@ -60,6 +62,7 @@ import struct
 import threading
 import time
 import warnings
+from typing import Callable
 
 import jaraco.functools
 from jaraco.functools import Throttler
@@ -131,14 +134,14 @@ class ServerConnection(Connection):
     @jaraco.functools.save_method_args
     def connect(
         self,
-        server,
-        port,
-        nickname,
-        password=None,
-        username=None,
-        ircname=None,
+        server: str,
+        port: int,
+        nickname: str,
+        password: str | None = None,
+        username: str | None = None,
+        ircname: str | None = None,
         connect_factory=connection.Factory(),
-        sasl_login=None,
+        sasl_login: str | None = None,
     ):
         """Connect/reconnect to a server.
 
@@ -169,7 +172,7 @@ class ServerConnection(Connection):
             self.disconnect("Changing servers")
 
         self.buffer = self.buffer_class()
-        self.handlers = {}
+        self.handlers: dict[str, Callable] = {}
         self.real_server_name = ""
         self.real_nickname = nickname
         self.server = server
