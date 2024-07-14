@@ -340,7 +340,7 @@ class ServerConnection(Connection):
         grp = _rfc_1459_command_regexp.match(line).group
 
         source = NickMask.from_group(grp("prefix"))
-        command = self._command_from_group(grp("command"))
+        command = events.Code.lookup(grp("command"))
         arguments = message.Arguments.from_group(grp('argument'))
         tags = message.Tag.from_group(grp('tags'))
 
@@ -430,12 +430,6 @@ class ServerConnection(Connection):
         )
         event = Event(command, source, target, arguments, tags)
         self._handle_event(event)
-
-    @staticmethod
-    def _command_from_group(group):
-        command = group.lower()
-        # Translate numerics into more readable strings.
-        return events.numeric.get(command, command)
 
     def _handle_event(self, event):
         """[Internal]"""
