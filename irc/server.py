@@ -431,10 +431,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         if len(params) == 0 or params.isspace():
             response = f':{self.server.servername} 461 {self.client_ident().nick} ISON :Not enough parameters'
             return response
-        nickOnline = []
-        for nick in params.split(" "):
-            if nick in self.server.clients:
-                nickOnline.append(nick)
+        nickOnline = [nick for nick in params.split(" ") if nick in self.server.clients]
         response += ' '.join(nickOnline)
         return response
 
