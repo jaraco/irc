@@ -1,9 +1,9 @@
 import contextlib
 
 try:
-    from importlib import metadata  # type: ignore
+    from importlib import metadata
 except ImportError:
-    import importlib_metadata as metadata  # type: ignore
+    import importlib_metadata as metadata  # type: ignore[no-redef]
 
 
 def _get_version():
