@@ -411,7 +411,10 @@ class ServerConnection(Connection):
     def _handle_other(self, arguments, command, source, tags):
         target = None
         if command == "quit":
-            arguments = [arguments[0]]
+            if len(arguments) > 0:
+                arguments = [arguments[0]]
+            else:
+                arguments = [""]
         elif command == "ping":
             target = arguments[0]
         else:
