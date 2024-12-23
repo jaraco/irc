@@ -384,7 +384,7 @@ class ServerConnection(Connection):
 
                 m = list(m)
                 log.debug(
-                    "command: %s, source: %s, target: %s, " "arguments: %s, tags: %s",
+                    "command: %s, source: %s, target: %s, arguments: %s, tags: %s",
                     command,
                     source,
                     target,
@@ -398,7 +398,7 @@ class ServerConnection(Connection):
                     self._handle_event(event)
             else:
                 log.debug(
-                    "command: %s, source: %s, target: %s, " "arguments: %s, tags: %s",
+                    "command: %s, source: %s, target: %s, arguments: %s, tags: %s",
                     command,
                     source,
                     target,
@@ -421,7 +421,7 @@ class ServerConnection(Connection):
             if not is_channel(target):
                 command = "umode"
         log.debug(
-            "command: %s, source: %s, target: %s, " "arguments: %s, tags: %s",
+            "command: %s, source: %s, target: %s, arguments: %s, tags: %s",
             command,
             source,
             target,
@@ -1126,9 +1126,7 @@ class DCCConnection(Connection):
 
             if len(self.buffer) > 2**14:
                 # Bad peer! Naughty peer!
-                log.info(
-                    "Received >16k from a peer without a newline; " "disconnecting."
-                )
+                log.info("Received >16k from a peer without a newline; disconnecting.")
                 self.disconnect()
                 return
         else:
