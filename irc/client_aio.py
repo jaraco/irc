@@ -226,7 +226,7 @@ class DCCProtocol(IrcProtocol):
     """
 
 
-class AIODCCConnection(DCCConnection):
+class AioDCCConnection(DCCConnection):
     """
     An asyncio-based DCCConnection.
 
@@ -246,7 +246,7 @@ class AIODCCConnection(DCCConnection):
 
     async def connect(
         self, address: str, port: int, connect_factory: connection.AioFactory = connection.AioFactory()
-    ) -> "AIODCCConnection":
+    ) -> "AioDCCConnection":
         """Connect/reconnect to a DCC peer.
 
         Arguments:
@@ -275,7 +275,7 @@ class AIODCCConnection(DCCConnection):
         return self
 
     # TODO: implement listen() in asyncio way
-    async def listen(self, addr=None) -> "AIODCCConnection":
+    async def listen(self, addr=None) -> "AioDCCConnection":
         """Wait for a connection/reconnection from a DCC peer.
 
         Returns the DCCConnection object.
@@ -392,7 +392,7 @@ class AioReactor(Reactor):
     """
 
     connection_class = AioConnection
-    dcc_connection_class = AIODCCConnection
+    dcc_connection_class = AioDCCConnection
 
     def __do_nothing(*args, **kwargs):
         pass
