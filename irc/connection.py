@@ -91,6 +91,10 @@ class AioFactory:
     """
 
     def __init__(self, **kwargs):
+        # Argument "ipv6" not needed/invalid in AIO, automatically detected based on server_address.
+        if "ipv6" in kwargs:
+            del kwargs["ipv6"]
+
         self.connection_args = kwargs
 
     def connect(self, protocol_instance, server_address):
