@@ -61,14 +61,10 @@ def on_passwdmismatch(connection, event):
 
 
 def on_links(connection, event):
-    global links
-
     links.append((event.arguments[0], event.arguments[1], event.arguments[2]))
 
 
 def on_endoflinks(connection, event):
-    global links
-
     print("\n")
 
     m = {}

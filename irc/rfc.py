@@ -7,8 +7,8 @@ def get_pages(filename):
     return data.split('\x0c')
 
 
-header_pattern = re.compile(r'^RFC \d+\s+.*\s+(\w+ \d{4})$', re.M)
-footer_pattern = re.compile(r'^\w+\s+\w+\s+\[Page \d+\]$', re.M)
+header_pattern = re.compile(r'^RFC \d+\s+.*\s+(\w+ \d{4})$', re.MULTILINE)
+footer_pattern = re.compile(r'^\w+\s+\w+\s+\[Page \d+\]$', re.MULTILINE)
 
 
 def remove_header(page):

@@ -27,7 +27,7 @@ class DCCReceive(irc.client.SimpleIRCClient):
     def on_ctcp(self, connection, event):
         payload = event.arguments[1]
         parts = shlex.split(payload)
-        command, filename, peer_address, peer_port, size = parts
+        command, filename, peer_address, peer_port, _size = parts
         if command != "SEND":
             return
         self.filename = os.path.basename(filename)
@@ -35,7 +35,7 @@ class DCCReceive(irc.client.SimpleIRCClient):
             print("A file named", self.filename, "already exists. Refusing to save it.")
             self.connection.quit()
             return
-        self.file = open(self.filename, "wb")
+        self.file = open(self.filename, "wb")  # noqa: SIM115 held open for the transfer
         peer_address = irc.client.ip_numstr_to_quad(peer_address)
         peer_port = int(peer_port)
         self.dcc = self.dcc_connect(peer_address, peer_port, "raw")

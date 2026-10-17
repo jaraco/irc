@@ -237,7 +237,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         event.arguments[2] == nick list
         """
 
-        ch_type, channel, nick_list = event.arguments
+        _ch_type, channel, nick_list = event.arguments
 
         if channel == '*':
             # User is not in any visible channel

@@ -12,8 +12,8 @@ import functools
 import ssl
 import sys
 
-import irc.client
 import irc
+import irc.client
 
 
 class IRCCat(irc.client.SimpleIRCClient):

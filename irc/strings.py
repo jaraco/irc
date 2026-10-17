@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from jaraco.text import FoldedCase
 
 
@@ -19,7 +21,7 @@ class IRCFoldedCase(FoldedCase):
     ''
     """
 
-    translation = dict(
+    translation: ClassVar = dict(
         zip(
             map(ord, r"[]\^"),
             map(ord, r"{}|~"),

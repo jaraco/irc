@@ -50,7 +50,6 @@ from __future__ import annotations
 import abc
 import base64
 import bisect
-import collections
 import contextlib
 import functools
 import itertools
@@ -61,8 +60,9 @@ import socket
 import struct
 import threading
 import time
+import typing
 import warnings
-from typing import Callable
+from collections.abc import Callable
 
 import jaraco.functools
 from jaraco.functools import Throttler
@@ -417,9 +417,8 @@ class ServerConnection(Connection):
         else:
             target = arguments[0] if arguments else None
             arguments = arguments[1:]
-        if command == "mode":
-            if not is_channel(target):
-                command = "umode"
+        if command == "mode" and not is_channel(target):
+            command = "umode"
         log.debug(
             "command: %s, source: %s, target: %s, arguments: %s, tags: %s",
             command,
@@ -483,7 +482,7 @@ class ServerConnection(Connection):
             .cap('REQ', 'multi-prefix', 'sasl')
             .cap('END')
         """
-        cap_subcommands = set('LS LIST REQ ACK NAK CLEAR END'.split())
+        cap_subcommands = {'LS', 'LIST', 'REQ', 'ACK', 'NAK', 'CLEAR', 'END'}
         client_subcommands = set(cap_subcommands) - {'NAK'}
         assert subcommand in client_subcommands, "invalid subcommand"
 
@@ -743,7 +742,10 @@ class ServerConnection(Connection):
         self.reactor.scheduler.execute_every(period=interval, func=pinger)
 
 
-class PrioritizedHandler(collections.namedtuple('Base', ('priority', 'callback'))):
+class PrioritizedHandler(typing.NamedTuple):
+    priority: int
+    callback: Callable
+
     def __lt__(self, other):
         "when sorting prioritized handlers, only use the priority"
         return self.priority < other.priority
@@ -887,7 +889,7 @@ class Reactor:
         log.log(logging.DEBUG - 2, "process_once()")
         sockets = self.sockets
         if sockets:
-            in_, out, err = select.select(sockets, [], [], timeout)
+            in_, _out, _err = select.select(sockets, [], [], timeout)
             self.process_data(in_)
         else:
             time.sleep(timeout)
@@ -1383,24 +1385,24 @@ class NickMask(str):
 
     @property
     def nick(self):
-        nick, sep, userhost = self.partition("!")
+        nick, _sep, _userhost = self.partition("!")
         return nick
 
     @property
     def userhost(self):
-        nick, sep, userhost = self.partition("!")
+        _nick, _sep, userhost = self.partition("!")
         return userhost or None
 
     @property
     def host(self):
-        nick, sep, userhost = self.partition("!")
-        user, sep, host = userhost.partition('@')
+        _nick, _sep, userhost = self.partition("!")
+        _user, _sep, host = userhost.partition('@')
         return host or None
 
     @property
     def user(self):
-        nick, sep, userhost = self.partition("!")
-        user, sep, host = userhost.partition('@')
+        _nick, _sep, userhost = self.partition("!")
+        user, _sep, _host = userhost.partition('@')
         return user or None
 
     @classmethod

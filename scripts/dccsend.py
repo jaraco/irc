@@ -24,7 +24,7 @@ class DCCSend(irc.client.SimpleIRCClient):
         self.receiver = receiver
         self.filename = filename
         self.filesize = os.path.getsize(self.filename)
-        self.file = open(filename, 'rb')
+        self.file = open(filename, 'rb')  # noqa: SIM115 held open for the transfer
         self.sent_bytes = 0
 
     def on_welcome(self, connection, event):

@@ -68,7 +68,7 @@ extensions += ['jaraco.tidelift']
 
 extensions += ['sphinx.ext.viewcode']
 
-for dependency in 'jaraco.text tempora jaraco.collections'.split():
+for dependency in ['jaraco.text', 'tempora', 'jaraco.collections']:
     rtd_name = dependency.replace('.', '')
     url = f'https://{rtd_name}.readthedocs.io/en/latest'
     intersphinx_mapping.update({dependency: (url, None)})

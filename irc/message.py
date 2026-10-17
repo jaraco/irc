@@ -36,7 +36,7 @@ class Tag:
         >>> Tag.parse(r'x=a\\nb\\nc')['value']
         'a\\nb\\nc'
         """
-        key, sep, value = item.partition('=')
+        key, _sep, value = item.partition('=')
         value = _TAG_UNESCAPE_RE.sub(
             lambda char: _TAG_UNESCAPE_MAP.get(char.group(1), char.group(1)), value
         )

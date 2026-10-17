@@ -50,7 +50,6 @@ class TestBot(irc.bot.SingleServerIRCBot):
             self.connection.get_nickname()
         ):
             self.do_command(e, a[1].strip())
-        return
 
     def on_dccmsg(self, c, e):
         # non-chat DCC messages are raw bytes; decode as text

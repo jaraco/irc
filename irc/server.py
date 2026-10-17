@@ -48,7 +48,6 @@ import logging
 import re
 import select
 import socketserver
-import typing
 
 import jaraco.logging
 from jaraco.stream import buffer
@@ -161,7 +160,7 @@ class IRCClient(socketserver.BaseRequestHandler):
 
         try:
             log.debug(f'from {self.client_ident()}: {line}')
-            command, sep, params = line.partition(' ')
+            command, _sep, params = line.partition(' ')
             handler = getattr(self, f'handle_{command.lower()}', None)
             if not handler:
                 log.info(f'No handler for command: {command}. Full line: {line}')
@@ -254,7 +253,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         if len(params) != 4:
             raise IRCError.from_name('needmoreparams', 'USER :Not enough parameters')
 
-        user, mode, unused, realname = params
+        user, mode, _unused, realname = params
         self.user = user
         self.mode = mode
         self.realname = realname
@@ -324,12 +323,12 @@ class IRCClient(socketserver.BaseRequestHandler):
         """
         A generic message handler (e.g. PRIVMSG and NOTICE)
         """
-        target, sep, msg = params.partition(' ')
+        target, _sep, msg = params.partition(' ')
         if not msg:
             raise IRCError.from_name('needmoreparams', cmd + ' :Not enough parameters')
 
         message = f':{self.client_ident()} {cmd} {target} {msg}'
-        if target.startswith('#') or target.startswith('$'):
+        if target.startswith(('#', '$')):
             # Message to channel. Check if the channel exists.
             channel = self.server.channels.get(target)
             if not channel:
@@ -355,7 +354,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         Send the message to all clients in the specified channel except for
         self.
         """
-        other_clients = [client for client in channel.clients if not client == self]
+        other_clients = [client for client in channel.clients if client != self]
         for client in other_clients:
             client.send_queue.append(message)
 
@@ -363,7 +362,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         """
         Handle a topic command.
         """
-        channel_name, sep, topic = params.partition(' ')
+        channel_name, _sep, topic = params.partition(' ')
 
         channel = self.server.channels.get(channel_name)
         if not channel:
@@ -473,10 +472,10 @@ class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
     allow_reuse_address = True
 
-    channels: typing.Dict[str, IRCChannel] = {}
+    channels: dict[str, IRCChannel]
     "Existing channels by channel name"
 
-    clients: typing.Dict[str, IRCClient] = {}
+    clients: dict[str, IRCClient]
     "Connected clients by nick name"
 
     def __init__(self, *args, **kwargs):
