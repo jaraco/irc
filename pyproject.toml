@@ -28,7 +28,6 @@ dependencies = [
 	"jaraco.logging",
 	"jaraco.functools>=1.20",
 	"jaraco.stream",
-	"pytz",
 	"more_itertools",
 	"tempora>=1.6",
 	'importlib_metadata; python_version < "3.8"',
